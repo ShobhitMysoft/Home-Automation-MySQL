@@ -60,42 +60,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
-                    android:hint="Phone number or email"
+                    android:hint="Phone number"
                     android:inputType="text"
                     android:maxLines="1"
                     android:paddingHorizontal="@dimen/_14sdp"
                     android:paddingVertical="@dimen/_12sdp" />
             </soup.neumorphism.NeumorphCardView>
-
-            <soup.neumorphism.NeumorphCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
-                app:neumorph_shapeType="pressed">
-
-                <EditText
-                    android:id="@+id/login_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:hint="Password"
-                    android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:paddingHorizontal="@dimen/_14sdp"
-                    android:paddingVertical="@dimen/_12sdp" />
-            </soup.neumorphism.NeumorphCardView>
-
-            <soup.neumorphism.NeumorphButton
-                android:id="@+id/login_forgot_pw_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginEnd="@dimen/_20sdp"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="Forgot password?"
-                android:textColor="@color/primary_text"
-                android:textSize="@dimen/_12ssp" />
 
             <soup.neumorphism.NeumorphCardView
                 android:layout_width="match_parent"

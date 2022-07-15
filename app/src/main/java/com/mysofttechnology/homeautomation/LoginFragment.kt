@@ -34,10 +34,5 @@ class LoginFragment : Fragment() {
             Navigation.findNavController(it).navigate(R.id.action_loginFragment_to_registrationFragment)
         }
 
-        binding.loginForgotPwBtn.setOnClickListener {
-            binding.loginForgotPwBtn.isEnabled = false
-            Navigation.findNavController(it).navigate(R.id.action_loginFragment_to_forgotPasswordFragment)
-        }
-
     }
 }

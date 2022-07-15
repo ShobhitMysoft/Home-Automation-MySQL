@@ -124,7 +124,7 @@ class DashbordFragment : Fragment() {
                         .setPositiveButton("Yes"
                         ) { _, _ ->
                             loadingDialog.show(childFragmentManager, LoadingDialog.LOADING_DIALOG)
-                            FirebaseAuth.getInstance().signOut()
+                            signOutUser()
                             val action = DashbordFragmentDirections.actionDashbordFragmentToRegistrationFragment()
                             findNavController().navigate(action)
                             loadingDialog.dismiss()
@@ -137,6 +137,10 @@ class DashbordFragment : Fragment() {
             true
         }
         popup.show()
+    }
+
+    private fun signOutUser() {
+        FirebaseAuth.getInstance().signOut()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {}

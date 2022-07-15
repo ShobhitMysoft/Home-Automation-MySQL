@@ -16,6 +16,10 @@
     <string name="verify">Verify</string>
     <string name="channel1Name">Home Automation</string>
     <string name="channel1ID">myNotificationChannel</string>
+    <!-- DATABASE -->
+    <string name="base_url">https://mysofttechnology.com/homeautomation/admin/api/</string>
+    <string name="url_register">register</string>
+    <string name="url_profile">profile</string>
 
     <integer-array name="icons_list">
         <item>@drawable/ic_light</item>
