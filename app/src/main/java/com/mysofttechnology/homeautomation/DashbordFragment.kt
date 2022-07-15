@@ -61,6 +61,7 @@ class DashbordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.actionbarTv.text = cuPhoneNo
         dbRef = db.getReference("root/users/$cuPhoneNo/profile")
 
         loadingDialog.show(childFragmentManager, TAG)
@@ -125,6 +126,7 @@ class DashbordFragment : Fragment() {
                             loadingDialog.show(childFragmentManager, LoadingDialog.LOADING_DIALOG)
                             FirebaseAuth.getInstance().signOut()
                             val action = DashbordFragmentDirections.actionDashbordFragmentToRegistrationFragment()
+                            findNavController().navigate(action)
                             loadingDialog.dismiss()
                         }
                         .setNegativeButton("No") { _, _ -> }
