@@ -22,19 +22,49 @@
             android:paddingHorizontal="16dp"
             android:paddingTop="8dp">
 
+            <androidx.cardview.widget.CardView xmlns:Card_View="http://schemas.android.com/apk/res-auto"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginVertical="7.5dp"
+                android:layout_marginEnd="7.5dp"
+                Card_View:cardBackgroundColor="@color/white"
+                Card_View:cardCornerRadius="15dp"
+                Card_View:cardElevation="2dp">
+
             <TextView
                 android:id="@+id/current_room_tv"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:drawableStart="@drawable/ic_sort"
                 android:drawablePadding="@dimen/_10sdp"
                 android:fontFamily="@font/raleway"
                 android:text="Room name"
-                android:textColor="@color/primary"
+                android:drawableTint="@color/white"
+                android:paddingHorizontal="16dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/white"
+                android:background="@color/colorAccent"
                 android:textSize="18dp"
                 android:textStyle="bold"
                 tools:ignore="UseCompatTextViewDrawableXml" />
+            </androidx.cardview.widget.CardView>
+
+            <soup.neumorphism.NeumorphCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/primary"
+                android:clickable="true"
+                android:focusable="true"
+                app:neumorph_shadowElevation="@dimen/_3sdp">
+
+                <ImageView
+                    android:id="@+id/refresh_btn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:elevation="2dp"
+                    android:src="@drawable/ic_refresh" />
+            </soup.neumorphism.NeumorphCardView>
 
             <soup.neumorphism.NeumorphCardView
                 android:layout_width="wrap_content"
@@ -78,33 +108,64 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="20dp"
+                        android:paddingBottom="12dp">
 
                         <FrameLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginHorizontal="@dimen/_4sdp"
                             android:orientation="horizontal">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="start"
-                                android:orientation="vertical">
+                                android:orientation="horizontal">
 
                                 <ImageView
                                     android:layout_width="40dp"
                                     android:layout_height="40dp"
                                     android:src="@drawable/ic_fan" />
 
-                                <TextView
+                                <FrameLayout
                                     android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="15dp"
-                                    android:fontFamily="@font/raleway"
-                                    android:text="Fan"
-                                    android:textColor="#000000"
-                                    android:textSize="17dp" />
+                                    android:layout_height="match_parent"
+                                    android:layout_marginStart="15dp">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="@font/raleway"
+                                        android:text="Fan"
+                                        android:layout_gravity="top"
+                                        android:textColor="#000000"
+                                        android:textSize="17dp" />
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_gravity="bottom"
+                                        android:layout_marginTop="@dimen/_6sdp"
+                                        android:orientation="horizontal">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Speed : "
+                                            android:textColor="@color/secondary_text"
+                                            android:textSize="@dimen/_10ssp" />
+
+                                        <TextView
+                                            android:id="@+id/fan_speed_tv"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="0"
+                                            android:textColor="@color/colorAccent"
+                                            android:textSize="@dimen/_10ssp" />
+                                    </LinearLayout>
+                                </FrameLayout>
+
                             </LinearLayout>
 
                             <LinearLayout
@@ -120,43 +181,19 @@
                                     android:layout_marginTop="5dp"
                                     android:gravity="center"
                                     android:text="OFF"
+                                    android:visibility="gone"
                                     android:textAllCaps="true"
                                     android:textColor="@color/colorAccent"
                                     android:textSize="14dp" />
 
                                 <com.suke.widget.SwitchButton
                                     android:id="@+id/fan_switch"
-                                    android:layout_width="70dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="10dp"
+                                    android:layout_width="65dp"
+                                    android:layout_height="30dp"
+                                    android:layout_gravity="end"
                                     Card_View:sb_checked_color="@color/colorAccent" />
                             </LinearLayout>
                         </FrameLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/_4sdp"
-                                android:layout_marginTop="10dp"
-                                android:text="Speed :"
-                                android:textColor="@color/secondary_text"
-                                android:textSize="@dimen/_12ssp" />
-
-                            <TextView
-                                android:id="@+id/fan_speed_tv"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/_4sdp"
-                                android:layout_marginTop="10dp"
-                                android:text="0"
-                                android:textColor="@color/secondary_text"
-                                android:textSize="@dimen/_12ssp" />
-                        </LinearLayout>
 
                         <com.google.android.material.slider.Slider
                             android:id="@+id/fan_speed_slider"
@@ -190,7 +227,7 @@
                 <!-- TODO:~~~~~~~~~~~~ -->
                 <androidx.cardview.widget.CardView xmlns:Card_View="http://schemas.android.com/apk/res-auto"
                     android:layout_width="match_parent"
-                    android:layout_height="230dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginVertical="7.5dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="7.5dp"
@@ -206,10 +243,13 @@
                             android:id="@+id/switch1_card"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
                             android:orientation="vertical"
-                            android:paddingHorizontal="10dp"
-                            android:paddingTop="10dp">
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="20dp">
+
+                            <FrameLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
 
                             <ImageView
                                 android:id="@+id/switch1_icon"
@@ -217,13 +257,22 @@
                                 android:layout_height="40dp"
                                 android:src="@drawable/ic_light" />
 
+
+                                <com.suke.widget.SwitchButton
+                                    android:id="@+id/switch1_switch"
+                                    android:layout_width="65dp"
+                                    android:layout_height="30dp"
+                                    android:layout_gravity="end|center"
+                                    Card_View:sb_checked_color="@color/colorAccent" />
+
+                            </FrameLayout>
+
                             <TextView
                                 android:id="@+id/switch1_name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
                                 android:fontFamily="@font/raleway"
-                                android:gravity="center"
                                 android:text="Switch 1"
                                 android:textColor="#000000"
                                 android:textSize="17dp" />
@@ -233,6 +282,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
                                 android:gravity="center"
+                                android:visibility="gone"
                                 android:orientation="horizontal">
 
                                 <TextView
@@ -244,13 +294,6 @@
                                     android:text="OFF"
                                     android:textColor="@color/colorAccent"
                                     android:textSize="14dp" />
-
-                                <com.suke.widget.SwitchButton
-                                    android:id="@+id/switch1_switch"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    Card_View:sb_checked_color="@color/colorAccent" />
                             </LinearLayout>
 
                             <View
@@ -387,8 +430,8 @@
                             android:id="@+id/switch1_more_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:padding="10dp"
+                            android:layout_gravity="end|bottom"
+                            android:padding="8dp"
                             android:src="@drawable/ic_more_vert" />
                     </FrameLayout>
 
@@ -404,7 +447,7 @@
 
                 <androidx.cardview.widget.CardView xmlns:Card_View="http://schemas.android.com/apk/res-auto"
                     android:layout_width="match_parent"
-                    android:layout_height="230dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginVertical="7.5dp"
                     android:layout_marginStart="7.5dp"
                     android:layout_marginEnd="15dp"
@@ -419,10 +462,13 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
                             android:orientation="vertical"
-                            android:paddingHorizontal="10dp"
-                            android:paddingTop="10dp">
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="20dp">
+
+                            <FrameLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
 
                             <ImageView
                                 android:id="@+id/switch2_icon"
@@ -430,13 +476,20 @@
                                 android:layout_height="40dp"
                                 android:src="@drawable/ic_light" />
 
+                                <com.suke.widget.SwitchButton
+                                    android:id="@+id/switch2_switch"
+                                    android:layout_width="65dp"
+                                    android:layout_height="30dp"
+                                    android:layout_gravity="end|center"
+                                    Card_View:sb_checked_color="@color/colorAccent" />
+                            </FrameLayout>
+
                             <TextView
                                 android:id="@+id/switch2_name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
                                 android:fontFamily="@font/raleway"
-                                android:gravity="center"
                                 android:text="Switch 2"
                                 android:textColor="#000000"
                                 android:textSize="17dp" />
@@ -445,6 +498,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
+                                android:visibility="gone"
                                 android:gravity="center"
                                 android:orientation="horizontal">
 
@@ -457,13 +511,6 @@
                                     android:text="OFF"
                                     android:textColor="@color/colorAccent"
                                     android:textSize="14dp" />
-
-                                <com.suke.widget.SwitchButton
-                                    android:id="@+id/switch2_switch"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    Card_View:sb_checked_color="@color/colorAccent" />
                             </LinearLayout>
 
                             <View
@@ -593,8 +640,8 @@
                             android:id="@+id/switch2_more_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:padding="10dp"
+                            android:layout_gravity="end|bottom"
+                            android:padding="8dp"
                             android:src="@drawable/ic_more_vert" />
                     </FrameLayout>
 
@@ -617,7 +664,7 @@
 
                 <androidx.cardview.widget.CardView xmlns:Card_View="http://schemas.android.com/apk/res-auto"
                     android:layout_width="match_parent"
-                    android:layout_height="230dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginVertical="7.5dp"
                     android:layout_marginStart="15dp"
                     android:layout_marginEnd="7.5dp"
@@ -632,10 +679,13 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
                             android:orientation="vertical"
-                            android:paddingHorizontal="10dp"
-                            android:paddingTop="10dp">
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="20dp">
+
+                            <FrameLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
 
                             <ImageView
                                 android:id="@+id/switch3_icon"
@@ -643,13 +693,20 @@
                                 android:layout_height="40dp"
                                 android:src="@drawable/ic_light" />
 
+                                <com.suke.widget.SwitchButton
+                                    android:id="@+id/switch3_switch"
+                                    android:layout_width="65dp"
+                                    android:layout_height="30dp"
+                                    android:layout_gravity="end|center"
+                                    Card_View:sb_checked_color="@color/colorAccent" />
+                            </FrameLayout>
+
                             <TextView
                                 android:id="@+id/switch3_name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
                                 android:fontFamily="@font/raleway"
-                                android:gravity="center"
                                 android:text="Switch 3"
                                 android:textColor="#000000"
                                 android:textSize="17dp" />
@@ -659,6 +716,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
                                 android:gravity="center"
+                                android:visibility="gone"
                                 android:orientation="horizontal">
 
                                 <TextView
@@ -670,13 +728,6 @@
                                     android:text="OFF"
                                     android:textColor="@color/colorAccent"
                                     android:textSize="14dp" />
-
-                                <com.suke.widget.SwitchButton
-                                    android:id="@+id/switch3_switch"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    Card_View:sb_checked_color="@color/colorAccent" />
                             </LinearLayout>
 
                             <View
@@ -806,8 +857,8 @@
                             android:id="@+id/switch3_more_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:padding="10dp"
+                            android:layout_gravity="end|bottom"
+                            android:padding="8dp"
                             android:src="@drawable/ic_more_vert" />
                     </FrameLayout>
 
@@ -823,7 +874,7 @@
 
                 <androidx.cardview.widget.CardView xmlns:Card_View="http://schemas.android.com/apk/res-auto"
                     android:layout_width="match_parent"
-                    android:layout_height="230dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginVertical="7.5dp"
                     android:layout_marginStart="7.5dp"
                     android:layout_marginEnd="15dp"
@@ -838,10 +889,13 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
                             android:orientation="vertical"
-                            android:paddingHorizontal="10dp"
-                            android:paddingTop="10dp">
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="20dp">
+
+                            <FrameLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
 
                             <ImageView
                                 android:id="@+id/switch4_icon"
@@ -849,13 +903,20 @@
                                 android:layout_height="40dp"
                                 android:src="@drawable/ic_light" />
 
+                                <com.suke.widget.SwitchButton
+                                    android:id="@+id/switch4_switch"
+                                    android:layout_width="65dp"
+                                    android:layout_height="30dp"
+                                    android:layout_gravity="end|center"
+                                    Card_View:sb_checked_color="@color/colorAccent" />
+                            </FrameLayout>
+
                             <TextView
                                 android:id="@+id/switch4_name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="15dp"
                                 android:fontFamily="@font/raleway"
-                                android:gravity="center"
                                 android:text="Switch 4"
                                 android:textColor="#000000"
                                 android:textSize="17dp" />
@@ -865,6 +926,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
                                 android:gravity="center"
+                                android:visibility="gone"
                                 android:orientation="horizontal">
 
                                 <TextView
@@ -876,13 +938,6 @@
                                     android:text="OFF"
                                     android:textColor="@color/colorAccent"
                                     android:textSize="14dp" />
-
-                                <com.suke.widget.SwitchButton
-                                    android:id="@+id/switch4_switch"
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    Card_View:sb_checked_color="@color/colorAccent" />
                             </LinearLayout>
 
                             <View
@@ -1012,8 +1067,8 @@
                             android:id="@+id/switch4_more_btn"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:padding="10dp"
+                            android:layout_gravity="end|bottom"
+                            android:padding="8dp"
                             android:src="@drawable/ic_more_vert" />
                     </FrameLayout>
 
