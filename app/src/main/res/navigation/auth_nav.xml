@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/auth_nav"
+    app:startDestination="@id/registrationFragment">
+
+    <fragment
+        android:id="@+id/registrationFragment"
+        android:name="com.mysofttechnology.homeautomation.RegistrationFragment"
+        android:label="fragment_registration"
+        tools:layout="@layout/fragment_registration" >
+        <action
+            android:id="@+id/action_registrationFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_registrationFragment_to_dashbordFragment"
+            app:destination="@id/navigation" />
+        <action
+            android:id="@+id/action_registrationFragment_to_verifyCodeFragment"
+            app:destination="@id/verifyCodeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.mysofttechnology.homeautomation.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
+            app:destination="@id/forgotPasswordFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_dashbordFragment"
+            app:destination="@id/navigation" />
+    </fragment>
+    <fragment
+        android:id="@+id/forgotPasswordFragment"
+        android:name="com.mysofttechnology.homeautomation.ForgotPasswordFragment"
+        android:label="fragment_forgot_password"
+        tools:layout="@layout/fragment_forgot_password" >
+        <action
+            android:id="@+id/action_forgotPasswordFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/verifyCodeFragment"
+        android:name="com.mysofttechnology.homeautomation.VerifyCodeFragment"
+        android:label="fragment_verify_code"
+        tools:layout="@layout/fragment_verify_code" >
+        <action
+            android:id="@+id/action_verifyCodeFragment_to_dashbordFragment"
+            app:destination="@id/navigation" />
+        <action
+            android:id="@+id/action_verifyCodeFragment_to_registrationFragment"
+            app:destination="@id/registrationFragment" />
+        <argument
+            android:name="verificationID"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="fullName"
+            app:argType="string" />
+        <argument
+            android:name="emailAddress"
+            app:argType="string" />
+        <argument
+            android:name="username"
+            app:argType="string" />
+        <argument
+            android:name="phoneNumber"
+            app:argType="string" />
+        <argument
+            android:name="password"
+            app:argType="string" />
+    </fragment>
+    <navigation
+        android:id="@+id/navigation"
+        android:label="Dashboard Nav"
+        app:startDestination="@id/dashbordFragment">
+        <fragment
+            android:id="@+id/dashbordFragment"
+            android:name="com.mysofttechnology.homeautomation.DashbordFragment"
+            android:label="fragment_dashbord"
+            tools:layout="@layout/fragment_dashbord">
+            <action
+                android:id="@+id/action_dashbordFragment_to_registrationFragment"
+                app:destination="@id/registrationFragment" />
+            <action
+                android:id="@+id/action_dashbordFragment_to_profileFragment"
+                app:destination="@id/profileFragment" />
+            <action
+                android:id="@+id/action_dashbordFragment_to_roomsFragment"
+                app:destination="@id/roomsFragment" />
+            <action
+                android:id="@+id/action_dashbordFragment_to_scanDeviceFragment"
+                app:destination="@id/scanDeviceFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/profileFragment"
+            android:name="com.mysofttechnology.homeautomation.ProfileFragment"
+            android:label="fragment_profile"
+            tools:layout="@layout/fragment_profile" >
+            <action
+                android:id="@+id/action_profileFragment_to_dashbordFragment"
+                app:destination="@id/dashbordFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/roomsFragment"
+            android:name="com.mysofttechnology.homeautomation.RoomsFragment"
+            android:label="fragment_rooms"
+            tools:layout="@layout/fragment_rooms" >
+            <action
+                android:id="@+id/action_roomsFragment_to_dashbordFragment"
+                app:destination="@id/dashbordFragment"
+                app:popUpTo="@id/auth_nav"
+                app:popUpToInclusive="true" />
+            <action
+                android:id="@+id/action_roomsFragment_to_scanDeviceFragment"
+                app:destination="@id/scanDeviceFragment" />
+            <action
+                android:id="@+id/action_roomsFragment_to_editRoomFragment"
+                app:destination="@id/editRoomFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/scanDeviceFragment"
+            android:name="com.mysofttechnology.homeautomation.ScanDeviceFragment"
+            android:label="fragment_scan_device"
+            tools:layout="@layout/fragment_scan_device" >
+            <action
+                android:id="@+id/action_scanDeviceFragment_to_connectDeviceFragment"
+                app:destination="@id/connectDeviceFragment" />
+            <action
+                android:id="@+id/action_scanDeviceFragment_to_roomsFragment"
+                app:destination="@id/roomsFragment"
+                app:popUpTo="@id/roomsFragment"
+                app:popUpToInclusive="true" />
+            <action
+                android:id="@+id/action_scanDeviceFragment_to_editRoomFragment"
+                app:destination="@id/editRoomFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/connectDeviceFragment"
+            android:name="com.mysofttechnology.homeautomation.ConnectDeviceFragment"
+            android:label="fragment_connect_device"
+            tools:layout="@layout/fragment_connect_device" >
+            <action
+                android:id="@+id/action_connectDeviceFragment_to_scanDeviceFragment"
+                app:destination="@id/scanDeviceFragment"
+                app:popUpTo="@id/scanDeviceFragment"
+                app:popUpToInclusive="true" />
+            <action
+                android:id="@+id/action_connectDeviceFragment_to_fillWifiDetailFragment"
+                app:destination="@id/fillWifiDetailFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/fillWifiDetailFragment"
+            android:name="com.mysofttechnology.homeautomation.FillWifiDetailFragment"
+            android:label="fragment_fill_wifi_detail"
+            tools:layout="@layout/fragment_fill_wifi_detail" >
+            <action
+                android:id="@+id/action_fillWifiDetailFragment_to_connectDeviceFragment"
+                app:destination="@id/connectDeviceFragment"
+                app:popUpTo="@id/connectDeviceFragment"
+                app:popUpToInclusive="true" />
+            <action
+                android:id="@+id/action_fillWifiDetailFragment_to_roomsFragment"
+                app:destination="@id/roomsFragment"
+                app:popUpTo="@id/dashbordFragment"
+                app:popUpToInclusive="true" />
+            <argument
+                android:name="btDevice"
+                app:argType="string" />
+        </fragment>
+        <fragment
+            android:id="@+id/editRoomFragment"
+            android:name="com.mysofttechnology.homeautomation.EditRoomFragment"
+            android:label="fragment_edit_room"
+            tools:layout="@layout/fragment_edit_room" >
+            <action
+                android:id="@+id/action_editRoomFragment_to_roomsFragment"
+                app:destination="@id/roomsFragment"
+                app:popUpTo="@id/auth_nav"
+                app:popUpToInclusive="true" />
+            <argument
+                android:name="roomID"
+                app:argType="string" />
+            <action
+                android:id="@+id/action_editRoomFragment_to_connectDeviceFragment"
+                app:destination="@id/connectDeviceFragment" />
+            <action
+                android:id="@+id/action_editRoomFragment_to_dashbordFragment"
+                app:destination="@id/dashbordFragment" />
+        </fragment>
+        <activity
+            android:id="@+id/editSwitchActivity"
+            android:name="com.mysofttechnology.homeautomation.activities.EditSwitchActivity"
+            android:label="activity_edit_switch"
+            tools:layout="@layout/activity_edit_switch" />
+    </navigation>
+</navigation>

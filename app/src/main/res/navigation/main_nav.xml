@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_nav"
+    app:startDestination="@id/addDeviceFragment">
+
+    <fragment
+        android:id="@+id/addDeviceFragment"
+        android:name="com.mysofttechnology.homeautomation.AddDeviceFragment"
+        android:label="fragment_add_device"
+        tools:layout="@layout/fragment_add_device" >
+        <action
+            android:id="@+id/action_addDeviceFragment_to_roomControlsFragment"
+            app:destination="@id/roomControlsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/roomControlsFragment"
+        android:name="com.mysofttechnology.homeautomation.RoomControlsFragment"
+        android:label="fragment_room_controls"
+        tools:layout="@layout/fragment_room_controls" >
+        <action
+            android:id="@+id/action_roomControlsFragment_to_addDeviceFragment"
+            app:destination="@id/addDeviceFragment" />
+    </fragment>
+</navigation>

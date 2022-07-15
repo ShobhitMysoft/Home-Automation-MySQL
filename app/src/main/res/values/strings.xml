@@ -1,0 +1,75 @@
+<resources>
+    <string name="app_name">Home Automation</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="powered_by">Powered By</string>
+    <string name="mysoft_technology">MySoft Technology</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="registration">Registration</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="log_in">Log in</string>
+    <string name="dont_have_an_account">Don\'t have an account?</string>
+    <string name="register">Register</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="verifiy_code">Verifiy Code</string>
+    <string name="verify">Verify</string>
+    <string name="channel1Name">Home Automation</string>
+    <string name="channel1ID">myNotificationChannel</string>
+
+    <integer-array name="icons_list">
+        <item>@drawable/ic_light</item>
+        <item>@drawable/ic_light_2</item>
+        <item>@drawable/ic_light_3</item>
+        <item>@drawable/ic_air_conditioner2</item>
+        <item>@drawable/ic_television</item>
+        <item>@drawable/ic_router_2</item>
+        <item>@drawable/ic_fridge</item>
+        <item>@drawable/ic_cooking</item>
+        <item>@drawable/ic_chimney</item>
+        <item>@drawable/ic_laundry</item>
+        <item>@drawable/ic_heater</item>
+        <item>@drawable/ic_water_heater</item>
+        <item>@drawable/ic_ventilator</item>
+        <item>@drawable/ic_microwave</item>
+        <item>@drawable/ic_toaster</item>
+        <item>@drawable/ic_speaker</item>
+        <item>@drawable/ic_curtains</item>
+        <item>@drawable/ic_desktop</item>
+        <item>@drawable/ic_laptop</item>
+        <item>@drawable/ic_cctv_cam</item>
+        <item>@drawable/ic_gaming</item>
+        <item>@drawable/ic_switch1</item>
+        <item>@drawable/ic_switch2</item>
+        <item>@drawable/ic_switch3</item>
+        <item>@drawable/ic_switch4</item>
+    </integer-array>
+
+    <string-array name="icons_names">
+        <item>Light Bulb</item>
+        <item>Light</item>
+        <item>Light</item>
+        <item>Air Conditioner</item>
+        <item>Television</item>
+        <item>Router</item>
+        <item>Refrigerator</item>
+        <item>Cooking</item>
+        <item>Chimney</item>
+        <item>Washing Machine</item>
+        <item>Heater</item>
+        <item>Water Heater</item>
+        <item>Ventilator</item>
+        <item>Microwave</item>
+        <item>Toaster</item>
+        <item>Music</item>
+        <item>Curtains</item>
+        <item>Desktop</item>
+        <item>Laptop</item>
+        <item>CCTV</item>
+        <item>Gaming</item>
+        <item>Switch 1</item>
+        <item>Switch 2</item>
+        <item>Switch 3</item>
+        <item>Switch 4</item>
+    </string-array>
+</resources>
