@@ -72,10 +72,7 @@ class RegistrationFragment : Fragment() {
     private fun validateUserInputData() {
         val fullName = binding.regFullName.text.toString().trim()
         val email = binding.regEmail.text.toString().trim()
-        val username = binding.regUsername.text.toString().trim()
         val phone = binding.regPhoneNo.text.toString().trim()
-        val password = binding.regPassword.text.toString().trim()
-        val confirmPassword = binding.regConfirmPassword.text.toString().trim()
 
         val builder = AlertDialog.Builder(requireActivity())
 
@@ -84,38 +81,26 @@ class RegistrationFragment : Fragment() {
 
         if (fullName.isNotBlank()) {
             if (email.isNotBlank()) {
-                if (username.isNotBlank()) {
                     if (phone.isNotBlank()) {
                         if (phone.length == 10 && phone.isDigitsOnly()) {
-                            if (password.isNotBlank()) {
-                                if (confirmPassword.isNotBlank()) {
-                                    if (password == confirmPassword) {
                                         builder.setTitle("Verify phone number").setMessage("We will send an SMS message to verify your phone number.")
                                             .setPositiveButton("Ok"
                                             ) { _, _ ->
 //                                                progressBar.visibility = View.VISIBLE
                                                 loadingDialog.show(childFragmentManager, LOADING_DIALOG)
-                                                registerUser(fullName, email, username, phone, password)
+                                                registerUser(fullName, email, phone)
                                             }
                                             .setNegativeButton("No") { _, _ -> }
                                         // Create the AlertDialog object and return it
                                         builder.create()
                                         builder.show()
-                                    } else {
-                                        binding.regConfirmPassword.selectAll()
-                                        binding.regConfirmPassword.error = "Passwords does not match"
-                                        binding.regPassword.error = "Passwords does not match"
-                                    }
-                                } else binding.regConfirmPassword.error = "Please confirm your password"
-                            } else binding.regPassword.error = "Password is required"
                         } else binding.regPhoneNo.error = "Enter a proper phone number"
                     } else binding.regPhoneNo.error = "Phone number is required"
-                } else binding.regUsername.error = "Username is required"
             } else binding.regEmail.error = "Email address is required"
         } else binding.regFullName.error = "Full name is required"
     }
 
-    private fun registerUser(fullName: String, email: String, username: String, phoneNumber: String, password: String) {
+    private fun registerUser(fullName: String, email: String, phoneNumber: String) {
         // TODO:  inform user that they might receive an SMS message for verification and standard rates apply
 
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
@@ -158,7 +143,7 @@ class RegistrationFragment : Fragment() {
                 storedVerificationId = verificationId
                 resendToken = token
 
-                val action = RegistrationFragmentDirections.actionRegistrationFragmentToVerifyCodeFragment(verificationId, fullName, email, username, phoneNumber, password)
+                val action = RegistrationFragmentDirections.actionRegistrationFragmentToVerifyCodeFragment(verificationId, fullName, email, phoneNumber)
                 findNavController().navigate(action)
 //                progressBar.visibility = View.GONE
                 loadingDialog.dismiss()

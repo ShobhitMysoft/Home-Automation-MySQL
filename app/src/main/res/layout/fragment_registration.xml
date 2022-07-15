@@ -47,7 +47,6 @@
             <soup.neumorphism.NeumorphCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
                 app:neumorph_shapeType="pressed">
 
                 <EditText
@@ -66,67 +65,6 @@
             <soup.neumorphism.NeumorphCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
-                app:neumorph_shapeType="pressed">
-
-                <EditText
-                    android:id="@+id/reg_username"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:hint="Username"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:paddingHorizontal="@dimen/_14sdp"
-                    android:paddingVertical="@dimen/_12sdp"
-                    android:text="shobhit.mysoft" />
-            </soup.neumorphism.NeumorphCardView>
-
-            <!--            <TextView-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:text="Phone number"-->
-            <!--                android:layout_marginTop="@dimen/_4sdp"-->
-            <!--                android:paddingHorizontal="@dimen/_14sdp"-->
-            <!--                android:textSize="@dimen/_12ssp" />-->
-
-            <!--            <soup.neumorphism.NeumorphCardView-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                app:neumorph_shapeType="pressed">-->
-
-            <!--                <LinearLayout-->
-            <!--                    android:layout_width="match_parent"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    android:orientation="horizontal"-->
-            <!--                    android:paddingHorizontal="@dimen/_14sdp"-->
-            <!--                    android:gravity="center">-->
-
-            <!--                    <TextView-->
-            <!--                        android:layout_width="wrap_content"-->
-            <!--                        android:layout_height="wrap_content"-->
-            <!--                        android:text="+91"-->
-            <!--                        android:textSize="@dimen/_14ssp"/>-->
-
-            <!--                    <EditText-->
-            <!--                        android:id="@+id/reg_phone_no"-->
-            <!--                        android:layout_width="match_parent"-->
-            <!--                        android:layout_height="wrap_content"-->
-            <!--                        android:hint="0000000000"-->
-            <!--                        android:maxLines="1"-->
-            <!--                        android:layout_marginStart="@dimen/_2ssp"-->
-            <!--                        android:inputType="phone"-->
-            <!--                        android:background="@null"-->
-            <!--                        android:paddingVertical="@dimen/_12sdp"/>-->
-
-            <!--                </LinearLayout>-->
-
-            <!--            </soup.neumorphism.NeumorphCardView>-->
-
-            <soup.neumorphism.NeumorphCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
                 app:neumorph_shapeType="pressed">
 
                 <!-- TODO: Add digit counter -->
@@ -139,47 +77,10 @@
                     android:hint="Phone number (10 Digits)"
                     android:inputType="phone"
                     android:maxLines="1"
+                    android:maxLength="10"
                     android:paddingHorizontal="@dimen/_14sdp"
                     android:paddingVertical="@dimen/_12sdp"
                     android:text="9560258881" />
-            </soup.neumorphism.NeumorphCardView>
-
-            <soup.neumorphism.NeumorphCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
-                app:neumorph_shapeType="pressed">
-
-                <EditText
-                    android:id="@+id/reg_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:hint="Password"
-                    android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:paddingHorizontal="@dimen/_14sdp"
-                    android:paddingVertical="@dimen/_12sdp"
-                    android:text="12345678" />
-            </soup.neumorphism.NeumorphCardView>
-
-            <soup.neumorphism.NeumorphCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_4sdp"
-                app:neumorph_shapeType="pressed">
-
-                <EditText
-                    android:id="@+id/reg_confirm_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:hint="Confirm Password"
-                    android:inputType="textPassword"
-                    android:maxLines="1"
-                    android:paddingHorizontal="@dimen/_14sdp"
-                    android:paddingVertical="@dimen/_12sdp"
-                    android:text="12345678" />
             </soup.neumorphism.NeumorphCardView>
 
             <soup.neumorphism.NeumorphCardView
@@ -202,31 +103,39 @@
                     android:textColor="@color/white" />
             </soup.neumorphism.NeumorphCardView>
 
-            <LinearLayout
-                android:id="@+id/reg_login_btn"
-                android:layout_width="wrap_content"
+            <soup.neumorphism.NeumorphCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/_14sdp"
+                android:backgroundTint="@color/primary"
+                app:neumorph_shapeType="basin"
                 android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                android:focusable="true">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/reg_login_btn"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/already_have_an_account"
-                    android:textColor="@color/secondary_text"
-                    android:textSize="@dimen/_14ssp" />
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/_14sdp"
+                    android:paddingVertical="@dimen/_12sdp"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_4ssp"
-                    android:text="@string/log_in"
-                    android:textColor="@color/primary_text"
-                    android:textSize="@dimen/_14ssp" />
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/already_have_an_account"
+                        android:textColor="@color/secondary_text"
+                        android:textSize="@dimen/_14ssp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_4ssp"
+                        android:text="@string/log_in"
+                        android:textColor="@color/primary_text"
+                        android:textSize="@dimen/_14ssp" />
+                </LinearLayout>
+            </soup.neumorphism.NeumorphCardView>
 
         </LinearLayout>
     </ScrollView>
