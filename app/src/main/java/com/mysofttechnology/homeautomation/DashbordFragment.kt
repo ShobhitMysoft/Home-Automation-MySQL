@@ -123,7 +123,7 @@ class DashbordFragment : Fragment() {
                     builder.setTitle("Logout").setMessage("Are you sure you want to logout?")
                         .setPositiveButton("Yes"
                         ) { _, _ ->
-                            loadingDialog.show(childFragmentManager, LoadingDialog.LOADING_DIALOG)
+                            loadingDialog.show(childFragmentManager, TAG)
                             signOutUser()
                             val action = DashbordFragmentDirections.actionDashbordFragmentToRegistrationFragment()
                             findNavController().navigate(action)

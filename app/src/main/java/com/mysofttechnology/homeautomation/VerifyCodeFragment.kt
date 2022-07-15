@@ -160,9 +160,11 @@ class VerifyCodeFragment : Fragment() {
                             .show()
                     }
                 } catch (e: Exception) {
+                    loadingDialog.dismiss()
                     Log.d(TAG, "Exception: $e")
                 }
             }, {
+                loadingDialog.dismiss()
                 Toast.makeText(requireActivity(), "Registration Failed", Toast.LENGTH_SHORT).show()
             }) {
             override fun getParams(): Map<String, String> {
