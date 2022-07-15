@@ -20,8 +20,4 @@ class LoadingDialog : DialogFragment() {
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
-
-    companion object {
-        const val LOADING_DIALOG = "Loading dialog"
-    }
 }

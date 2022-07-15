@@ -14,7 +14,6 @@ import androidx.navigation.fragment.findNavController
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
-import com.mysofttechnology.homeautomation.LoadingDialog.Companion.LOADING_DIALOG
 import com.mysofttechnology.homeautomation.databinding.FragmentRegistrationBinding
 import java.util.concurrent.TimeUnit
 
@@ -90,7 +89,7 @@ class RegistrationFragment : Fragment() {
                             .setPositiveButton("Ok"
                             ) { _, _ ->
 //                                                progressBar.visibility = View.VISIBLE
-                                loadingDialog.show(childFragmentManager, LOADING_DIALOG)
+                                loadingDialog.show(childFragmentManager, TAG)
                                 registerUser(fullName, email, phone)
                             }
                             .setNegativeButton("No") { _, _ -> }
@@ -165,7 +164,7 @@ class RegistrationFragment : Fragment() {
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
+    /*private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
         auth.signInWithCredential(credential).addOnCompleteListener {
             if (it.isSuccessful) {
                 // Sign in success, update UI with the signed-in user's information
@@ -181,7 +180,7 @@ class RegistrationFragment : Fragment() {
                 // Update UI
             }
         }
-    }
+    }*/
 
     override fun onStart() {
         super.onStart()

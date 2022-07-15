@@ -85,7 +85,7 @@ class ScanDeviceFragment : Fragment() {
             binding.sdContinueBtn.isEnabled = false
             val deviceId = binding.deviceIdEt.text.toString()
             if (deviceId.isNotEmpty()) {
-                loadingDialog.show(childFragmentManager, LoadingDialog.LOADING_DIALOG)
+                loadingDialog.show(childFragmentManager, TAG)
                 checkDeviceAvailability(deviceId)
             } else {
                 Toast.makeText(
@@ -119,7 +119,7 @@ class ScanDeviceFragment : Fragment() {
                 requireActivity().runOnUiThread {
                     Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
                     binding.deviceIdEt.setText(it.toString())
-                    loadingDialog.show(childFragmentManager, LoadingDialog.LOADING_DIALOG)
+                    loadingDialog.show(childFragmentManager, TAG)
                     checkDeviceAvailability(it.toString())
                 }
             }
