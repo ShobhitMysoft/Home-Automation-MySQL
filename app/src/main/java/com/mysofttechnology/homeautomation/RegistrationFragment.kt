@@ -3,12 +3,12 @@ package com.mysofttechnology.homeautomation
 import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.text.isDigitsOnly
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.FirebaseException
@@ -19,6 +19,7 @@ import com.mysofttechnology.homeautomation.databinding.FragmentRegistrationBindi
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "RegistrationFragment"
+
 class RegistrationFragment : Fragment() {
 
     private lateinit var storedVerificationId: String
@@ -60,7 +61,8 @@ class RegistrationFragment : Fragment() {
 
         binding.regLoginBtn.setOnClickListener {
             binding.regLoginBtn.isEnabled = false
-            Navigation.findNavController(it).navigate(R.id.action_registrationFragment_to_loginFragment)
+            Navigation.findNavController(it)
+                .navigate(R.id.action_registrationFragment_to_loginFragment)
         }
         binding.regRegisterBtn.setOnClickListener {
             binding.regRegisterBtn.isEnabled = false
@@ -81,21 +83,22 @@ class RegistrationFragment : Fragment() {
 
         if (fullName.isNotBlank()) {
             if (email.isNotBlank()) {
-                    if (phone.isNotBlank()) {
-                        if (phone.length == 10 && phone.isDigitsOnly()) {
-                                        builder.setTitle("Verify phone number").setMessage("We will send an SMS message to verify your phone number.")
-                                            .setPositiveButton("Ok"
-                                            ) { _, _ ->
+                if (phone.isNotBlank()) {
+                    if (phone.length == 10 && phone.isDigitsOnly()) {
+                        builder.setTitle("Verify phone number")
+                            .setMessage("We will send an SMS message to verify your phone number.")
+                            .setPositiveButton("Ok"
+                            ) { _, _ ->
 //                                                progressBar.visibility = View.VISIBLE
-                                                loadingDialog.show(childFragmentManager, LOADING_DIALOG)
-                                                registerUser(fullName, email, phone)
-                                            }
-                                            .setNegativeButton("No") { _, _ -> }
-                                        // Create the AlertDialog object and return it
-                                        builder.create()
-                                        builder.show()
-                        } else binding.regPhoneNo.error = "Enter a proper phone number"
-                    } else binding.regPhoneNo.error = "Phone number is required"
+                                loadingDialog.show(childFragmentManager, LOADING_DIALOG)
+                                registerUser(fullName, email, phone)
+                            }
+                            .setNegativeButton("No") { _, _ -> }
+                        // Create the AlertDialog object and return it
+                        builder.create()
+                        builder.show()
+                    } else binding.regPhoneNo.error = "Enter a proper phone number"
+                } else binding.regPhoneNo.error = "Phone number is required"
             } else binding.regEmail.error = "Email address is required"
         } else binding.regFullName.error = "Full name is required"
     }
@@ -143,7 +146,9 @@ class RegistrationFragment : Fragment() {
                 storedVerificationId = verificationId
                 resendToken = token
 
-                val action = RegistrationFragmentDirections.actionRegistrationFragmentToVerifyCodeFragment(verificationId, fullName, email, phoneNumber)
+                val action =
+                    RegistrationFragmentDirections.actionRegistrationFragmentToVerifyCodeFragment(
+                        verificationId, fullName, email, phoneNumber, 1)
                 findNavController().navigate(action)
 //                progressBar.visibility = View.GONE
                 loadingDialog.dismiss()
@@ -183,7 +188,8 @@ class RegistrationFragment : Fragment() {
 
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            val action = RegistrationFragmentDirections.actionRegistrationFragmentToDashbordFragment()
+            val action =
+                RegistrationFragmentDirections.actionRegistrationFragmentToDashbordFragment()
             findNavController().navigate(action)
         }
     }

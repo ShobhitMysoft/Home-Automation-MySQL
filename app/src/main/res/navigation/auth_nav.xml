@@ -29,20 +29,11 @@
             android:id="@+id/action_loginFragment_to_registrationFragment"
             app:destination="@id/registrationFragment" />
         <action
-            android:id="@+id/action_loginFragment_to_forgotPasswordFragment"
-            app:destination="@id/forgotPasswordFragment" />
-        <action
             android:id="@+id/action_loginFragment_to_dashbordFragment"
             app:destination="@id/navigation" />
-    </fragment>
-    <fragment
-        android:id="@+id/forgotPasswordFragment"
-        android:name="com.mysofttechnology.homeautomation.ForgotPasswordFragment"
-        android:label="fragment_forgot_password"
-        tools:layout="@layout/fragment_forgot_password" >
         <action
-            android:id="@+id/action_forgotPasswordFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            android:id="@+id/action_loginFragment_to_verifyCodeFragment"
+            app:destination="@id/verifyCodeFragment" />
     </fragment>
     <fragment
         android:id="@+id/verifyCodeFragment"
@@ -68,6 +59,12 @@
         <argument
             android:name="phoneNumber"
             app:argType="string" />
+        <action
+            android:id="@+id/action_verifyCodeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <argument
+            android:name="authFlag"
+            app:argType="integer" />
     </fragment>
     <navigation
         android:id="@+id/navigation"
