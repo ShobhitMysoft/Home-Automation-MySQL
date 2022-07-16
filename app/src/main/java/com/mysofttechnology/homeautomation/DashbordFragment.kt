@@ -11,28 +11,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.mysofttechnology.homeautomation.databinding.FragmentDashbordBinding
+import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import org.json.JSONArray
+import org.json.JSONObject
 
 private const val TAG = "DashbordFragment"
 class DashbordFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseDatabase
-    private lateinit var dbRef: DatabaseReference
 
     private var _binding: FragmentDashbordBinding? = null
     private val binding get() = _binding!!
 
     private var currentUser: FirebaseUser? = null
     private var cuPhoneNo: String? = null
-    private var roomsList: ArrayList<String> = arrayListOf()
 
     private lateinit var loadingDialog: LoadingDialog
 
@@ -50,7 +52,6 @@ class DashbordFragment : Fragment() {
         _binding = FragmentDashbordBinding.inflate(inflater, container, false)
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseDatabase.getInstance()
 
         currentUser = auth.currentUser
         cuPhoneNo = currentUser?.phoneNumber.toString().takeLast(10)
@@ -62,7 +63,6 @@ class DashbordFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.actionbarTv.text = cuPhoneNo
-        dbRef = db.getReference("root/users/$cuPhoneNo/profile")
 
         loadingDialog.show(childFragmentManager, TAG)
 
@@ -79,22 +79,48 @@ class DashbordFragment : Fragment() {
 
     private fun checkDeviceAvailability() {
         if (isOnline()) {
-            dbRef.get().addOnSuccessListener {
-                if (it.hasChild("devices")) {
-                    it.child("devices").children.forEach { device ->
-                        roomsList.add(device.child("name").value.toString())
+            val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+            val url = getString(R.string.base_url)+getString(R.string.url_room_list)
+
+            val stringRequest = object : StringRequest(Method.POST, url,
+                { response ->
+                    try {
+                        val mData = JSONObject(response.toString())
+                        val resp = mData.get("response") as Int
+                        val msg = mData.get("msg")
+
+                        if (resp == 1) {
+                            val roomListData = mData.get("data") as JSONArray
+                            updateUI(true)
+                            Log.d(TAG, "checkDeviceAvailability: Message - $msg")
+                        } else {
+                            loadingDialog.dismiss()
+                            updateUI(false)
+//                            showToast("No user found. Please register first.")
+                            Log.d(TAG, "checkDeviceAvailability: Message - $msg")
+                        }
+                    } catch (e: Exception) {
+                        loadingDialog.dismiss()
+                        Log.d(TAG, "Exception: $e")
+                        showToast(e.message)
                     }
+                }, {
                     loadingDialog.dismiss()
-                    binding.addDeviceBtn.visibility = View.GONE
-                    binding.mainDashboard.visibility = View.VISIBLE
-                } else {
-                    Log.d(TAG, "checkDeviceAvailability: No device available")
-                    dbRef.child("deviceCount").setValue("0")
-                    loadingDialog.dismiss()
-                    binding.addDeviceBtn.visibility = View.VISIBLE
-                    binding.mainDashboard.visibility = View.VISIBLE
+                    showToast("Something went wrong.")
+                }) {
+                override fun getParams(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = cuPhoneNo.toString()
+                    return params
+                }
+
+                override fun getHeaders(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["Content-Type"] = "application/x-www-form-urlencoded"
+                    return params
                 }
             }
+            requestQueue.add(stringRequest)
         } else {
             loadingDialog.dismiss()
             Snackbar.make(binding.dashRootView, "No internet.", Snackbar.LENGTH_INDEFINITE)
@@ -102,6 +128,23 @@ class DashbordFragment : Fragment() {
                     checkDeviceAvailability()
                 }.show()
         }
+    }
+
+    private fun updateUI(flag: Boolean) {
+        if (flag) {
+            loadingDialog.dismiss()
+            binding.addDeviceBtn.visibility = View.GONE
+            binding.fragmentContainerView2.visibility = View.VISIBLE
+        } else {
+            Log.d(TAG, "updateUI: No device available")
+            loadingDialog.dismiss()
+            binding.addDeviceBtn.visibility = View.VISIBLE
+            binding.fragmentContainerView2.visibility = View.GONE
+        }
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
     private fun showPopupMenu(view: View?) {
