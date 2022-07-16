@@ -25,8 +25,6 @@ class AddDeviceFragment : Fragment() {
 //    private lateinit var progressBar: View
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseDatabase
-    private lateinit var dbRef: DatabaseReference
 
     private var currentUser: FirebaseUser? = null
     private var cuPhoneNo: String? = null
@@ -51,7 +49,6 @@ class AddDeviceFragment : Fragment() {
 //        progressBar = requireActivity().findViewById(R.id.dashboard_pbar)
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseDatabase.getInstance()
 
         currentUser = auth.currentUser
         cuPhoneNo = currentUser?.phoneNumber.toString().takeLast(10)
@@ -62,35 +59,22 @@ class AddDeviceFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        dbRef = db.getReference("root/users/$cuPhoneNo/profile")
-
-//        binding.addDeviceBtn.visibility = View.GONE
-//        progressBar.visibility = View.VISIBLE
         checkDeviceAvailability()
-
-//        binding.addDeviceBtn.setOnClickListener {
-////            Navigation.findNavController(it).navigate(R.id.action_addDeviceFragment_to_scanDeviceFragment)
-//            requireActivity().supportFragmentManager.commit {
-//                replace(R.id.scanDeviceFragment, DashbordFragment())
-//                setReorderingAllowed(true)
-//                addToBackStack(null)
-//            }
-//        }
     }
 
     private fun checkDeviceAvailability() {
-        dbRef.get().addOnSuccessListener {
-            if (it.hasChild("devices")){
-                val action = AddDeviceFragmentDirections.actionAddDeviceFragmentToRoomControlsFragment()
-                findNavController().navigate(action)
-//                progressBar.visibility = View.GONE
-//                binding.addDeviceBtn.visibility = View.VISIBLE
-            } else {
-                Log.d(TAG, "checkDeviceAvailability: No device available")
-                binding.msg.visibility = View.VISIBLE
-//                progressBar.visibility = View.GONE
-//                binding.addDeviceBtn.visibility = View.VISIBLE
-            }
-        }
+//        dbRef.get().addOnSuccessListener {
+//            if (it.hasChild("devices")){
+//                val action = AddDeviceFragmentDirections.actionAddDeviceFragmentToRoomControlsFragment()
+//                findNavController().navigate(action)
+////                progressBar.visibility = View.GONE
+////                binding.addDeviceBtn.visibility = View.VISIBLE
+//            } else {
+//                Log.d(TAG, "checkDeviceAvailability: No device available")
+//                binding.msg.visibility = View.VISIBLE
+////                progressBar.visibility = View.GONE
+////                binding.addDeviceBtn.visibility = View.VISIBLE
+//            }
+//        }
     }
 }

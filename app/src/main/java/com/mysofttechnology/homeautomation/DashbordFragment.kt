@@ -14,6 +14,7 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
@@ -131,15 +132,15 @@ class DashbordFragment : Fragment() {
     }
 
     private fun updateUI(flag: Boolean) {
-        if (flag) {
+        if (!flag) {
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.GONE
-            binding.fragmentContainerView2.visibility = View.VISIBLE
+            binding.fragmentContainerView2.findNavController().navigate(R.id.roomControlsFragment)
         } else {
             Log.d(TAG, "updateUI: No device available")
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.VISIBLE
-            binding.fragmentContainerView2.visibility = View.GONE
+            binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
         }
     }
 
