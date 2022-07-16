@@ -91,11 +91,11 @@ class DashbordFragment : Fragment() {
 
                         if (resp == 1) {
                             val roomListData = mData.get("data") as JSONArray
-                            updateUI(roomListData)
+                            updateUI(true)
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         } else {
                             loadingDialog.dismiss()
-                            updateUI(JSONArray())
+                            updateUI(false)
 //                            showToast("No user found. Please register first.")
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         }
@@ -130,18 +130,16 @@ class DashbordFragment : Fragment() {
         }
     }
 
-    private fun updateUI(roomListData: JSONArray) {
-        if (roomListData.length() == 0) {
+    private fun updateUI(flag: Boolean) {
+        if (flag) {
+            loadingDialog.dismiss()
+            binding.addDeviceBtn.visibility = View.GONE
+            binding.fragmentContainerView2.visibility = View.VISIBLE
+        } else {
             Log.d(TAG, "updateUI: No device available")
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.VISIBLE
             binding.fragmentContainerView2.visibility = View.GONE
-        } else {
-            loadingDialog.dismiss()
-            Log.d(TAG, "updateUI: Rooms - $roomListData")
-            showToast("Rooms : $roomListData")
-            binding.addDeviceBtn.visibility = View.GONE
-            binding.fragmentContainerView2.visibility = View.VISIBLE
         }
     }
 
