@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit
 private const val TAG = "LoginFragment"
 class LoginFragment : Fragment() {
 
+    private var phoneNumber: String = ""
     private lateinit var storedVerificationId: String
     private lateinit var resendToken: PhoneAuthProvider.ForceResendingToken
 
@@ -33,6 +34,16 @@ class LoginFragment : Fragment() {
     private lateinit var loadingDialog: LoadingDialog
 
     private lateinit var auth: FirebaseAuth
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        loadingDialog = LoadingDialog()
+        loadingDialog.isCancelable = false
+
+        arguments?.let {
+            phoneNumber = it.getString("phoneNumber").toString()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +60,8 @@ class LoginFragment : Fragment() {
 
         auth = FirebaseAuth.getInstance()
 
+        binding.loginNumberEt.setText(phoneNumber)
+
         binding.loginBackBtn.setOnClickListener {
             binding.loginBackBtn.isEnabled = false
             Navigation.findNavController(it).navigate(R.id.action_loginFragment_to_registrationFragment)
@@ -64,7 +77,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun validateUserInputData() {
-        val phone = binding.loginNumberEmail.text.toString().trim()
+        val phone = binding.loginNumberEt.text.toString().trim()
 
         val builder = AlertDialog.Builder(requireActivity())
 
@@ -82,47 +95,13 @@ class LoginFragment : Fragment() {
                 // Create the AlertDialog object and return it
                 builder.create()
                 builder.show()
-            } else binding.loginNumberEmail.error = "Enter a proper phone number"
-        } else binding.loginNumberEmail.error = "Phone number is required"
+            } else binding.loginNumberEt.error = "Enter a proper phone number"
+        } else binding.loginNumberEt.error = "Phone number is required"
     }
 
     private fun checkUserData(phone: String) {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val url = getString(R.string.base_url)+getString(R.string.url_profile)
-
-        /*val stringRequest = object : StringRequest(Method.GET, url,
-            { response ->
-                val mData = JSONObject(response)
-                val resp = mData.get("response")
-                val name = mData.get("name").toString()
-                val email = mData.get("email").toString()
-
-                if (resp == 1) {
-                    loginUser(name, email,phone)
-                } else {
-                    loadingDialog.dismiss()
-                    Toast.makeText(requireActivity(), "No user found. Please register first.",
-                        Toast.LENGTH_LONG).show()
-                }
-            },
-            {
-                loadingDialog.dismiss()
-                Toast.makeText(requireActivity(), "Network Error!", Toast.LENGTH_LONG).show()
-            }) {
-            override fun getParams(): Map<String, String> {
-                val params = HashMap<String, String>()
-                params["mobile_no"] = phone
-                return params
-            }
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val params = HashMap<String, String>()
-                params["Content-Type"] = "application/x-www-form-urlencoded"
-                return params
-            }
-        }
-
-        queue.add(stringRequest)*/
 
         val stringRequest = object : StringRequest(Method.POST, url,
             { response ->
