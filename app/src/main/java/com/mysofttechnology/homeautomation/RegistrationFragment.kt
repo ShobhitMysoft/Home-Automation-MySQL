@@ -6,15 +6,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import com.android.volley.toolbox.StringRequest
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
 import com.mysofttechnology.homeautomation.databinding.FragmentRegistrationBinding
+import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "RegistrationFragment"
@@ -60,8 +64,7 @@ class RegistrationFragment : Fragment() {
 
         binding.regLoginBtn.setOnClickListener {
             binding.regLoginBtn.isEnabled = false
-            Navigation.findNavController(it)
-                .navigate(R.id.action_registrationFragment_to_loginFragment)
+            gotoLogin("")
         }
         binding.regRegisterBtn.setOnClickListener {
             binding.regRegisterBtn.isEnabled = false
@@ -70,15 +73,17 @@ class RegistrationFragment : Fragment() {
         }
     }
 
+    private fun gotoLogin(phoneNumber: String) {
+        val action = RegistrationFragmentDirections.actionRegistrationFragmentToLoginFragment(phoneNumber)
+        findNavController().navigate(action)
+    }
+
     private fun validateUserInputData() {
         val fullName = binding.regFullName.text.toString().trim()
         val email = binding.regEmail.text.toString().trim()
         val phone = binding.regPhoneNo.text.toString().trim()
 
         val builder = AlertDialog.Builder(requireActivity())
-
-        // TODO: Check if username is available or not
-        // TODO: Check if phone number is available or not
 
         if (fullName.isNotBlank()) {
             if (email.isNotBlank()) {
@@ -90,7 +95,7 @@ class RegistrationFragment : Fragment() {
                             ) { _, _ ->
 //                                                progressBar.visibility = View.VISIBLE
                                 loadingDialog.show(childFragmentManager, TAG)
-                                registerUser(fullName, email, phone)
+                                checkUserData(fullName, email, phone)
                             }
                             .setNegativeButton("No") { _, _ -> }
                         // Create the AlertDialog object and return it
@@ -102,25 +107,71 @@ class RegistrationFragment : Fragment() {
         } else binding.regFullName.error = "Full name is required"
     }
 
+    private fun checkUserData(fullName: String, email: String, phone: String) {
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val url = getString(R.string.base_url)+getString(R.string.url_profile)
+
+        val builder = AlertDialog.Builder(requireActivity())
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        loadingDialog.dismiss()
+
+                        builder.setMessage("$phone is already registered. Please login to continue.")
+                            .setPositiveButton("Login"
+                            ) { _, _ ->
+                                gotoLogin(phone)
+                            }
+                            .setNeutralButton("Cancel") { _, _ -> }
+                        builder.create()
+                        builder.show()
+
+//                        Toast.makeText(requireActivity(), "$phone is already registered.", Toast.LENGTH_SHORT).show()
+                        Log.d(TAG, "checkUserData: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        registerUser(fullName, email, phone)
+                        Log.d(TAG, "checkUserData: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    Log.d(TAG, "Exception: $e")
+                    Toast.makeText(requireActivity(), e.message, Toast.LENGTH_SHORT).show()
+                }
+            }, {
+                loadingDialog.dismiss()
+                Toast.makeText(requireActivity(), "Something went wrong.", Toast.LENGTH_SHORT).show()
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["mobile_no"] = phone
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(stringRequest)
+    }
+
     private fun registerUser(fullName: String, email: String, phoneNumber: String) {
         // TODO:  inform user that they might receive an SMS message for verification and standard rates apply
 
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                // This callback will be invoked in two situations:
-                // 1 - Instant verification. In some cases the phone number can be instantly
-                //     verified without needing to send or enter a verification code.
-                // 2 - Auto-retrieval. On some devices Google Play services can automatically
-                //     detect the incoming verification SMS and perform verification without
-                //     user action.
                 Log.d(TAG, "onVerificationCompleted:$credential")
-//                signInWithPhoneAuthCredential(credential)
             }
 
             override fun onVerificationFailed(e: FirebaseException) {
-                // This callback is invoked in an invalid request for verification is made,
-                // for instance if the the phone number format is not valid.
                 Log.w(TAG, "onVerificationFailed", e)
 
                 if (e is FirebaseAuthInvalidCredentialsException) {
@@ -136,9 +187,7 @@ class RegistrationFragment : Fragment() {
                 verificationId: String,
                 token: PhoneAuthProvider.ForceResendingToken
             ) {
-                // The SMS verification code has been sent to the provided phone number, we
-                // now need to ask the user to enter the code and then construct a credential
-                // by combining the code with a verification ID.
+                Toast.makeText(requireActivity(), "The SMS verification code has been sent to the provided phone number.", Toast.LENGTH_SHORT).show()
                 Log.d(TAG, "onCodeSent:$verificationId")
 
                 // Save verification ID and resending token so we can use them later
@@ -163,24 +212,6 @@ class RegistrationFragment : Fragment() {
             .build()
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
-
-    /*private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
-        auth.signInWithCredential(credential).addOnCompleteListener {
-            if (it.isSuccessful) {
-                // Sign in success, update UI with the signed-in user's information
-                Log.d(TAG, "signInWithCredential:success")
-
-                val user = it.result?.user
-            } else {
-                // Sign in failed, display a message and update the UI
-                Log.w(TAG, "signInWithCredential:failure", it.exception)
-                if (it.exception is FirebaseAuthInvalidCredentialsException) {
-                    // The verification code entered was invalid
-                }
-                // Update UI
-            }
-        }
-    }*/
 
     override fun onStart() {
         super.onStart()

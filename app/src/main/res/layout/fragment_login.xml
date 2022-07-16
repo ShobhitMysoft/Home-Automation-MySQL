@@ -56,7 +56,7 @@
                 app:neumorph_shapeType="pressed">
 
                 <EditText
-                    android:id="@+id/login_number_email"
+                    android:id="@+id/login_number_et"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"

@@ -34,6 +34,9 @@
         <action
             android:id="@+id/action_loginFragment_to_verifyCodeFragment"
             app:destination="@id/verifyCodeFragment" />
+        <argument
+            android:name="phoneNumber"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/verifyCodeFragment"
