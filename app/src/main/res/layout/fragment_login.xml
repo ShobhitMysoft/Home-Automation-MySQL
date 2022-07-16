@@ -88,31 +88,39 @@
                     android:textColor="@color/white" />
             </soup.neumorphism.NeumorphCardView>
 
-            <LinearLayout
-                android:id="@+id/login_register_btn"
-                android:layout_width="wrap_content"
+            <soup.neumorphism.NeumorphCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/_14sdp"
+                android:backgroundTint="@color/primary"
+                app:neumorph_shapeType="basin"
                 android:clickable="true"
-                android:focusable="true"
-                android:orientation="horizontal">
+                android:focusable="true">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/login_register_btn"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/dont_have_an_account"
-                    android:textColor="@color/secondary_text"
-                    android:textSize="@dimen/_14ssp" />
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/_14sdp"
+                    android:paddingVertical="@dimen/_12sdp"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/_4ssp"
-                    android:text="@string/register"
-                    android:textColor="@color/primary_text"
-                    android:textSize="@dimen/_14ssp" />
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/dont_have_an_account"
+                        android:textColor="@color/secondary_text"
+                        android:textSize="@dimen/_14ssp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_4ssp"
+                        android:text="@string/register"
+                        android:textColor="@color/primary_text"
+                        android:textSize="@dimen/_14ssp" />
+                </LinearLayout>
+            </soup.neumorphism.NeumorphCardView>
 
         </LinearLayout>
     </ScrollView>

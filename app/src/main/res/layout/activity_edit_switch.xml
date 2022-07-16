@@ -41,7 +41,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/_50sdp"
         app:layout_constraintTop_toBottomOf="@id/es_action_bar">
 
         <LinearLayout
@@ -116,7 +115,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingTop="@dimen/_10sdp">
+                        android:paddingTop="@dimen/_5sdp">
 
                         <ImageView
                             android:id="@+id/switch_icon"
@@ -137,7 +136,7 @@
                             android:maxLength="20"
                             android:maxLines="1"
                             android:textColor="#000000"
-                            android:textSize="@dimen/_12sdp" />
+                            android:textSize="@dimen/_12ssp" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -173,7 +172,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingTop="@dimen/_12sdp">
+                        android:paddingTop="@dimen/_5sdp">
 
                         <LinearLayout
                             android:id="@+id/start_time_picker"
@@ -191,15 +190,16 @@
                                 android:layout_height="wrap_content"
                                 android:text="Start Time" />
 
-                            <EditText
-                                android:id="@+id/start_time_et"
+                            <TextView
+                                android:id="@+id/start_time_tv"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:enabled="false"
                                 android:gravity="center"
-                                android:hint="9:00 AM"
+                                android:hint="00:00"
                                 android:inputType="none"
-                                android:textColor="@color/dark_green" />
+                                android:paddingVertical="12dp"
+                                android:textColor="@color/dark_green"
+                                android:textSize="@dimen/_12ssp" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -218,14 +218,15 @@
                                 android:layout_height="wrap_content"
                                 android:text="Stop Time" />
 
-                            <EditText
-                                android:id="@+id/stop_time_et"
+                            <TextView
+                                android:id="@+id/stop_time_tv"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:enabled="false"
                                 android:gravity="center"
-                                android:hint="9:00 AM"
+                                android:hint="00:00"
                                 android:inputType="none"
+                                android:paddingVertical="12dp"
+                                android:textSize="@dimen/_12ssp"
                                 android:textColor="@color/dark_red" />
                         </LinearLayout>
 
@@ -239,50 +240,50 @@
 
                     <CheckBox
                         android:id="@+id/sun_cb"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
                         android:buttonTint="@color/colorAccent"
                         android:text="Sunday" />
 
                     <CheckBox
                         android:id="@+id/mon_cb"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
                         android:buttonTint="@color/colorAccent"
                         android:text="Monday" />
 
                     <CheckBox
                         android:id="@+id/tue_cb"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
                         android:buttonTint="@color/colorAccent"
                         android:text="Tuesday" />
 
                     <CheckBox
                         android:id="@+id/wed_cb"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
                         android:buttonTint="@color/colorAccent"
                         android:text="Wednesday" />
 
                     <CheckBox
                         android:id="@+id/thu_cb"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
                         android:buttonTint="@color/colorAccent"
                         android:text="Thursday" />
 
                     <CheckBox
                         android:id="@+id/fri_cb"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
                         android:buttonTint="@color/colorAccent"
                         android:text="Friday" />
 
                     <CheckBox
                         android:id="@+id/sat_cb"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
                         android:buttonTint="@color/colorAccent"
                         android:text="Saturday" />
                 </LinearLayout>
@@ -296,7 +297,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
-                android:layout_marginBottom="15dp"
+                android:layout_marginBottom="75dp"
                 android:backgroundTint="@color/primary"
                 android:text="Submit"
                 android:textColor="@color/white"

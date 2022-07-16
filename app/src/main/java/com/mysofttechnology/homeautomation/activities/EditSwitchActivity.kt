@@ -108,8 +108,8 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
 
         if (switchName.trim().isNotBlank()) {
             if (START_TIME_FLAG or START_TIME_FLAG) {
-                if (bind.sunCb.isChecked || bind.monCb.isChecked || bind.monCb.isChecked || bind.monCb.isChecked
-                    || bind.monCb.isChecked || bind.monCb.isChecked || bind.monCb.isChecked) {
+                if (bind.sunCb.isChecked || bind.monCb.isChecked || bind.tueCb.isChecked || bind.wedCb.isChecked
+                    || bind.thuCb.isChecked || bind.friCb.isChecked || bind.satCb.isChecked) {
                     submitData(switchName)
                 } else {
                     loadingDialog.dismiss()
@@ -127,8 +127,8 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         myDB.dbProfileRef.child("devices").child(roomId).child(switchId).apply {
             child("name").setValue(switchName)
             child("icon").setValue(switchIconIndex)
-            child(START_TIME).setValue(bind.startTimeEt.text.toString())
-            child(STOP_TIME).setValue(bind.stopTimeEt.text.toString())
+            child(START_TIME).setValue(bind.startTimeTv.text.toString())
+            child(STOP_TIME).setValue(bind.stopTimeTv.text.toString())
             child(SUN).setValue(if (bind.sunCb.isChecked) ONE else ZERO)
             child(MON).setValue(if (bind.monCb.isChecked) ONE else ZERO)
             child(TUE).setValue(if (bind.tueCb.isChecked) ONE else ZERO)
@@ -219,8 +219,8 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
                 bind.switchIcon.setImageResource(iconsList.getResourceId(switchIconIndex, 0))
                 bind.switchNameEt.setText(it.child(switchId).child("name").value.toString())
 
-                bind.startTimeEt.setText(it.child(switchId).child(START_TIME).value.toString())
-                bind.stopTimeEt.setText(it.child(switchId).child(STOP_TIME).value.toString())
+                bind.startTimeTv.setText(it.child(switchId).child(START_TIME).value.toString())
+                bind.stopTimeTv.setText(it.child(switchId).child(STOP_TIME).value.toString())
 
                 bind.sunCb.isChecked = it.child(switchId).child(SUN).value.toString() == "1"
                 bind.monCb.isChecked = it.child(switchId).child(MON).value.toString() == "1"
@@ -272,12 +272,12 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
 
         if (TIME_PICKER_FLAG == 1) {
             cal1 = cal
-            bind.startTimeEt.setText(time)
+            bind.startTimeTv.setText(time)
             START_TIME_FLAG = true
         }
         if (TIME_PICKER_FLAG == 2) {
             cal2 = cal
-            bind.stopTimeEt.setText(time)
+            bind.stopTimeTv.setText(time)
             STOP_TIME_FLAG = true
         }
     }
