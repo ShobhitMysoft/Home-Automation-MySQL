@@ -17,6 +17,7 @@ import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import com.android.volley.toolbox.StringRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
@@ -51,6 +52,9 @@ import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Compani
 import com.mysofttechnology.homeautomation.activities.ErrorActivity
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBinding
 import com.mysofttechnology.homeautomation.utils.MyFirebaseDatabase
+import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import org.json.JSONArray
+import org.json.JSONObject
 
 private const val TAG = "RoomControlsFragment"
 
@@ -59,15 +63,16 @@ class RoomControlsFragment : Fragment() {
     private lateinit var waitSnackbar: Snackbar
 //    private var valueEventListener: ValueEventListener? = null
     private var currentDeviceId: String? = null
+    private var currentUserId: String? = null
 
     private var _binding: FragmentRoomControlsBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var loadingDialog: LoadingDialog
 
-    private lateinit var myFD: MyFirebaseDatabase
-    private lateinit var profileDBRef: DatabaseReference
-    private lateinit var devicesDBRef: DatabaseReference
+//    private lateinit var myFD: MyFirebaseDatabase
+//    private lateinit var profileDBRef: DatabaseReference
+//    private lateinit var devicesDBRef: DatabaseReference
     private var roomsList: ArrayList<String> = arrayListOf()
     private var deviceIDList: ArrayList<String> = arrayListOf()
 
@@ -97,7 +102,7 @@ class RoomControlsFragment : Fragment() {
         savedInstanceState: Bundle?): View? {
         _binding = FragmentRoomControlsBinding.inflate(inflater, container, false)
 
-        myFD = MyFirebaseDatabase()
+//        myFD = MyFirebaseDatabase()
         iconsList = resources.obtainTypedArray(R.array.icons_list)
 
         return binding.root
@@ -107,16 +112,13 @@ class RoomControlsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.i(TAG, "onViewCreated: Called")
 
-//        loadingDialog.show(childFragmentManager, TAG)
-//        disableUI()
-        Log.i(TAG, "onViewCreated: Loading dialog 1")
+        val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+        currentUserId = sharedPref.getString(getString(R.string.current_user_id), "")
+        Log.d(TAG, "onViewCreated: $currentUserId")
+
         waitSnackbar =
             Snackbar.make(requireActivity().findViewById(android.R.id.content), "Please wait...",
                 Snackbar.LENGTH_INDEFINITE)
-//            .setAnchorView(binding.rootView)
-
-        profileDBRef = myFD.dbProfileRef
-        devicesDBRef = myFD.dbDevicesRef
 
         Log.d(TAG, "onViewCreated: currentDeviceId - $currentDeviceId")
 
@@ -129,23 +131,80 @@ class RoomControlsFragment : Fragment() {
             true
         }
 
-        uiHandler()
+//        uiHandler()
 
     }
 
-    var checkDBCounter = 0
     private fun checkDatabase() {
-        roomsList.clear()
-        deviceIDList.clear()
+        loadingDialog.show(childFragmentManager, TAG)
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val url = getString(R.string.base_url)+getString(R.string.url_room_list)
 
-        profileDBRef.child(DEVICES).get().addOnFailureListener {
-            Log.d(TAG, "checkDatabase: addOnFailureListener Called")
-            profileDBRef.child("deviceCount").setValue(ZERO)
-            Navigation.findNavController(requireView())
-                .navigate(R.id.action_roomControlsFragment_to_addDeviceFragment)
+        if (isOnline()) {
+            roomsList.clear()
+            deviceIDList.clear()
+
+            val stringRequest = object : StringRequest(Method.POST, url,
+                { response ->
+                    try {
+                        val mData = JSONObject(response.toString())
+                        val resp = mData.get("response") as Int
+                        val msg = mData.get("msg")
+
+                        if (resp == 1) {
+                            val roomListData = mData.get("data") as JSONArray
+                            createRoom(roomListData)
+
+                            Log.d(TAG, "checkDatabase: Message - $msg")
+                        } else {
+                            loadingDialog.dismiss()
+                            Log.d(TAG, "checkDatabase: Message - $msg")
+
+                            gotoAddDevice()
+                        }
+                    } catch (e: Exception) {
+                        loadingDialog.dismiss()
+                        Log.e(TAG, "Exception: $e")
+                        showToast(e.message)
+                        gotoAddDevice()
+                    }
+                }, {
+                    loadingDialog.dismiss()
+                    showToast("Something went wrong.")
+                    gotoAddDevice()
+                    Log.e(TAG, "VollyError: ${it.message}")
+                }) {
+                override fun getParams(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = currentUserId.toString()
+                    return params
+                }
+
+                override fun getHeaders(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["Content-Type"] = "application/x-www-form-urlencoded"
+                    return params
+                }
+            }
+            requestQueue.add(stringRequest)
+        } else {
+            loadingDialog.dismiss()
+            showLSnackbar("No internet connection")
+        }
+    }
+
+    private fun createRoom(roomListData: JSONArray) {
+        for (i in 0 until roomListData.length()) {
+            val device = roomListData.getJSONObject(i)
+            roomsList.add(device.get("room_name").toString())
+            deviceIDList.add(device.get("device_id").toString())
         }
 
-        profileDBRef.child(DEVICES).get().addOnSuccessListener {
+        currentDeviceId = deviceIDList[selectedRoomIndex]
+        updateUI()
+
+
+        /*profileDBRef.child(DEVICES).get().addOnSuccessListener {
 
             Log.d(TAG, "checkDatabase: ${it.childrenCount}")
 
@@ -180,7 +239,7 @@ class RoomControlsFragment : Fragment() {
                 binding.currentRoomTv.text = roomsList[selectedRoomIndex]
                 updateUI()
             }
-        }
+        }*/
     }
 
     /*
@@ -253,9 +312,80 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun updateUI() {
-        Log.i(TAG, "updateUI: Called")
+        Log.i(TAG, "updateUI: Called $currentDeviceId")
 
-        currentDeviceId?.let {
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val url = getString(R.string.base_url)+getString(R.string.url_get_live)
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                Log.i(TAG, "updateUI: $response")
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        val app1Val = mData.get(APPL1).toString()
+                        val app2Val = mData.get(APPL2).toString()
+                        val app3Val = mData.get(APPL3).toString()
+                        val app4Val = mData.get(APPL4).toString()
+                        val fan = mData.get(FAN).toString()
+                        // TODO: Wifi Implementation
+                        val wifi = mData.get("wifi").toString()
+                        val fanSpeed = fan.toInt()
+
+                        binding.switch1Switch.isChecked = app1Val == ONE
+                        binding.switch2Switch.isChecked = app2Val == ONE
+                        binding.switch3Switch.isChecked = app3Val == ONE
+                        binding.switch4Switch.isChecked = app4Val == ONE
+
+                        if (fanSpeed == 0) {
+                            binding.fanSpeedSlider.value = 0.0f
+                            binding.fanSpeedTv.text = ZERO
+                            if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
+                        } else {
+                            binding.fanSpeedSlider.value = fanSpeed.toFloat()
+                            binding.fanSpeedTv.text = fan
+                            if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                        }
+
+                        togglePower(app1Val, app2Val, app3Val, app4Val, fan)
+
+                        Log.d(TAG, "updateUI: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                       // TODO: Show snackbar to retry
+                        showToast("unable to get data")
+//                        showErrorScreen()
+                        Log.e(TAG, "updateUI: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception in updateUI: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = currentDeviceId.toString()
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(stringRequest)
+
+
+        /*currentDeviceId?.let {
 
             devicesDBRef.child(it).get().addOnSuccessListener { device ->
                 try {
@@ -490,10 +620,10 @@ class RoomControlsFragment : Fragment() {
                     Log.e(TAG, "databaseHandler: Error", e)
                 }
             }
-        }
+        }*/
     }
 
-    private fun uiHandler() {
+    /*private fun uiHandler() {
         Log.d(TAG, "uiHandler: Called\n")
 
         binding.powerBtn.setOnClickListener {
@@ -613,24 +743,26 @@ class RoomControlsFragment : Fragment() {
         binding.switch4MoreBtn.setOnClickListener {
             showPopupMenu(it, SWITCH4)
         }
-    }
+    }*/
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
         fan: String) {
         if (isAdded) {
             try {
                 if (app1Val == ZERO && app2Val == ZERO && app3Val == ZERO && app4Val == ZERO && fan == ZERO) {
-                    profileDBRef.child("devices").child(currentDeviceId.toString()).child("power")
-                        .setValue(0)
+//                    profileDBRef.child("devices").child(currentDeviceId.toString()).child("power")
+//                        .setValue(0)
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
                     enableUI()
+                    loadingDialog.dismiss()
                 } else {
-                    profileDBRef.child("devices").child(currentDeviceId.toString()).child("power")
-                        .setValue(1)
+//                    profileDBRef.child("devices").child(currentDeviceId.toString()).child("power")
+//                        .setValue(1)
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
                     enableUI()
+                    loadingDialog.dismiss()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "togglePower: Error", e)
@@ -639,7 +771,7 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun togglePower() {
-        profileDBRef.child(DEVICES).child(currentDeviceId!!).child(POWER).get()
+        /*profileDBRef.child(DEVICES).child(currentDeviceId!!).child(POWER).get()
             .addOnSuccessListener {
                 val power = it.value.toString()
 
@@ -682,7 +814,12 @@ class RoomControlsFragment : Fragment() {
                                     }.addOnFailureListener { togglePower() }
                             }.addOnFailureListener { togglePower() }
                     }.addOnFailureListener { togglePower() }
-            }
+            }*/
+    }
+
+    private fun gotoAddDevice() {
+        Navigation.findNavController(requireView())
+            .navigate(R.id.action_roomControlsFragment_to_addDeviceFragment)
     }
 
     private fun showChooseRoomDialog() {
@@ -788,6 +925,10 @@ class RoomControlsFragment : Fragment() {
         return false
     }
 
+    private fun showToast(message: String?) {
+        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
+    }
+
     private fun showSSnackbar(msg: String = "Please wait...") {
         Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_SHORT)
             .setAnchorView(binding.rcRootView)
@@ -803,7 +944,7 @@ class RoomControlsFragment : Fragment() {
             Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") {
                     if (isOnline()) refreshUI()
-                    else showLSnackbar("No internet connection")
+                    else showLSnackbar(msg)
                 }
                 .show()
         }
