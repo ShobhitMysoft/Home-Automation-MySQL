@@ -186,24 +186,6 @@ class ScanDeviceFragment : Fragment() {
             }
         }
         requestQueue.add(stringRequest)
-
-        /*profileDBRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.child(deviceId).exists()) {
-                    Toast.makeText(requireActivity(), "Device already exists", Toast.LENGTH_SHORT)
-                        .show()
-                    addDevice(deviceId)
-                } else {
-                    Toast.makeText(requireActivity(), "New device", Toast.LENGTH_SHORT)
-                        .show()
-                    addDevice(deviceId)
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e(TAG, "onCancelled: ${error.message}")
-            }
-        })*/
     }
 
     private fun roomExists(roomListData: JSONArray, deviceId: String): Boolean {
