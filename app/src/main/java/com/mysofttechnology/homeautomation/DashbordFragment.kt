@@ -132,7 +132,7 @@ class DashbordFragment : Fragment() {
     }
 
     private fun updateUI(flag: Boolean) {
-        if (!flag) {
+        if (flag) {
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.GONE
             binding.fragmentContainerView2.findNavController().navigate(R.id.roomControlsFragment)
