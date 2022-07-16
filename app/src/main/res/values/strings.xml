@@ -20,6 +20,7 @@
     <string name="base_url">https://mysofttechnology.com/homeautomation/admin/api/</string>
     <string name="url_register">register</string>
     <string name="url_profile">profile</string>
+    <string name="url_room_list">room_list</string>
 
     <integer-array name="icons_list">
         <item>@drawable/ic_light</item>
