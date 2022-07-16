@@ -14,6 +14,7 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
@@ -90,7 +91,6 @@ class DashbordFragment : Fragment() {
                         val msg = mData.get("msg")
 
                         if (resp == 1) {
-                            val roomListData = mData.get("data") as JSONArray
                             updateUI(true)
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         } else {
@@ -107,6 +107,7 @@ class DashbordFragment : Fragment() {
                 }, {
                     loadingDialog.dismiss()
                     showToast("Something went wrong.")
+                    Log.e(TAG, "VollyError: ${it.message}")
                 }) {
                 override fun getParams(): Map<String, String> {
                     val params = HashMap<String, String>()
@@ -134,12 +135,12 @@ class DashbordFragment : Fragment() {
         if (flag) {
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.GONE
-            binding.fragmentContainerView2.visibility = View.VISIBLE
+            binding.fragmentContainerView2.findNavController().navigate(R.id.roomControlsFragment)
         } else {
             Log.d(TAG, "updateUI: No device available")
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.VISIBLE
-            binding.fragmentContainerView2.visibility = View.GONE
+            binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
         }
     }
 

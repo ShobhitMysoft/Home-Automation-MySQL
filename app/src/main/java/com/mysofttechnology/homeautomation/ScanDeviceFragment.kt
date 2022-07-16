@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import com.android.volley.toolbox.StringRequest
 import com.budiyev.android.codescanner.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -26,15 +27,15 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.TUE
 import com.mysofttechnology.homeautomation.StartActivity.Companion.WED
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ZERO
 import com.mysofttechnology.homeautomation.databinding.FragmentScanDeviceBinding
+import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import org.json.JSONArray
+import org.json.JSONObject
 
 private const val TAG = "ScanDeviceFragment"
 
 class ScanDeviceFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseDatabase
-    private lateinit var dbRef: DatabaseReference
-    private lateinit var profileDBRef: DatabaseReference
 
     private var currentUser: FirebaseUser? = null
     private var cuPhoneNo: String? = null
@@ -57,8 +58,6 @@ class ScanDeviceFragment : Fragment() {
     ): View? {
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseDatabase.getInstance()
-        dbRef = db.getReference("root/devices")
 
         currentUser = auth.currentUser
         cuPhoneNo = currentUser?.phoneNumber.toString().takeLast(10)
@@ -69,8 +68,6 @@ class ScanDeviceFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        profileDBRef = db.getReference("root/users/$cuPhoneNo/profile")
 
         activityResultLauncher.launch(Manifest.permission.CAMERA)
         codeScanner()
@@ -139,7 +136,58 @@ class ScanDeviceFragment : Fragment() {
     }
 
     private fun checkDeviceAvailability(deviceId: String) {
-        profileDBRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val url = getString(R.string.base_url)+getString(R.string.url_room_list)
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        val roomListData = mData.get("data") as JSONArray
+                        if (roomExists(roomListData, deviceId)) {
+                            // TODO: Room Already exists dialog(Choose continue to add wifi or finish)
+                            showToast("Device already exists")
+                            gotoConnectDevice()
+                        } else {
+                            showToast("New device")
+                            addDevice(deviceId)
+                        }
+                        Log.d(TAG, "checkDeviceAvailability: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        showToast("New device")
+                        addDevice(deviceId)
+                        Log.d(TAG, "checkDeviceAvailability: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["user_id"] = cuPhoneNo.toString()
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(stringRequest)
+
+        /*profileDBRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.child(deviceId).exists()) {
                     Toast.makeText(requireActivity(), "Device already exists", Toast.LENGTH_SHORT)
@@ -155,13 +203,69 @@ class ScanDeviceFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {
                 Log.e(TAG, "onCancelled: ${error.message}")
             }
-        })
+        })*/
+    }
+
+    private fun roomExists(roomListData: JSONArray, deviceId: String): Boolean {
+        var flag = false
+        for (i in 0 until roomListData.length()) {
+            val room = roomListData.getJSONObject(i)
+            if (room.get("device_id") == deviceId) {
+                flag = true
+            }
+        }
+        return flag
     }
 
     private fun addDevice(deviceId: String) {
-        // TODO: Do not add if already exists (maybe bcoz the user wants to add wifi password so just update)
-        // TODO: Add user id to device child(user: UserId) or "connected: 0/1" so that only connected user...
-        profileDBRef.get().addOnSuccessListener {
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val url = getString(R.string.base_url)+getString(R.string.url_room)
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        for (i in 1..5) {
+                            createSwitch(deviceId, i)
+                        }
+                        Log.d(TAG, "addDevice: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        showToast("unable to create room")
+                        Log.e(TAG, "addDevice: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId
+                params["user_id"] = cuPhoneNo.toString()
+                params["room_name"] = "Room $deviceId"
+                params["power"] = ZERO
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(stringRequest)
+
+        /*profileDBRef.get().addOnSuccessListener {
             var deviceCount = (it.child("deviceCount").value as String).toInt()
 
             if (it.child("devices").hasChild(deviceId)) {
@@ -173,9 +277,9 @@ class ScanDeviceFragment : Fragment() {
                 profileDBRef.child("deviceCount").setValue(deviceCount.toString())
 
                 profileDBRef.child("devices").child(deviceId).apply {
-                    child("name").setValue("Room $deviceCount")
-                    child("order").setValue(deviceCount)
-                    child("id").setValue(deviceId)
+                    child("device_id").setValue(deviceId)
+                    child("user_id").setValue(deviceCount)
+                    child("room_name").setValue("Room $deviceCount")
                     child("power").setValue(0)
 
                     child("switch1").child("icon").setValue(0)
@@ -226,12 +330,71 @@ class ScanDeviceFragment : Fragment() {
                     child("switch4").child(FRI).setValue(ZERO)
                     child("switch4").child(SAT).setValue(ZERO)
                 }
-                Navigation.findNavController(requireView())
-                    .navigate(R.id.action_scanDeviceFragment_to_connectDeviceFragment)
-                loadingDialog.dismiss()
             }
         }
 
+        loadingDialog.dismiss()*/
+    }
+
+    private fun createSwitch(deviceId: String, i: Int) {
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val url = getString(R.string.base_url)+getString(R.string.url_switch)
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        if (i>=5) gotoConnectDevice()
+                        Log.d(TAG, "createSwitch: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        showToast("unable to create room")
+                        Log.e(TAG, "createSwitch: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId
+                params["switch"] = if (i==5) "Fan" else "Switch $i"
+                params["icon"] = ZERO
+                params[START_TIME] = BLANK
+                params[STOP_TIME] = BLANK
+                params[SUN] = ZERO
+                params[MON] = ZERO
+                params[TUE] = ZERO
+                params[WED] = ZERO
+                params[THU] = ZERO
+                params[FRI] = ZERO
+                params[SAT] = ZERO
+                params["switch_id_by_app"] = i.toString()
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(stringRequest)
+    }
+
+    private fun gotoConnectDevice() {
+        Navigation.findNavController(requireView())
+            .navigate(R.id.action_scanDeviceFragment_to_connectDeviceFragment)
         loadingDialog.dismiss()
     }
 
@@ -248,6 +411,10 @@ class ScanDeviceFragment : Fragment() {
             // TODO: Navigate Up
 //                Navigation.findNavController(requireView()).navigateUp()
         }
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
     override fun onResume() {
