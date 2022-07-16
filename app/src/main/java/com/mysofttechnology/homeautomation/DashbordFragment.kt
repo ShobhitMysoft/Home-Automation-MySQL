@@ -91,7 +91,6 @@ class DashbordFragment : Fragment() {
                         val msg = mData.get("msg")
 
                         if (resp == 1) {
-                            val roomListData = mData.get("data") as JSONArray
                             updateUI(true)
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         } else {
@@ -108,6 +107,7 @@ class DashbordFragment : Fragment() {
                 }, {
                     loadingDialog.dismiss()
                     showToast("Something went wrong.")
+                    Log.e(TAG, "VollyError: ${it.message}")
                 }) {
                 override fun getParams(): Map<String, String> {
                     val params = HashMap<String, String>()
