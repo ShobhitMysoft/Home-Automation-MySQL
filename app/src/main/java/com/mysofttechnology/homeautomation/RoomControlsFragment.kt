@@ -56,6 +56,7 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private val CHECK_WIFI_DELAY_TIME: Long = 1000
     private lateinit var toggleWifi: Handler
     private var checkWifiIsRunning: Boolean = false
     private var checkWifi: Boolean = false
@@ -204,106 +205,7 @@ class RoomControlsFragment : Fragment() {
         currentDeviceId = deviceIDList[selectedRoomIndex]
         binding.currentRoomTv.text = roomsList[selectedRoomIndex]
         updateUI()
-
-
-        /*profileDBRef.child(DEVICES).get().addOnSuccessListener {
-
-            Log.d(TAG, "checkDatabase: ${it.childrenCount}")
-
-            it.children.forEach { device ->
-                val devId = device.child("id").value
-                if (devId != null && devId.toString() != "null") {
-                    roomsList.add(device.child("name").value.toString())
-                    deviceIDList.add(devId.toString())
-                } else profileDBRef.child(DEVICES).child(device.key.toString()).removeValue()
-            }
-
-            Log.i(TAG, "checkDatabase: $deviceIDList")
-            if (deviceIDList.isEmpty()) checkDatabase()
-            else currentDeviceId = deviceIDList[selectedRoomIndex]
-
-            if (currentDeviceId.isNullOrBlank() or roomsList.isEmpty() or deviceIDList.isEmpty()) {
-                if (checkDBCounter > 2) {
-//                    loadingDialog.dismiss()
-                    binding.rcRootView.visibility = View.INVISIBLE
-                    Snackbar.make(binding.rcRootView, "Something went wrong",
-                        Snackbar.LENGTH_INDEFINITE)
-                        .setAction("Retry") {
-                            Navigation.findNavController(requireView())
-                                .navigate(R.id.action_roomControlsFragment_to_addDeviceFragment)
-                        }
-                        .show()
-                } else {
-                    checkDatabase()
-                    checkDBCounter++
-                }
-            } else {
-                binding.currentRoomTv.text = roomsList[selectedRoomIndex]
-                updateUI()
-            }
-        }*/
     }
-
-    /*
-//    private fun databaseHandler() {
-//        Log.d(TAG, "databaseHandler: Called")
-////        devicesDBRef.child(currentDeviceId).child("oldFanSpeed").setValue(ZERO)
-//
-//        currentDeviceId?.let {
-//            valueEventListener =
-//                devicesDBRef.child(it).addValueEventListener(object : ValueEventListener {
-//                    override fun onDataChange(snapshot: DataSnapshot) {
-//                        valueEventListener?.let { vel -> devicesDBRef.removeEventListener(vel) }
-//                        devicesDBRef.child(it).get().addOnSuccessListener { device ->
-//                            try {
-//                                val app1Val = device.child(APPL1).value.toString()
-//                                val app2Val = device.child(APPL2).value.toString()
-//                                val app3Val = device.child(APPL3).value.toString()
-//                                val app4Val = device.child(APPL4).value.toString()
-//                                val fan = device.child(FAN).value.toString()
-//                                val fanSpeed = fan.toInt()
-//
-//                                binding.switch1Switch.isChecked = app1Val == ONE
-//
-//                                binding.switch2Switch.isChecked = app2Val == ONE
-//
-//                                binding.switch3Switch.isChecked = app3Val == ONE
-//
-//                                binding.switch4Switch.isChecked = app4Val == ONE
-//
-//                                if (fanSpeed == 0) {
-//                                    binding.fanSpeedSlider.value = 0.0f
-//                                    binding.fanSpeedTv.text = ZERO
-//                                    binding.fanSwitch.isChecked = false
-//                                } else {
-//                                    binding.fanSpeedSlider.value = fanSpeed.toFloat()
-//                                    binding.fanSpeedTv.text = fan
-//                                    binding.fanSwitch.isChecked = true
-//                                }
-//
-//                                togglePower(app1Val, app2Val, app3Val, app4Val, fan)
-//                            } catch (e: Exception) {
-//                                showErrorScreen()
-////                            showLSnackbar()
-//                                Log.e(TAG, "onDataChange: Database Error", e)
-//                            }
-//                        }
-//
-////                        loadingDialog.dismiss()
-//                    }
-//
-//                    override fun onCancelled(error: DatabaseError) {
-//                        Log.e(TAG, "onCancelled: databaseHandler() - ${error.message}")
-////                        loadingDialog.dismiss()
-//                    }
-//                })
-//        }
-////        loadingDialog.dismiss()
-//
-//        uiHandler()
-//    }
-
-     */
 
     private fun showErrorScreen() {
         if (isAdded) {
@@ -565,10 +467,20 @@ class RoomControlsFragment : Fragment() {
         Log.d(TAG, "uiHandler: Called\n")
         val spEditor = sharedPref?.edit()
 
+        binding.refreshBtn.setOnClickListener {
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
+            checkDatabase()
+        }
+
         binding.powerBtn.setOnClickListener {
             loadingDialog.show(childFragmentManager, TAG)
-            // TODO: Check DATABASE Wifi value
-//            if (checkWifiIsRunning) toggleWifi.postDelayed(wifiRunnable, 10000)
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
             togglePower()
         }
 
@@ -579,7 +491,7 @@ class RoomControlsFragment : Fragment() {
                 disableUI()
                 if (!checkWifiIsRunning) {
                     checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, 10000)
+                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
                 }
                 val speed = slider.value
 
@@ -587,110 +499,57 @@ class RoomControlsFragment : Fragment() {
 
                 spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
                 spEditor?.apply()
-
-                /*currentDeviceId?.let {
-                    devicesDBRef.child(it).child("fan").setValue(speed.toInt().toString())
-                        .addOnSuccessListener {
-                            devicesDBRef.child(currentDeviceId!!).child("oldFanSpeed")
-                                .setValue(if (speed.toInt() < 1) "1" else speed.toInt().toString())
-                            updateUI()
-                        }
-                }*/
             }
         })
 
         binding.fanSwitch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, 10000)
-                }
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
             if (!isChecked) {
                 updateLive(ZERO, FAN)
             } else {
                 var oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)", "1")
                 updateLive(oldFanSpeed.toString(), FAN)
-
-                /*currentDeviceId?.let { device ->
-                    devicesDBRef.child(device).child("oldFanSpeed").get()
-                        .addOnSuccessListener { speed ->
-                            oldFanSpeed = speed.value.toString()
-                            devicesDBRef.child(device).child(FAN).setValue(oldFanSpeed)
-                                .addOnSuccessListener {
-                                    updateUI()
-                                }
-                        }.addOnFailureListener {
-                            devicesDBRef.child(device).child(FAN).setValue(oldFanSpeed)
-                                .addOnSuccessListener {
-                                    updateUI()
-                                }
-                        }
-                }*/
             }
         }
 
         binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, 10000)
-                }
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
             updateLive(if (isChecked) ONE else ZERO, APPL1)
-
-            /*currentDeviceId?.let {
-                devicesDBRef.child(it).child(APPL1).setValue(if (isChecked) ONE else ZERO)
-                    .addOnSuccessListener {
-                        updateUI()
-                    }
-            }*/
         }
 
         binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, 10000)
-                }
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
             updateLive(if (isChecked) ONE else ZERO, APPL2)
-
-            /*currentDeviceId?.let {
-                devicesDBRef.child(it).child(APPL2).setValue(if (isChecked) ONE else ZERO)
-                    .addOnSuccessListener {
-                        updateUI()
-                    }
-            }*/
         }
 
         binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, 10000)
-                }
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
             updateLive(if (isChecked) ONE else ZERO, APPL3)
-
-            /*currentDeviceId?.let {
-                devicesDBRef.child(it).child(APPL3).setValue(if (isChecked) ONE else ZERO)
-                    .addOnSuccessListener {
-                        updateUI()
-                    }
-            }*/
         }
 
         binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, 10000)
-                }
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
             updateLive(if (isChecked) ONE else ZERO, APPL4)
-
-            /*currentDeviceId?.let {
-                devicesDBRef.child(it).child(APPL4).setValue(if (isChecked) ONE else ZERO)
-                    .addOnSuccessListener {
-                        updateUI()
-                    }
-            }*/
         }
 
         /*binding.switch1MoreBtn.setOnClickListener {
@@ -759,7 +618,8 @@ class RoomControlsFragment : Fragment() {
     val wifiRunnable = Runnable {
         Log.i(TAG, "Runnable: Called")
         checkWifiIsRunning = false
-        checkWifi = true }
+        checkWifi = true
+    }
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
         fan: String) {
@@ -783,10 +643,21 @@ class RoomControlsFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e(TAG, "togglePower: Error", e)
             }
-        } else togglePower()
+        }
+//        else togglePower()
     }
 
     private fun togglePower() {
+        val toggleFlag = !binding.fanSwitch.isChecked && !binding.switch1Switch.isChecked
+                && !binding.switch2Switch.isChecked && !binding.switch3Switch.isChecked
+                && !binding.switch4Switch.isChecked
+
+        binding.fanSwitch.isChecked = toggleFlag
+        binding.switch1Switch.isChecked = toggleFlag
+        binding.switch2Switch.isChecked = toggleFlag
+        binding.switch3Switch.isChecked = toggleFlag
+        binding.switch4Switch.isChecked = toggleFlag
+
         /*profileDBRef.child(DEVICES).child(currentDeviceId!!).child(POWER).get()
             .addOnSuccessListener {
                 val power = it.value.toString()
