@@ -56,6 +56,7 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private val CHECK_WIFI_DELAY_TIME: Long = 1000
     private lateinit var toggleWifi: Handler
     private var checkWifiIsRunning: Boolean = false
     private var checkWifi: Boolean = false
@@ -466,11 +467,19 @@ class RoomControlsFragment : Fragment() {
         Log.d(TAG, "uiHandler: Called\n")
         val spEditor = sharedPref?.edit()
 
+        binding.refreshBtn.setOnClickListener {
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
+            checkDatabase()
+        }
+
         binding.powerBtn.setOnClickListener {
             loadingDialog.show(childFragmentManager, TAG)
             if (!checkWifiIsRunning) {
                 checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, 10000)
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
             }
             togglePower()
         }
@@ -482,7 +491,7 @@ class RoomControlsFragment : Fragment() {
                 disableUI()
                 if (!checkWifiIsRunning) {
                     checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, 10000)
+                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
                 }
                 val speed = slider.value
 
@@ -497,7 +506,7 @@ class RoomControlsFragment : Fragment() {
             disableUI()
             if (!checkWifiIsRunning) {
                 checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, 10000)
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
             }
             if (!isChecked) {
                 updateLive(ZERO, FAN)
@@ -511,7 +520,7 @@ class RoomControlsFragment : Fragment() {
             disableUI()
             if (!checkWifiIsRunning) {
                 checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, 10000)
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
             }
             updateLive(if (isChecked) ONE else ZERO, APPL1)
         }
@@ -520,7 +529,7 @@ class RoomControlsFragment : Fragment() {
             disableUI()
             if (!checkWifiIsRunning) {
                 checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, 10000)
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
             }
             updateLive(if (isChecked) ONE else ZERO, APPL2)
         }
@@ -529,7 +538,7 @@ class RoomControlsFragment : Fragment() {
             disableUI()
             if (!checkWifiIsRunning) {
                 checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, 10000)
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
             }
             updateLive(if (isChecked) ONE else ZERO, APPL3)
         }
@@ -538,7 +547,7 @@ class RoomControlsFragment : Fragment() {
             disableUI()
             if (!checkWifiIsRunning) {
                 checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, 10000)
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
             }
             updateLive(if (isChecked) ONE else ZERO, APPL4)
         }
