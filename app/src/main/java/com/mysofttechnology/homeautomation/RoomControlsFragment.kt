@@ -1,5 +1,6 @@
 package com.mysofttechnology.homeautomation
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -8,6 +9,7 @@ import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -28,20 +30,18 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL2
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL3
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL4
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FAN
-import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
-import com.mysofttechnology.homeautomation.StartActivity.Companion.SUN
-import com.mysofttechnology.homeautomation.StartActivity.Companion.MON
-import com.mysofttechnology.homeautomation.StartActivity.Companion.TUE
-import com.mysofttechnology.homeautomation.StartActivity.Companion.WED
-import com.mysofttechnology.homeautomation.StartActivity.Companion.THU
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
-import com.mysofttechnology.homeautomation.StartActivity.Companion.OFF
-import com.mysofttechnology.homeautomation.StartActivity.Companion.ON
-import com.mysofttechnology.homeautomation.StartActivity.Companion.SAT
+import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
+import com.mysofttechnology.homeautomation.StartActivity.Companion.MON
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ONE
+import com.mysofttechnology.homeautomation.StartActivity.Companion.SAT
 import com.mysofttechnology.homeautomation.StartActivity.Companion.START_TIME
 import com.mysofttechnology.homeautomation.StartActivity.Companion.STOP_TIME
+import com.mysofttechnology.homeautomation.StartActivity.Companion.SUN
 import com.mysofttechnology.homeautomation.StartActivity.Companion.SWITCH
+import com.mysofttechnology.homeautomation.StartActivity.Companion.THU
+import com.mysofttechnology.homeautomation.StartActivity.Companion.TUE
+import com.mysofttechnology.homeautomation.StartActivity.Companion.WED
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ZERO
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.ROOM_ID
@@ -56,6 +56,9 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private lateinit var toggleWifi: Handler
+    private var checkWifiIsRunning: Boolean = false
+    private var checkWifi: Boolean = false
     private var sharedPref: SharedPreferences? = null
     private lateinit var requestQueue: RequestQueue
     private lateinit var waitSnackbar: Snackbar
@@ -113,6 +116,7 @@ class RoomControlsFragment : Fragment() {
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
         Log.d(TAG, "onViewCreated: $currentUserId")
 
+        toggleWifi = Handler()
         waitSnackbar =
             Snackbar.make(requireActivity().findViewById(android.R.id.content), "Please wait...",
                 Snackbar.LENGTH_INDEFINITE)
@@ -328,26 +332,32 @@ class RoomControlsFragment : Fragment() {
                         val app3Val = mData.get(APPL3).toString()
                         val app4Val = mData.get(APPL4).toString()
                         val fan = mData.get(FAN).toString()
-                        // TODO: Wifi Implementation
+
                         val wifi = mData.get("wifi").toString()
-                        val fanSpeed = fan.toInt()
 
-                        binding.switch1Switch.isChecked = app1Val == ONE
-                        binding.switch2Switch.isChecked = app2Val == ONE
-                        binding.switch3Switch.isChecked = app3Val == ONE
-                        binding.switch4Switch.isChecked = app4Val == ONE
+                        if (checkWifi && wifi == "0") showDeviceOfflineDialog()
+                        else {
+                            updateLive("0", "wifi")
+                            val fanSpeed = fan.toInt()
 
-                        if (fanSpeed == 0) {
-                            binding.fanSpeedSlider.value = 0.0f
-                            binding.fanSpeedTv.text = ZERO
-                            if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
-                        } else {
-                            binding.fanSpeedSlider.value = fanSpeed.toFloat()
-                            binding.fanSpeedTv.text = fan
-                            if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                            binding.switch1Switch.isChecked = app1Val == ONE
+                            binding.switch2Switch.isChecked = app2Val == ONE
+                            binding.switch3Switch.isChecked = app3Val == ONE
+                            binding.switch4Switch.isChecked = app4Val == ONE
+
+                            if (fanSpeed == 0) {
+                                binding.fanSpeedSlider.value = 0.0f
+                                binding.fanSpeedTv.text = ZERO
+                                if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
+                            } else {
+                                binding.fanSpeedSlider.value = fanSpeed.toFloat()
+                                binding.fanSpeedTv.text = fan
+                                if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                            }
+
+                            checkWifi = false
+                            togglePower(app1Val, app2Val, app3Val, app4Val, fan)
                         }
-
-                        togglePower(app1Val, app2Val, app3Val, app4Val, fan)
 
                         Log.d(TAG, "updateUI: Message - $msg")
                     } else {
@@ -430,6 +440,19 @@ class RoomControlsFragment : Fragment() {
 
         requestQueue.add(liveDataRequest)
         requestQueue.add(switchListRequest)
+    }
+
+    private fun showDeviceOfflineDialog() {
+        checkWifi = false
+        loadingDialog.dismiss()
+        val builder = AlertDialog.Builder(requireActivity())
+        builder.setTitle("Device Offline")
+            .setMessage(
+                "${roomsList[selectedRoomIndex]} is currently offline. Please make sure the device is connected to wifi.")
+            .setPositiveButton("Ok"
+            ) { _, _ -> enableUI() }
+        builder.create()
+        builder.show()
     }
 
     private fun updateSwitch(switchId: String, switch: JSONObject) {
@@ -544,6 +567,8 @@ class RoomControlsFragment : Fragment() {
 
         binding.powerBtn.setOnClickListener {
             loadingDialog.show(childFragmentManager, TAG)
+            // TODO: Check DATABASE Wifi value
+//            if (checkWifiIsRunning) toggleWifi.postDelayed(wifiRunnable, 10000)
             togglePower()
         }
 
@@ -552,6 +577,10 @@ class RoomControlsFragment : Fragment() {
 
             override fun onStopTrackingTouch(slider: Slider) {
                 disableUI()
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, 10000)
+                }
                 val speed = slider.value
 
                 updateLive(speed.toInt().toString(), FAN)
@@ -572,6 +601,10 @@ class RoomControlsFragment : Fragment() {
 
         binding.fanSwitch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, 10000)
+                }
             if (!isChecked) {
                 updateLive(ZERO, FAN)
             } else {
@@ -598,6 +631,10 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, 10000)
+                }
             updateLive(if (isChecked) ONE else ZERO, APPL1)
 
             /*currentDeviceId?.let {
@@ -610,6 +647,10 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, 10000)
+                }
             updateLive(if (isChecked) ONE else ZERO, APPL2)
 
             /*currentDeviceId?.let {
@@ -622,6 +663,10 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, 10000)
+                }
             updateLive(if (isChecked) ONE else ZERO, APPL3)
 
             /*currentDeviceId?.let {
@@ -634,6 +679,10 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, 10000)
+                }
             updateLive(if (isChecked) ONE else ZERO, APPL4)
 
             /*currentDeviceId?.let {
@@ -670,7 +719,7 @@ class RoomControlsFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        updateUI()
+                        if (appl != "wifi") updateUI()
                         Log.d(TAG, "updateLive: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
@@ -706,6 +755,11 @@ class RoomControlsFragment : Fragment() {
 
         requestQueue.add(liveUpdateRequest)
     }
+
+    val wifiRunnable = Runnable {
+        Log.i(TAG, "Runnable: Called")
+        checkWifiIsRunning = false
+        checkWifi = true }
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
         fan: String) {
