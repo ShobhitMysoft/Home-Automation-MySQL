@@ -55,6 +55,8 @@ class StartActivity : AppCompatActivity() {
         const val OFF = "OFF"
 
         const val BLANK = ""
+        const val SWITCH = "switch"
+        const val ICON = "icon"
         const val START_TIME = "startTime"
         const val STOP_TIME = "stopTime"
         const val SUN = "sun"

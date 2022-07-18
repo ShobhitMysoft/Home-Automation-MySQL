@@ -2,6 +2,7 @@ package com.mysofttechnology.homeautomation
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -29,6 +30,7 @@ import org.json.JSONObject
 private const val TAG = "DashbordFragment"
 class DashbordFragment : Fragment() {
 
+    private var sharedPref: SharedPreferences? = null
     private lateinit var auth: FirebaseAuth
 
     private var _binding: FragmentDashbordBinding? = null
@@ -36,6 +38,7 @@ class DashbordFragment : Fragment() {
 
     private var currentUser: FirebaseUser? = null
     private var cuPhoneNo: String? = null
+    private var currentUserId: String? = null
 
     private lateinit var loadingDialog: LoadingDialog
 
@@ -63,7 +66,9 @@ class DashbordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.actionbarTv.text = cuPhoneNo
+        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+        currentUserId = sharedPref?.getString(getString(R.string.current_user_id), "")
+        binding.actionbarTv.text = currentUserId
 
         loadingDialog.show(childFragmentManager, TAG)
 
@@ -207,5 +212,13 @@ class DashbordFragment : Fragment() {
             }
         }
         return false
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val spEditor = sharedPref?.edit()
+//                                                                 TODO: ????
+        spEditor?.putString(getString(R.string.current_user_id), cuPhoneNo)
+        spEditor?.apply()
     }
 }

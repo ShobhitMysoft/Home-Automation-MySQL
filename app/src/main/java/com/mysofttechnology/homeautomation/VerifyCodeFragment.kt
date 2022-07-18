@@ -1,5 +1,7 @@
 package com.mysofttechnology.homeautomation
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -26,6 +28,7 @@ private const val TAG = "VerifyCodeFragment"
 
 class VerifyCodeFragment : Fragment() {
 
+    private var sharedPref: SharedPreferences? = null
     private var verificationId: String? = null
     private lateinit var fullName: String
     private lateinit var emailAddress: String
@@ -38,8 +41,8 @@ class VerifyCodeFragment : Fragment() {
     private lateinit var loadingDialog: LoadingDialog
 
     private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseDatabase
-    private lateinit var dbRef: DatabaseReference
+//    private lateinit var db: FirebaseDatabase
+//    private lateinit var dbRef: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,8 +70,10 @@ class VerifyCodeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
-        db = FirebaseDatabase.getInstance()
-        dbRef = db.reference
+//        db = FirebaseDatabase.getInstance()
+//        dbRef = db.reference
+
+        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
 
         if (authFlag == 0) { gotoRegistration() }
 
@@ -185,6 +190,11 @@ class VerifyCodeFragment : Fragment() {
     }
 
     private fun gotoDashboard() {
+        val spEditor = sharedPref?.edit()
+//                                                                 TODO: ????
+        spEditor?.putString(getString(R.string.current_user_id), "phoneNumber")
+        spEditor?.apply()
+
         val action = VerifyCodeFragmentDirections.actionVerifyCodeFragmentToDashbordFragment()
         findNavController().navigate(action)
         loadingDialog.dismiss()

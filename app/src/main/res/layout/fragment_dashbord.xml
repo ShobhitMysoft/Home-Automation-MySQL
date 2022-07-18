@@ -98,7 +98,7 @@
         android:layout_marginTop="154dp"
         android:gravity="center"
         android:padding="@dimen/_30sdp"
-        android:text="You have not connected any device yet! Add your first device right now and enjoy."
+        android:text="Loading..."
         android:textSize="@dimen/_16ssp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
