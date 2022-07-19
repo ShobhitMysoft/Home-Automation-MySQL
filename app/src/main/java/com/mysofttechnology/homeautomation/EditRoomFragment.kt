@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.TypedArray
-import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -15,31 +14,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.content.ContextCompat
-import androidx.core.text.isDigitsOnly
 import androidx.navigation.Navigation
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
 import com.mysofttechnology.homeautomation.StartActivity.Companion.SWITCH
-import com.mysofttechnology.homeautomation.activities.DeletedActivity
 import com.mysofttechnology.homeautomation.activities.WorkDoneActivity
 import com.mysofttechnology.homeautomation.adapters.IconListAdapter
 import com.mysofttechnology.homeautomation.databinding.FragmentEditRoomBinding
-import com.mysofttechnology.homeautomation.models.RoomsViewModel
-import com.mysofttechnology.homeautomation.utils.MyFirebaseDatabase
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.HashMap
 
 private const val ARG_ROOM_ID = "roomID"
+private const val ARG_DEVICE_ID = "deviceID"
 private const val ARG_ROOM_NAME = "roomName"
 private const val TAG = "EditRoomFragment"
 
 class EditRoomFragment : Fragment() {
     private var roomId: String? = null
+    private var deviceId: String? = null
     private var roomName: String? = null
 
     private lateinit var loadingDialog: LoadingDialog
@@ -49,6 +45,7 @@ class EditRoomFragment : Fragment() {
     private var _binding: FragmentEditRoomBinding? = null
     private val bind get() = _binding!!
 
+    private lateinit var requestQueue: RequestQueue
     private lateinit var iconsList: TypedArray
     private lateinit var iconsNameList: Array<String>
     private var switch1Icon: Int = 0
@@ -60,6 +57,7 @@ class EditRoomFragment : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             roomId = it.getString(ARG_ROOM_ID)
+            deviceId = it.getString(ARG_DEVICE_ID)
             roomName = it.getString(ARG_ROOM_NAME)
         }
     }
@@ -82,11 +80,12 @@ class EditRoomFragment : Fragment() {
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
 
+        requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
 
-        updateUI()
-
+        loadUI()
 
         bind.switch1Icon.setOnClickListener { showChooseIconDialog(1, bind.switch1Icon) }
         bind.switch2Icon.setOnClickListener { showChooseIconDialog(2, bind.switch2Icon) }
@@ -108,10 +107,10 @@ class EditRoomFragment : Fragment() {
         val switch4Name = bind.switch4NameEt.text.toString().trim()
 
         if (roomName.isNotBlank()) {
-            if (switch1Name.isNotBlank()) {
-                if (switch2Name.isNotBlank()) {
-                    if (switch3Name.isNotBlank()) {
-                        if (switch4Name.isNotBlank()) {
+//            if (switch1Name.isNotBlank()) {
+//                if (switch2Name.isNotBlank()) {
+//                    if (switch3Name.isNotBlank()) {
+//                        if (switch4Name.isNotBlank()) {
                             showConfirmDialog(
                                 roomName,
                                 switch1Name,
@@ -119,10 +118,10 @@ class EditRoomFragment : Fragment() {
                                 switch3Name,
                                 switch4Name
                             )
-                        } else bind.switch4NameEt.error = "Switch name is required"
-                    } else bind.switch3NameEt.error = "Switch name is required"
-                } else bind.switch2NameEt.error = "Switch name is required"
-            } else bind.switch1NameEt.error = "Switch name address is required"
+//                        } else bind.switch4NameEt.error = "Switch name is required"
+//                    } else bind.switch3NameEt.error = "Switch name is required"
+//                } else bind.switch2NameEt.error = "Switch name is required"
+//            } else bind.switch1NameEt.error = "Switch name address is required"
         } else bind.roomNameEt.error = "Room name is required"
     }
 
@@ -134,10 +133,11 @@ class EditRoomFragment : Fragment() {
         switch4Name: String
     ) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Update Room").setMessage("Are you sure you want to update $roomId room?")
+        builder.setTitle("Update Room").setMessage("Are you sure you want to update $roomName room?")
             .setPositiveButton(
                 "Ok"
             ) { _, _ ->
+                updateRoom(roomName, switch1Name, switch2Name, switch3Name, switch4Name)
                 /*myDbHandler.dbProfileRef.child("devices").child(roomId!!).apply {
                     child("name").setValue(roomName)
                     child("switch1").child("name").setValue(switch1Name)
@@ -151,10 +151,6 @@ class EditRoomFragment : Fragment() {
                 }*/
 //                Navigation.findNavController(requireView()).navigate(R.id.action_editRoomFragment_to_dashbordFragment)
 //                Toast.makeText(requireActivity(), "Room updated!", Toast.LENGTH_SHORT).show()
-
-                val intent = Intent(requireContext(), WorkDoneActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                requireContext().startActivity(intent)
             }
             .setNegativeButton("No") { _, _ -> }
 
@@ -187,12 +183,114 @@ class EditRoomFragment : Fragment() {
         }
     }
 
-    private fun updateUI() {
-        bind.roomIdTv.text = roomId
+    private fun updateRoom(roomName: String, switch1Name: String, switch2Name: String,
+        switch3Name: String, switch4Name: String) {
+        val roomUrl = getString(R.string.base_url) + getString(R.string.url_room)
+
+        val roomUpdateRequest = object : StringRequest(Method.POST, roomUrl,
+            { response ->
+                Log.i(TAG, "updateUI: $response")
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+//                        updateSwitch(switch1Name, switch2Name, switch3Name, switch4Name)
+
+                        showToast("Room updated.")
+                        Log.d(TAG, "updateRoom: Message - $msg")
+
+                        val intent = Intent(requireContext(), WorkDoneActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        requireContext().startActivity(intent)
+                    } else {
+                        loadingDialog.dismiss()
+                        // TODO: Show snackbar to retry
+                        showToast("Unable to update room.")
+//                        showErrorScreen()
+                        Log.e(TAG, "updateRoom: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception in updateUI: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId.toString()
+                params["user_id"] = currentUserId.toString()
+                params["room_name"] = roomName
+                params["room_id"] = roomId.toString()
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(roomUpdateRequest)
+    }
+
+    /*private fun updateSwitch(switch1Name: String, switch2Name: String, switch3Name: String, switch4Name: String) {
+        val switchListUrl = getString(R.string.base_url) + getString(R.string.url_switch_list)
+
+        val switchListRequest = object : StringRequest(Method.POST, switchListUrl,
+            { response ->
+                Log.i(TAG, "updateUI: $response")
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        val switchListData = mData.get("data") as JSONArray
+
+                        Log.d(TAG, "updateUI: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        // TODO: Show snackbar to retry
+//                        showToast("unable to get data")
+//                        showErrorScreen()
+                        Log.e(TAG, "switch updateUI: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception in switch updateUI: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId.toString()
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(switchListRequest)
+    }*/
+
+    private fun loadUI() {
+        bind.roomIdTv.text = deviceId
         bind.roomNameEt.setText(roomName)
 
-        loadingDialog.show(childFragmentManager, "$TAG updateUI")
-        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        /*loadingDialog.show(childFragmentManager, "$TAG updateUI")
         val switchListUrl = getString(R.string.base_url) + getString(R.string.url_switch_list)
 
         if (isOnline()) {
@@ -210,8 +308,8 @@ class EditRoomFragment : Fragment() {
                             for (i in 0..4) {
                                 val switchData = switchListData.getJSONObject(i)
                                 Log.d(TAG, "updateUI: $i - $switchData")
-                                if (switchData.get("switch_id_by_app").toString() != "5") 
-                                    updateSwitch(switchData.get("switch_id_by_app").toString(), switchData)
+                                if (switchData.get("switch_id_by_app").toString() != "5")
+                                    loadSwitch(switchData.get("switch_id_by_app").toString(), switchData)
                             }
                             loadingDialog.dismiss()
                             Log.d(TAG, "updateUI: Message - $msg")
@@ -248,7 +346,7 @@ class EditRoomFragment : Fragment() {
         } else {
             loadingDialog.dismiss()
             showLSnackbar("No internet connection")
-        }
+        }*/
 
         /*myDbHandler.dbProfileRef.child("devices").child(roomId!!).get().addOnSuccessListener {
             bind.roomNameEt.setText(it.child("name").value.toString())
@@ -272,7 +370,7 @@ class EditRoomFragment : Fragment() {
         }*/
     }
 
-    private fun updateSwitch(switchId: String, switch: JSONObject) {
+    /*private fun loadSwitch(switchId: String, switch: JSONObject) {
         Log.d(TAG, "updateSwitch: $switchId | $switch")
         val switchName = when (switchId) {
             "1" -> bind.switch1NameEt
@@ -291,27 +389,27 @@ class EditRoomFragment : Fragment() {
         switchName.setText(switch.getString(SWITCH))
         switchIcon.setImageResource(
             iconsList.getResourceId(switch.getString(ICON).toInt(), 0))
-    }
+    }*/
 
     private fun showToast(message: String?) {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
-    private fun showLSnackbar(msg: String = "Something went wrong.") {
+    /*private fun showLSnackbar(msg: String = "Something went wrong.") {
         if (context != null) {
             Snackbar.make(bind.erRootView, msg, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") {
-                    if (isOnline()) updateUI()
+                    if (isOnline()) loadUI()
                     else showLSnackbar(msg)
                 }
                 .show()
         } else {
             Log.e(TAG, "showLSnackbar: Context Error - $context")
-            updateUI()
+            loadUI()
         }
-    }
+    }*/
 
-    private fun isOnline(): Boolean {
+    /*private fun isOnline(): Boolean {
         val connectivityManager =
             context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val capabilities =
@@ -329,5 +427,5 @@ class EditRoomFragment : Fragment() {
             }
         }
         return false
-    }
+    }*/
 }
