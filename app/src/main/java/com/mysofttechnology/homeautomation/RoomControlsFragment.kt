@@ -45,7 +45,9 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.WED
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ZERO
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.ROOM_ID
+import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.ROOM_NAME
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.SWITCH_ID
+import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.SWITCH_ID_BY_APP
 import com.mysofttechnology.homeautomation.activities.ErrorActivity
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
@@ -56,6 +58,10 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private var SWITCH1: String? = null
+    private var SWITCH2: String? = null
+    private var SWITCH3: String? = null
+    private var SWITCH4: String? = null
     private val CHECK_WIFI_DELAY_TIME: Long = 10000
     private lateinit var toggleWifi: Handler
     private var checkWifiIsRunning: Boolean = false
@@ -303,9 +309,6 @@ class RoomControlsFragment : Fragment() {
                             val switchData = switchListData.getJSONObject(i)
                             if (switchData.get("switch_id_by_app").toString() != "5")
                                 updateSwitch(switchData.get("switch_id_by_app").toString(), switchData)
-//                            if (switchList.get("switch_id_by_app") == i) {
-//
-//                            }
                         }
                         Log.d(TAG, "updateUI: Message - $msg")
                     } else {
@@ -356,6 +359,12 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun updateSwitch(switchId: String, switch: JSONObject) {
+        when (switchId) {
+            "1" -> SWITCH1 = switch.get("id").toString()
+            "2" -> SWITCH2 = switch.get("id").toString()
+            "3" -> SWITCH3 = switch.get("id").toString()
+            else -> SWITCH4 = switch.get("id").toString()
+        }
         val switchName = when (switchId) {
             "1" -> binding.switch1Name
             "2" -> binding.switch2Name
@@ -428,8 +437,17 @@ class RoomControlsFragment : Fragment() {
         switchIcon.setImageResource(
             iconsList.getResourceId(switch.getString(ICON).toInt(), 0))
 
-        switchStartTime.text = switch.getString(START_TIME)
-        switchStopTime.text = switch.getString(STOP_TIME)
+        var startTime = switch.getString(START_TIME).trim()
+        if (startTime.length > 4) {
+            startTime = startTime.substring(0, 4) + " " + startTime.substring(5, startTime.length)
+        }
+        switchStartTime.text = startTime
+
+        var stopTime = switch.getString(STOP_TIME).trim()
+        if (stopTime.length > 4) {
+            stopTime = stopTime.substring(0, 4) + " " + stopTime.substring(5, stopTime.length)
+        }
+        switchStopTime.text = stopTime
 
         if (switch.getString(SUN) == ONE) {
             sunTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
@@ -550,18 +568,18 @@ class RoomControlsFragment : Fragment() {
             updateLive(if (isChecked) ONE else ZERO, APPL4)
         }
 
-        /*binding.switch1MoreBtn.setOnClickListener {
-            showPopupMenu(it, SWITCH1)
+        binding.switch1MoreBtn.setOnClickListener {
+            SWITCH1?.let { id -> showPopupMenu(it, id, "1") }
         }
         binding.switch2MoreBtn.setOnClickListener {
-            showPopupMenu(it, SWITCH2)
+            SWITCH2?.let { id -> showPopupMenu(it, id, "2") }
         }
         binding.switch3MoreBtn.setOnClickListener {
-            showPopupMenu(it, SWITCH3)
+            SWITCH3?.let { id -> showPopupMenu(it, id, "3") }
         }
         binding.switch4MoreBtn.setOnClickListener {
-            showPopupMenu(it, SWITCH4)
-        }*/
+            SWITCH4?.let { id -> showPopupMenu(it, id, "4") }
+        }
     }
 
     private fun updateLive(value: String, appl: String) {
@@ -738,7 +756,7 @@ class RoomControlsFragment : Fragment() {
             .show()
     }
 
-    private fun showPopupMenu(view: View?, switchID: String) {
+    private fun showPopupMenu(view: View?, switchID: String, switchIDByApp: String) {
         val popup = PopupMenu(requireActivity(), view)
         popup.menuInflater.inflate(R.menu.switch_menu, popup.menu)
         popup.setOnMenuItemClickListener {
@@ -746,7 +764,9 @@ class RoomControlsFragment : Fragment() {
                 R.id.edit -> {
                     val intent = Intent(context, EditSwitchActivity::class.java)
                     intent.putExtra(ROOM_ID, currentDeviceId)
+                    intent.putExtra(ROOM_NAME, roomsList[selectedRoomIndex])
                     intent.putExtra(SWITCH_ID, switchID)
+                    intent.putExtra(SWITCH_ID_BY_APP, switchIDByApp)
                     startActivity(intent)
                 }
             }
