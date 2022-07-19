@@ -478,7 +478,7 @@ class RoomControlsFragment : Fragment() {
             satTv.typeface = Typeface.DEFAULT_BOLD
         }
 
-        checkForNotification(switchId, switch.getString(SWITCH), switch.getString(NOTIFICATION))
+        checkForNotification(switch.get("id").toString(), switch.getString(SWITCH), switch.getString(NOTIFICATION))
     }
 
     private fun checkForNotification(switchId: String, switchName: String, notif: String) {
