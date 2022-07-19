@@ -27,6 +27,7 @@
     <string name="url_get_live">get_live</string>
     <string name="url_switch_list">switch_list</string>
     <string name="url_live_update">live_update</string>
+    <string name="url_switch_notification">switch_notification</string>
 
     <integer-array name="icons_list">
         <item>@drawable/ic_light</item>

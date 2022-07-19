@@ -66,5 +66,6 @@ class StartActivity : AppCompatActivity() {
         const val THU = "thu"
         const val FRI = "fri"
         const val SAT = "sat"
+        const val NOTIFICATION = "notification"
     }
 }
