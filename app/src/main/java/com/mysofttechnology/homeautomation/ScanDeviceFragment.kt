@@ -264,7 +264,7 @@ class ScanDeviceFragment : Fragment() {
                         Log.d(TAG, "createSwitch: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        showToast("unable to create room")
+                        showToast("Failed to get all data")
                         Log.e(TAG, "createSwitch: Message - $msg")
                     }
                 } catch (e: Exception) {
