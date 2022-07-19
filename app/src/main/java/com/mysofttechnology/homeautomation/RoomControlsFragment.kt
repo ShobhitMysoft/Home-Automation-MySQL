@@ -299,9 +299,10 @@ class RoomControlsFragment : Fragment() {
 
                     if (resp == 1) {
                         val switchListData = mData.get("data") as JSONArray
-                        for (i in 1..4) {
+                        for (i in 0..4) {
                             val switchData = switchListData.getJSONObject(i)
-                            updateSwitch(switchData.get("switch_id_by_app").toString(), switchData)
+                            if (switchData.get("switch_id_by_app").toString() != "5")
+                                updateSwitch(switchData.get("switch_id_by_app").toString(), switchData)
 //                            if (switchList.get("switch_id_by_app") == i) {
 //
 //                            }

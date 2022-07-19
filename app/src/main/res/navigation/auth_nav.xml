@@ -186,6 +186,9 @@
             <action
                 android:id="@+id/action_editRoomFragment_to_dashbordFragment"
                 app:destination="@id/dashbordFragment" />
+            <argument
+                android:name="roomName"
+                app:argType="string" />
         </fragment>
         <activity
             android:id="@+id/editSwitchActivity"

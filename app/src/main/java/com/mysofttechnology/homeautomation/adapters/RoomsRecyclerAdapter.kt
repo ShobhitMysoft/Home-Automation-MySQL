@@ -40,7 +40,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
 
         holder.itemView.setOnClickListener {
             val navController = Navigation.findNavController(holder.itemView)
-            val action = RoomsFragmentDirections.actionRoomsFragmentToEditRoomFragment(room.roomId)
+            val action = RoomsFragmentDirections.actionRoomsFragmentToEditRoomFragment(room.roomId, room.roomName)
             navController.navigate(action)
         }
     }
