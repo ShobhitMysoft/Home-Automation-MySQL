@@ -33,6 +33,7 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.FAN
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
 import com.mysofttechnology.homeautomation.StartActivity.Companion.MON
+import com.mysofttechnology.homeautomation.StartActivity.Companion.NOTIFICATION
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ONE
 import com.mysofttechnology.homeautomation.StartActivity.Companion.SAT
 import com.mysofttechnology.homeautomation.StartActivity.Companion.START_TIME
@@ -137,7 +138,6 @@ class RoomControlsFragment : Fragment() {
 
         refreshUI()
         uiHandler()
-
     }
 
     private fun checkDatabase() {
@@ -308,7 +308,7 @@ class RoomControlsFragment : Fragment() {
                         for (i in 0..4) {
                             val switchData = switchListData.getJSONObject(i)
                             if (switchData.get("switch_id_by_app").toString() != "5")
-                                updateSwitch(switchData.get("switch_id_by_app").toString(), switchData)
+                                loadSwitch(switchData.get("switch_id_by_app").toString(), switchData)
                         }
                         Log.d(TAG, "updateUI: Message - $msg")
                     } else {
@@ -358,7 +358,7 @@ class RoomControlsFragment : Fragment() {
         builder.show()
     }
 
-    private fun updateSwitch(switchId: String, switch: JSONObject) {
+    private fun loadSwitch(switchId: String, switch: JSONObject) {
         when (switchId) {
             "1" -> SWITCH1 = switch.get("id").toString()
             "2" -> SWITCH2 = switch.get("id").toString()
@@ -477,6 +477,64 @@ class RoomControlsFragment : Fragment() {
             satTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
             satTv.typeface = Typeface.DEFAULT_BOLD
         }
+
+        checkForNotification(switchId, switch.getString(SWITCH), switch.getString(NOTIFICATION))
+    }
+
+    private fun checkForNotification(switchId: String, switchName: String, notif: String) {
+        when (notif) {
+            "1" -> {
+                showSToast("$switchName was turned ON on time.")
+                updateSwitch(switchId)
+            }
+            "2" -> {
+                showSToast("$switchName was turned OFF on time.")
+                updateSwitch(switchId)
+            }
+        }
+    }
+
+    private fun updateSwitch(switchId: String) {
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val url = getString(R.string.base_url) + getString(R.string.url_switch_notification)
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        Log.d(TAG, "updateSwitch: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        showToast("unable to create room")
+                        Log.e(TAG, "updateSwitch: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception: $e")
+                }
+            }, {
+                loadingDialog.dismiss()
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = java.util.HashMap<String, String>()
+                params["switch_id"] = switchId
+                params["notification"] = "0"
+
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = java.util.HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(stringRequest)
     }
 
     private fun uiHandler() {
@@ -841,6 +899,10 @@ class RoomControlsFragment : Fragment() {
 
     private fun showToast(message: String?) {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
+    }
+
+    private fun showSToast(message: String?) {
+        Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
     }
 
     private fun showSSnackbar(msg: String = "Please wait...") {
