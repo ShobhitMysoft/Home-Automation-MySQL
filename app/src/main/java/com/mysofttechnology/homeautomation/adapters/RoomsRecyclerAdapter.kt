@@ -32,7 +32,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
         val room = roomList[position]
 
         holder.roomName.text = room.roomName
-        holder.roomID.text = room.roomId
+        holder.roomID.text = room.deviceId
 
         holder.deleteBtn.setOnClickListener {
             showDeleteDialog(room.roomName, position)
@@ -40,7 +40,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
 
         holder.itemView.setOnClickListener {
             val navController = Navigation.findNavController(holder.itemView)
-            val action = RoomsFragmentDirections.actionRoomsFragmentToEditRoomFragment(room.roomId)
+            val action = RoomsFragmentDirections.actionRoomsFragmentToEditRoomFragment(room.deviceId, room.roomName, room.roomId)
             navController.navigate(action)
         }
     }

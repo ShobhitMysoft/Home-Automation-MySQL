@@ -67,27 +67,4 @@ class MyFirebaseDatabase {
         * 4 .loop and device.order-1 */
     }
 
-    fun singleRoomDetail() {
-
-    }
-
-    fun roomsData() : ArrayList<RoomsViewModel> {
-//        Log.d(TAG, "roomsData: Called")
-        dbProfileRef = db.getReference("root/users/$cuPhoneNo/profile")
-
-        val roomsData = ArrayList<RoomsViewModel>()
-
-        dbProfileRef.child("devices").get().addOnSuccessListener {
-//            Log.d(TAG, "roomsData: Get() Success")
-            it.children.forEach { device ->
-//                Log.d(TAG, "roomsData: $device")
-                val deviceName = device.child("name").value.toString()
-                val deviceId = device.child("id").value.toString()
-                roomsData.add(RoomsViewModel(deviceName, deviceId))
-            }
-        }
-//        Log.i(TAG, "roomsData: $roomsData")
-        return roomsData
-    }
-
 }

@@ -101,7 +101,8 @@ class RoomsFragment : Fragment() {
                                 val device = roomListData.getJSONObject(i)
                                 val deviceName = device.get("room_name").toString()
                                 val deviceId = device.get("device_id").toString()
-                                roomsData.add(RoomsViewModel(deviceName, deviceId))
+                                val id = device.get("ID").toString()
+                                roomsData.add(RoomsViewModel(deviceName, deviceId, id))
                                 roomAdapter.notifyDataSetChanged()
                             }
                             loadingDialog.dismiss()

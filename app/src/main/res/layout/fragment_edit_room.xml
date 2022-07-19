@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/er_root_view"
     android:background="@color/grey_50"
     tools:context=".EditRoomFragment">
 
@@ -131,6 +132,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
+                android:visibility="gone"
                 android:layout_marginBottom="15dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="15dp"
@@ -187,6 +189,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
+                android:visibility="gone"
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="15dp"
                 app:cardBackgroundColor="#FFFFFF"
@@ -245,6 +248,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
+                android:visibility="gone"
                 android:layout_marginBottom="15dp"
                 app:cardBackgroundColor="#FFFFFF"
                 app:cardCornerRadius="15dp"
@@ -304,6 +308,7 @@
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="15dp"
                 app:cardBackgroundColor="#FFFFFF"
+                android:visibility="gone"
                 app:cardCornerRadius="15dp"
                 app:cardElevation="2dp">
 
@@ -374,6 +379,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
+                android:visibility="gone"
                 android:layout_marginBottom="15dp"
                 android:backgroundTint="@color/secondary_text"
                 android:text="Updat"
