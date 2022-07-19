@@ -83,8 +83,7 @@ class MyFirebaseDatabase {
 //                Log.d(TAG, "roomsData: $device")
                 val deviceName = device.child("name").value.toString()
                 val deviceId = device.child("id").value.toString()
-                val deviceOrder = device.child("order").value.toString()
-                roomsData.add(RoomsViewModel(deviceName, deviceId, deviceOrder))
+                roomsData.add(RoomsViewModel(deviceName, deviceId))
             }
         }
 //        Log.i(TAG, "roomsData: $roomsData")
