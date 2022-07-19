@@ -56,7 +56,7 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
-    private val CHECK_WIFI_DELAY_TIME: Long = 1000
+    private val CHECK_WIFI_DELAY_TIME: Long = 10000
     private lateinit var toggleWifi: Handler
     private var checkWifiIsRunning: Boolean = false
     private var checkWifi: Boolean = false
@@ -64,7 +64,6 @@ class RoomControlsFragment : Fragment() {
     private lateinit var requestQueue: RequestQueue
     private lateinit var waitSnackbar: Snackbar
 
-    //    private var valueEventListener: ValueEventListener? = null
     private var currentDeviceId: String? = null
     private var currentUserId: String? = null
 
@@ -73,9 +72,6 @@ class RoomControlsFragment : Fragment() {
 
     private lateinit var loadingDialog: LoadingDialog
 
-    //    private lateinit var myFD: MyFirebaseDatabase
-//    private lateinit var profileDBRef: DatabaseReference
-//    private lateinit var devicesDBRef: DatabaseReference
     private var roomsList: ArrayList<String> = arrayListOf()
     private var deviceIDList: ArrayList<String> = arrayListOf()
 
@@ -133,12 +129,13 @@ class RoomControlsFragment : Fragment() {
             true
         }
 
+        refreshUI()
         uiHandler()
 
     }
 
     private fun checkDatabase() {
-        loadingDialog.show(childFragmentManager, TAG)
+        loadingDialog.show(childFragmentManager, "$TAG checkDatabase")
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val url = getString(R.string.base_url) + getString(R.string.url_room_list)
 
@@ -476,7 +473,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.powerBtn.setOnClickListener {
-            loadingDialog.show(childFragmentManager, TAG)
+            loadingDialog.show(childFragmentManager, "$TAG powerBtn")
             if (!checkWifiIsRunning) {
                 checkWifiIsRunning = true
                 toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
@@ -648,60 +645,69 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun togglePower() {
+        val appliances = arrayOf(APPL1, APPL2, APPL3, APPL4, FAN)
         val toggleFlag = !binding.fanSwitch.isChecked && !binding.switch1Switch.isChecked
                 && !binding.switch2Switch.isChecked && !binding.switch3Switch.isChecked
                 && !binding.switch4Switch.isChecked
 
-        binding.fanSwitch.isChecked = toggleFlag
-        binding.switch1Switch.isChecked = toggleFlag
-        binding.switch2Switch.isChecked = toggleFlag
-        binding.switch3Switch.isChecked = toggleFlag
-        binding.switch4Switch.isChecked = toggleFlag
+//        binding.fanSwitch.isChecked = toggleFlag
+//        binding.switch1Switch.isChecked = toggleFlag
+//        binding.switch2Switch.isChecked = toggleFlag
+//        binding.switch3Switch.isChecked = toggleFlag
+//        binding.switch4Switch.isChecked = toggleFlag
+        for (appl in appliances) {
+            updatePowerLive(if (toggleFlag) ONE else ZERO, appl)
+        }
+    }
 
-        /*profileDBRef.child(DEVICES).child(currentDeviceId!!).child(POWER).get()
-            .addOnSuccessListener {
-                val power = it.value.toString()
+    private fun updatePowerLive(value: String, appl: String) {
 
-                devicesDBRef.child(currentDeviceId.toString()).child(APPL1)
-                    .setValue(if (power == ONE) ZERO else ONE)
-                    .addOnSuccessListener {
-                        devicesDBRef.child(currentDeviceId.toString()).child(APPL2)
-                            .setValue(if (power == ONE) ZERO else ONE)
-                            .addOnSuccessListener {
-                                devicesDBRef.child(currentDeviceId.toString()).child(APPL3)
-                                    .setValue(if (power == ONE) ZERO else ONE)
-                                    .addOnSuccessListener {
-                                        devicesDBRef.child(currentDeviceId.toString())
-                                            .child(APPL4)
-                                            .setValue(if (power == ONE) ZERO else ONE)
-                                            .addOnSuccessListener {
-                                                devicesDBRef.child(currentDeviceId.toString())
-                                                    .child("oldFanSpeed").get()
-                                                    .addOnSuccessListener { speed ->
-                                                        devicesDBRef.child(currentDeviceId!!)
-                                                            .child(FAN)
-                                                            .setValue(
-                                                                if (power == ONE) ZERO else speed.value.toString())
-                                                            .addOnSuccessListener {
-                                                                updateUI()
-                                                                loadingDialog.dismiss()
-                                                            }.addOnFailureListener { togglePower() }
-                                                    }.addOnFailureListener {
-                                                        devicesDBRef.child(
-                                                            currentDeviceId.toString())
-                                                            .child(FAN)
-                                                            .setValue(
-                                                                if (power == ONE) ZERO else ONE)
-                                                            .addOnSuccessListener {
-                                                                updateUI()
-                                                                loadingDialog.dismiss()
-                                                            }.addOnFailureListener { togglePower() }
-                                                    }.addOnFailureListener { togglePower() }
-                                            }.addOnFailureListener { togglePower() }
-                                    }.addOnFailureListener { togglePower() }
-                            }.addOnFailureListener { togglePower() }
-                    }.addOnFailureListener { togglePower() }
-            }*/
+        val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
+
+        val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
+            { response ->
+                Log.i(TAG, "updateUI: $response")
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        if (appl == FAN) updateUI()
+                        Log.d(TAG, "updateLive: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        // TODO: Show snackbar to retry
+//                        showToast("unable to get data")
+//                        showErrorScreen()
+                        Log.e(TAG, "updateLive: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception in updateLive: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = currentDeviceId.toString()
+                params["appliance"] = appl
+                params["data"] = value
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+
+        requestQueue.add(liveUpdateRequest)
     }
 
     private fun gotoAddDevice() {
@@ -852,9 +858,8 @@ class RoomControlsFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.i(TAG, "onResume: Called $currentDeviceId")
-        refreshUI()
-    }
+//    override fun onResume() {
+//        super.onResume()
+//        Log.i(TAG, "onResume: Called $currentDeviceId")
+//    }
 }
