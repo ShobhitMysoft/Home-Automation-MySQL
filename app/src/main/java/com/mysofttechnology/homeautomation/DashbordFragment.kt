@@ -64,7 +64,7 @@ class DashbordFragment : Fragment() {
 
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref?.getString(getString(R.string.current_user_id), "")
-        binding.actionbarTv.text = currentUserId
+//        binding.actionbarTv.text = currentUserId
 
         loadingDialog.show(childFragmentManager, TAG)
 
