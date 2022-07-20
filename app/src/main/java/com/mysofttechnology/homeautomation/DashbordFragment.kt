@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
-import androidx.activity.addCallback
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -21,10 +20,8 @@ import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.*
 import com.mysofttechnology.homeautomation.databinding.FragmentDashbordBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
-import org.json.JSONArray
 import org.json.JSONObject
 
 private const val TAG = "DashbordFragment"
@@ -52,7 +49,6 @@ class DashbordFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         _binding = FragmentDashbordBinding.inflate(inflater, container, false)
 
         auth = FirebaseAuth.getInstance()

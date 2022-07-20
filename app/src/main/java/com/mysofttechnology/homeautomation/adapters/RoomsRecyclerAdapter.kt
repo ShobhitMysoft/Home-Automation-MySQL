@@ -10,17 +10,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
-import com.mysofttechnology.homeautomation.DashbordFragment
 import com.mysofttechnology.homeautomation.R
 import com.mysofttechnology.homeautomation.RoomsFragmentDirections
-import com.mysofttechnology.homeautomation.StartActivity
 import com.mysofttechnology.homeautomation.activities.DeletedActivity
 import com.mysofttechnology.homeautomation.models.RoomsViewModel
-import com.mysofttechnology.homeautomation.utils.MyFirebaseDatabase
 
 class RoomsRecyclerAdapter(private val context: Context, private val roomList: MutableList<RoomsViewModel>) : RecyclerView.Adapter<RoomsRecyclerAdapter.ViewHolder>() {
-
-    private val myFBDatabase = MyFirebaseDatabase()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.rooms_list_item, parent, false)
@@ -50,7 +45,8 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
         builder.setTitle("Delete Room?").setMessage("Are you sure you want to delete $roomName?")
             .setPositiveButton("Ok"
             ) { _, _ ->
-                myFBDatabase.removeRoom(roomName)
+                // TODO: Delete room from Database also
+//                myFBDatabase.removeRoom(roomName)
                 roomList.removeAt(position)
                 notifyItemRemoved(position)
 
@@ -59,7 +55,6 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
                 context.startActivity(intent)
             }
             .setNegativeButton("No") { _, _ -> }
-        // Create the AlertDialog object and return it
         builder.create()
         builder.show()
     }

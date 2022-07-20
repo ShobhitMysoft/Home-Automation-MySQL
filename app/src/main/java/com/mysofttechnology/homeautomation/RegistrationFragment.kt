@@ -69,7 +69,6 @@ class RegistrationFragment : Fragment() {
         binding.regRegisterBtn.setOnClickListener {
             binding.regRegisterBtn.isEnabled = false
             validateUserInputData()
-//            Navigation.findNavController(it).navigate(R.id.action_registrationFragment_to_dashbordFragment)
         }
     }
 
@@ -93,12 +92,10 @@ class RegistrationFragment : Fragment() {
                             .setMessage("We will send an SMS message to verify your phone number.")
                             .setPositiveButton("Ok"
                             ) { _, _ ->
-//                                                progressBar.visibility = View.VISIBLE
                                 loadingDialog.show(childFragmentManager, TAG)
                                 checkUserData(fullName, email, phone)
                             }
                             .setNegativeButton("No") { _, _ -> }
-                        // Create the AlertDialog object and return it
                         builder.create()
                         builder.show()
                     } else binding.regPhoneNo.error = "Enter a proper phone number"
@@ -132,7 +129,6 @@ class RegistrationFragment : Fragment() {
                         builder.create()
                         builder.show()
 
-//                        Toast.makeText(requireActivity(), "$phone is already registered.", Toast.LENGTH_SHORT).show()
                         Log.d(TAG, "checkUserData: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
@@ -176,11 +172,15 @@ class RegistrationFragment : Fragment() {
 
                 if (e is FirebaseAuthInvalidCredentialsException) {
                     // Invalid request
+                    Log.e(TAG, "onVerificationFailed: Invalid request", e)
                 } else if (e is FirebaseTooManyRequestsException) {
                     // The SMS quota for the project has been exceeded
+                    Log.e(TAG, "onVerificationFailed: The SMS quota for the project has been exceeded", e)
+                } else {
+                    Toast.makeText(requireActivity(), "Verification failed.", Toast.LENGTH_SHORT)
+                        .show()
+                    Log.e(TAG, "onVerificationFailed: ", e)
                 }
-
-                // Show a message and update the UI
             }
 
             override fun onCodeSent(
@@ -198,9 +198,7 @@ class RegistrationFragment : Fragment() {
                     RegistrationFragmentDirections.actionRegistrationFragmentToVerifyCodeFragment(
                         verificationId, fullName, email, phoneNumber, 1)
                 findNavController().navigate(action)
-//                progressBar.visibility = View.GONE
                 loadingDialog.dismiss()
-//                Navigation.findNavController().navigate(R.id.action_registrationFragment_to_verifyCodeFragment)
             }
         }
 
