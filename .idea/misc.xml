@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/z_black_rect_sharp.xml" value="0.1745" />
+        <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/z_red_border.xml" value="0.1745" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/activity_deleted.xml" value="0.22982456140350876" />
-        <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/activity_edit_switch.xml" value="0.22982456140350876" />
+        <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/activity_edit_switch.xml" value="0.5" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/fragment_add_device.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/fragment_connect_device.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/fragment_dashbord.xml" value="0.22982456140350876" />
