@@ -15,18 +15,18 @@
         <!-- Customize your theme here. -->
     </style>
 
-<!--    <style name="Theme.App.Starting" parent="Theme.SplashScreen">-->
-<!--        <item name="windowSplashScreenBackground">@color/background</item>-->
-<!--        <item name="windowSplashScreenAnimatedIcon">@drawable/mysoft_symbol</item>-->
-<!--        <item name="postSplashScreenTheme">@style/Theme.HomeAutomation</item>-->
-<!--    </style>-->
+    <!--    <style name="Theme.App.Starting" parent="Theme.SplashScreen">-->
+    <!--        <item name="windowSplashScreenBackground">@color/background</item>-->
+    <!--        <item name="windowSplashScreenAnimatedIcon">@drawable/mysoft_symbol</item>-->
+    <!--        <item name="postSplashScreenTheme">@style/Theme.HomeAutomation</item>-->
+    <!--    </style>-->
 
-<!--    <style name="ThemeOverlay.HomeAutomation.FullscreenContainer" parent="">-->
-<!--        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>-->
-<!--        <item name="fullscreenTextColor">@color/light_blue_A200</item>-->
-<!--    </style>-->
+    <!--    <style name="ThemeOverlay.HomeAutomation.FullscreenContainer" parent="">-->
+    <!--        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>-->
+    <!--        <item name="fullscreenTextColor">@color/light_blue_A200</item>-->
+    <!--    </style>-->
 
-<!--    Custom Style-->
+    <!--    Custom Style-->
     <style name="FullScreen" parent="Theme.HomeAutomation">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
@@ -42,5 +42,18 @@
     <style name="NeumorphismCard">
         <item name="neumorph_cornerFamily">rounded</item>
         <item name="neumorph_cornerSize">@dimen/_10sdp</item>
+    </style>
+
+    <style name="Theme.HomeAutomation.Fullscreen" parent="Theme.HomeAutomation">
+        <item name="android:actionBarStyle">
+            @style/Widget.Theme.HomeAutomation.ActionBar.Fullscreen
+        </item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="ThemeOverlay.HomeAutomation.FullscreenContainer" parent="">
+        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>
+        <item name="fullscreenTextColor">@color/light_blue_A200</item>
     </style>
 </resources>

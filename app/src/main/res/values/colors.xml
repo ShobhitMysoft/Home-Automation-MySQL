@@ -16,9 +16,9 @@
 
     <!--Custom colors-->
     <color name="primary">#0c83e5</color>
-<!--    <color name="primary">#123DC9</color>-->
+    <!--    <color name="primary">#123DC9</color>-->
     <color name="colorAccent">#0c83e5</color>
-<!--    <color name="primary">#2D7Df6</color>-->
+    <!--    <color name="primary">#2D7Df6</color>-->
     <color name="background">#EFEEEE</color>
     <!-- Snapchat background color -->
     <color name="grey_50">#FAFAFA</color>
