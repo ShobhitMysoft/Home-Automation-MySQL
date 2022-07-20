@@ -35,15 +35,6 @@
             android:textSize="@dimen/_22ssp"
             android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:layout_marginEnd="@dimen/_15sdp"
-            android:text="RESET"
-            android:textColor="@color/grey_50"
-            android:textSize="@dimen/_20ssp" />
-
     </LinearLayout>
 
     <ScrollView
