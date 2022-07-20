@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/_18sdp">
+
+    <EditText
+        android:id="@+id/user_name_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:textSize="16sp"
+        android:hint="Enter your name" />
+
+    <EditText
+        android:id="@+id/user_email_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:textSize="16sp"
+        android:layout_marginTop="10dp"
+        android:hint="Enter your email address" />
+
+    <!-- Submit Button -->
+    <Button
+        android:id="@+id/ep_submit_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:backgroundTint="@color/primary"
+        android:text="Submit"
+        android:textColor="@color/white"
+        android:theme="@style/Theme.Material3.Dark" />
+
+</LinearLayout>
