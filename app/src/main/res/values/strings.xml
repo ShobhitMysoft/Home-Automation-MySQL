@@ -28,6 +28,7 @@
     <string name="url_switch_list">switch_list</string>
     <string name="url_live_update">live_update</string>
     <string name="url_switch_notification">switch_notification</string>
+    <string name="url_room_delete">room_delete</string>
 
     <integer-array name="icons_list">
         <item>@drawable/ic_light</item>
