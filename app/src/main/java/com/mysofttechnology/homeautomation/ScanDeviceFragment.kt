@@ -1,6 +1,8 @@
 package com.mysofttechnology.homeautomation
 
 import android.Manifest
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,9 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.android.volley.toolbox.StringRequest
 import com.budiyev.android.codescanner.*
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.*
 import com.mysofttechnology.homeautomation.StartActivity.Companion.BLANK
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.START_TIME
@@ -35,10 +34,8 @@ private const val TAG = "ScanDeviceFragment"
 
 class ScanDeviceFragment : Fragment() {
 
-    private lateinit var auth: FirebaseAuth
-
-    private var currentUser: FirebaseUser? = null
-    private var cuPhoneNo: String? = null
+    private var currentUserId: String? = null
+    private var sharedPref: SharedPreferences? = null
 
     private var _binding: FragmentScanDeviceBinding? = null
     private val binding get() = _binding!!
@@ -56,18 +53,15 @@ class ScanDeviceFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        auth = FirebaseAuth.getInstance()
-
-        currentUser = auth.currentUser
-        cuPhoneNo = currentUser?.phoneNumber.toString().takeLast(10)
-
         _binding = FragmentScanDeviceBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+        currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
 
         activityResultLauncher.launch(Manifest.permission.CAMERA)
         codeScanner()
@@ -175,7 +169,7 @@ class ScanDeviceFragment : Fragment() {
             }) {
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
-                params["user_id"] = cuPhoneNo.toString()
+                params["user_id"] = currentUserId.toString()
                 return params
             }
 
@@ -233,7 +227,7 @@ class ScanDeviceFragment : Fragment() {
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
                 params["device_id"] = deviceId
-                params["user_id"] = cuPhoneNo.toString()
+                params["user_id"] = currentUserId.toString()
                 params["room_name"] = "Room $deviceId"
                 params["power"] = ZERO
                 return params

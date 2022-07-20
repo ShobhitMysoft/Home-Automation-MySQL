@@ -46,8 +46,6 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
     private var START_TIME_FLAG = false
     private var STOP_TIME_FLAG = false
     private var TIME_PICKER_FLAG = 1
-    private var START_REQUEST_CODE = 10
-    private var STOP_REQUEST_CODE = 20
     private lateinit var deviceId: String
     private lateinit var roomName: String
     private lateinit var switchId: String
@@ -317,8 +315,6 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         const val ROOM_NAME = "room_name"
         const val SWITCH_ID = "switch_id"
         const val SWITCH_ID_BY_APP = "switch_id_by_app"
-        const val START = "START"
-        const val STOP = "STOP"
     }
 
     override fun onTimeSet(p0: TimePicker?, hour: Int, minute: Int) {
@@ -328,8 +324,6 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         cal.set(Calendar.MINUTE, minute)
         cal.set(Calendar.SECOND, 0)
 
-//        val timeUnit = if (hour < 12) "AM" else "PM"
-//        val time = "${if (hour > 12) hour-12 else hour}:$minute $timeUnit"
         val time = DateFormat.getTimeInstance(DateFormat.SHORT).format(cal.time)
 
         if (TIME_PICKER_FLAG == 1) {

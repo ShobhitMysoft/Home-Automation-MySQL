@@ -18,8 +18,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthProvider
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.mysofttechnology.homeautomation.databinding.FragmentVerifyCodeBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONObject
@@ -41,8 +39,6 @@ class VerifyCodeFragment : Fragment() {
     private lateinit var loadingDialog: LoadingDialog
 
     private lateinit var auth: FirebaseAuth
-//    private lateinit var db: FirebaseDatabase
-//    private lateinit var dbRef: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,8 +66,6 @@ class VerifyCodeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         auth = FirebaseAuth.getInstance()
-//        db = FirebaseDatabase.getInstance()
-//        dbRef = db.reference
 
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
 
@@ -191,8 +185,8 @@ class VerifyCodeFragment : Fragment() {
 
     private fun gotoDashboard() {
         val spEditor = sharedPref?.edit()
-//                                                                 TODO: ????
-        spEditor?.putString(getString(R.string.current_user_id), "phoneNumber")
+
+        spEditor?.putString(getString(R.string.current_user_id), phoneNumber)
         spEditor?.apply()
 
         val action = VerifyCodeFragmentDirections.actionVerifyCodeFragmentToDashbordFragment()

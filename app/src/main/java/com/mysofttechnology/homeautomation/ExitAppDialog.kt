@@ -9,7 +9,6 @@ class ExitAppDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
-            // Use the Builder class for convenient dialog construction
             val builder = AlertDialog.Builder(it)
             builder.setTitle("Exit").setMessage("Are you sure you want to exit?")
                 .setPositiveButton("Ok"
@@ -17,7 +16,6 @@ class ExitAppDialog : DialogFragment() {
                     activity?.finish()
                 }
                 .setNegativeButton("No") { _, _ -> }
-            // Create the AlertDialog object and return it
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }

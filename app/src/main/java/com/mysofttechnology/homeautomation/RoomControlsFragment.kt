@@ -63,7 +63,7 @@ class RoomControlsFragment : Fragment() {
     private var SWITCH2: String? = null
     private var SWITCH3: String? = null
     private var SWITCH4: String? = null
-    private val CHECK_WIFI_DELAY_TIME: Long = 10000
+    private val CHECK_WIFI_DELAY_TIME: Long = 4000
     private lateinit var toggleWifi: Handler
     private var checkWifiIsRunning: Boolean = false
     private var checkWifi: Boolean = false
@@ -104,7 +104,6 @@ class RoomControlsFragment : Fragment() {
         savedInstanceState: Bundle?): View? {
         _binding = FragmentRoomControlsBinding.inflate(inflater, container, false)
 
-//        myFD = MyFirebaseDatabase()
         iconsList = resources.obtainTypedArray(R.array.icons_list)
 
         return binding.root
@@ -136,7 +135,6 @@ class RoomControlsFragment : Fragment() {
             true
         }
 
-        refreshUI()
         uiHandler()
     }
 
@@ -700,15 +698,11 @@ class RoomControlsFragment : Fragment() {
         if (isAdded) {
             try {
                 if (app1Val == ZERO && app2Val == ZERO && app3Val == ZERO && app4Val == ZERO && fan == ZERO) {
-//                    profileDBRef.child("devices").child(currentDeviceId.toString()).child("power")
-//                        .setValue(0)
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
                     enableUI()
                     loadingDialog.dismiss()
                 } else {
-//                    profileDBRef.child("devices").child(currentDeviceId.toString()).child("power")
-//                        .setValue(1)
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
                     enableUI()
@@ -727,11 +721,6 @@ class RoomControlsFragment : Fragment() {
                 && !binding.switch2Switch.isChecked && !binding.switch3Switch.isChecked
                 && !binding.switch4Switch.isChecked
 
-//        binding.fanSwitch.isChecked = toggleFlag
-//        binding.switch1Switch.isChecked = toggleFlag
-//        binding.switch2Switch.isChecked = toggleFlag
-//        binding.switch3Switch.isChecked = toggleFlag
-//        binding.switch4Switch.isChecked = toggleFlag
         for (appl in appliances) {
             updatePowerLive(if (toggleFlag) ONE else ZERO, appl)
         }
@@ -905,18 +894,17 @@ class RoomControlsFragment : Fragment() {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun showSSnackbar(msg: String = "Please wait...") {
+    /*private fun showSSnackbar(msg: String = "Please wait...") {
         Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_SHORT)
             .setAnchorView(binding.rcRootView)
 //            .setAction("Retry") {
 //
 //            }
             .show()
-    }
+    }*/
 
     private fun showLSnackbar(msg: String = "Something went wrong.") {
         if (context != null) {
-//            Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
             Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") {
                     if (isOnline()) refreshUI()
@@ -935,14 +923,13 @@ class RoomControlsFragment : Fragment() {
 
         if (!currentDeviceId.isNullOrBlank() || !currentDeviceId.equals("null")) checkDatabase()
         else {
-//            loadingDialog.isCancelable = true
-//            loadingDialog.dismiss()
             Log.i(TAG, "onViewCreated: ~~~~ $currentDeviceId is not present")
         }
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//        Log.i(TAG, "onResume: Called $currentDeviceId")
-//    }
+    override fun onResume() {
+        super.onResume()
+        Log.i(TAG, "onResume: Called $currentDeviceId")
+        refreshUI()
+    }
 }

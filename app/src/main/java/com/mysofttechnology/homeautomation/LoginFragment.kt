@@ -87,12 +87,10 @@ class LoginFragment : Fragment() {
                     .setMessage("We will send an SMS message to verify your phone number.")
                     .setPositiveButton("Ok"
                     ) { _, _ ->
-//                                                progressBar.visibility = View.VISIBLE
                         loadingDialog.show(childFragmentManager, TAG)
                         checkUserData(phone)
                     }
                     .setNegativeButton("No") { _, _ -> }
-                // Create the AlertDialog object and return it
                 builder.create()
                 builder.show()
             } else binding.loginNumberEt.error = "Enter a proper phone number"
@@ -190,9 +188,7 @@ class LoginFragment : Fragment() {
                     LoginFragmentDirections.actionLoginFragmentToVerifyCodeFragment(
                         verificationId, fullName, email, phoneNumber, 2)
                 findNavController().navigate(action)
-//                progressBar.visibility = View.GONE
                 loadingDialog.dismiss()
-//                Navigation.findNavController().navigate(R.id.action_registrationFragment_to_verifyCodeFragment)
             }
         }
 

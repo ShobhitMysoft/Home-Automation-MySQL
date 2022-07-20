@@ -124,7 +124,6 @@ class ConnectDeviceFragment : Fragment() {
                 Navigation.findNavController(requireView())
                     .navigate(R.id.action_connectDeviceFragment_to_scanDeviceFragment)
             }
-        // Create the AlertDialog object and return it
         builder.create()
         builder.show()
     }

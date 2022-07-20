@@ -60,6 +60,7 @@ class RoomsFragment : Fragment() {
 
         roomAdapter = RoomsRecyclerAdapter(requireActivity(), roomsData())
 
+        // TODO: Show msg if empty
 //        if (roomsData().isEmpty()) {
 //            bind.msg.visibility = View.VISIBLE
 //        } else bind.msg.visibility = View.GONE
@@ -205,26 +206,3 @@ class RoomsFragment : Fragment() {
         return false
     }
 }
-
-
-// TODO: Use this code for fragments
-//
-//
-//private var _binding: FragmentNameBinding? = null
-//private val bind get() = _binding!!
-//
-//override fun onCreateView(
-//    inflater: LayoutInflater, container: ViewGroup?,
-//    savedInstanceState: Bundle?
-//): View? {
-//    _binding = FragmentNameBinding.inflate(inflater, container, false)
-//    return bind.root
-//}
-//
-//override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//    super.onViewCreated(view, savedInstanceState)
-//
-//    bind.backBtn.setOnClickListener {
-//        Navigation.findNavController(it).navigate(R.id.action)
-//    }
-//}

@@ -15,7 +15,6 @@ class LoadingDialog : DialogFragment() {
 
         return activity?.let {
             builder.setView(view).setCancelable(false)
-                .setTitle(tag)
 
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")

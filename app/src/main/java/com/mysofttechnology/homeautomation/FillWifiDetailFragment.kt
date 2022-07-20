@@ -45,7 +45,6 @@ class FillWifiDetailFragment : Fragment() {
     private val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     private lateinit var btDevice: String
 
-    //    private lateinit var progressBar: View
     private var wifiSSIDList: ArrayList<String> = arrayListOf()
     private lateinit var listAdapter: ArrayAdapter<String>
 
@@ -81,7 +80,6 @@ class FillWifiDetailFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentFillWifiDetailBinding.inflate(inflater, container, false)
-//        progressBar = requireActivity().findViewById(R.id.dashboard_pbar)
         listAdapter =
             ArrayAdapter(requireActivity(), android.R.layout.simple_list_item_1, wifiSSIDList)
 
@@ -133,13 +131,6 @@ class FillWifiDetailFragment : Fragment() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             loadingDialog.dismiss()
-//            Snackbar.make(bind.rootView, "Location permission is not enabled.",
-//                Snackbar.LENGTH_SHORT)
-////                .setAction("Retry") {
-////                    checkSettings()
-////                }
-//                .setAnchorView(bind.refreshFab)
-//                .show()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(
                     arrayOf(
@@ -216,14 +207,6 @@ class FillWifiDetailFragment : Fragment() {
         builder.show()
     }
 
-//    fun passwordText(password: String) {
-//        if (password.isBlank()) {
-//            Toast.makeText(requireActivity(), "Please enter a password", Toast.LENGTH_SHORT).show()
-//        } else {
-//            sendWifiDetailtoDevice(password)
-//        }
-//    }
-
     private fun sendSSIDToDevice() {
         // TODO: If anything goes wrong try to remove space at the end
         val wifiSSID = "SSID:$ssid "
@@ -257,15 +240,12 @@ class FillWifiDetailFragment : Fragment() {
     private fun closeSocket() {
         try {
             btSocket.close()
-//            progressBar.visibility = View.GONE
         } catch (e: IOException) {
             Log.e(TAG, "connectToBtDevice: Socket Close Error : ", e)
-//            progressBar.visibility = View.GONE
         }
     }
 
     private fun connectToBtDevice() {
-//        progressBar.visibility = View.VISIBLE
 
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
 
@@ -279,12 +259,10 @@ class FillWifiDetailFragment : Fragment() {
             Log.i(TAG, "connectToBtDevice: Trying to connect socket.")
             btSocket.connect()
             Log.d(TAG, "connectToBtDevice: Connected = ${btSocket.isConnected}")
-//            progressBar.visibility = View.GONE
         } catch (e: IOException) {
             Log.e(TAG, "connectToBtDevice: Socket Connect Error : ", e)
             Log.d(TAG, "connectToBtDevice: Connected = ${btSocket.isConnected}")
             snackbar?.show()
-//            progressBar.visibility = View.GONE
         }
 
         if (btSocket.isConnected) {
@@ -341,12 +319,14 @@ class FillWifiDetailFragment : Fragment() {
         wifiSSIDList.clear()
 
         results.forEach {
-            Log.d(TAG, "scanSuccess: ${it.SSID}")
+            Log.d(TAG, "scanFailure: ${it.SSID}")
             wifiSSIDList.add(it.SSID)
             listAdapter.notifyDataSetChanged()
         }
 
         bind.wifiLv.adapter = listAdapter
+        // TODO: May remove if something wrong happens, added extra
+        getWifiDetails()
     }
 
     private fun showTurnOnGPSDialog() {
@@ -381,26 +361,26 @@ class FillWifiDetailFragment : Fragment() {
         builder.show()
     }
 
-//    private fun retryDialog() {
-//        val builder = AlertDialog.Builder(requireActivity())
-//        builder.setTitle("Failed to connect")
-//            .setMessage("There was a problem connecting to the device. Please try again.")
-//            .setPositiveButton(
-//                "Try again"
-//            ) { _, _ ->
-//                connectToBtDevice()
-//            }
-//            .setNeutralButton("Go back") { _, _ ->
-//                dialog.cancel()
-//                dialog.dismiss()
-//                val action =
-//                    FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToRoomsFragment()
-//                findNavController().navigate(action)
-//            }
-//        // Create the AlertDialog object and return it
-//        dialog = builder.create()
-//        dialog.show()
-//    }
+    /*private fun retryDialog() {
+        val builder = AlertDialog.Builder(requireActivity())
+        builder.setTitle("Failed to connect")
+            .setMessage("There was a problem connecting to the device. Please try again.")
+            .setPositiveButton(
+                "Try again"
+            ) { _, _ ->
+                connectToBtDevice()
+            }
+            .setNeutralButton("Go back") { _, _ ->
+                dialog.cancel()
+                dialog.dismiss()
+                val action =
+                    FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToRoomsFragment()
+                findNavController().navigate(action)
+            }
+        // Create the AlertDialog object and return it
+        dialog = builder.create()
+        dialog.show()
+    }*/
 
     companion object {
         const val LOCATION_PERMISSION_REQUEST_CODE = 102
