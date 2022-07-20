@@ -186,6 +186,8 @@ class VerifyCodeFragment : Fragment() {
     private fun gotoDashboard() {
         val spEditor = sharedPref?.edit()
 
+        spEditor?.putString(getString(R.string.current_user_name), fullName)
+        spEditor?.putString(getString(R.string.current_user_email), emailAddress)
         spEditor?.putString(getString(R.string.current_user_id), phoneNumber)
         spEditor?.apply()
 
