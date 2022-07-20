@@ -30,7 +30,6 @@ private const val TAG = "RoomsFragment"
 class RoomsFragment : Fragment() {
 
     private lateinit var roomAdapter: RoomsRecyclerAdapter
-    private lateinit var roomTouchHelper: ItemTouchHelper
 
     private lateinit var loadingDialog: LoadingDialog
     private var currentUserId: String? = null
@@ -77,9 +76,6 @@ class RoomsFragment : Fragment() {
         }
 
         bind.roomRecyclerview.adapter = roomAdapter
-        roomTouchHelper = ItemTouchHelper(roomItemTouchHelper)
-
-        roomTouchHelper.attachToRecyclerView(bind.roomRecyclerview)
     }
 
     private fun roomsData(): MutableList<RoomsViewModel> {
@@ -142,30 +138,6 @@ class RoomsFragment : Fragment() {
             showLSnackbar("No internet connection")
         }
         return roomsData
-    }
-
-    private var roomItemTouchHelper = object :
-        ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.START or ItemTouchHelper.END or ItemTouchHelper.DOWN or ItemTouchHelper.UP,
-            0
-        ) {
-        override fun onMove(
-            recyclerView: RecyclerView,
-            viewHolder: RecyclerView.ViewHolder,
-            target: RecyclerView.ViewHolder
-        ): Boolean {
-
-            val fromPosition = viewHolder.adapterPosition
-            val toPosition = target.adapterPosition
-
-            Collections.swap(roomsData(), fromPosition, toPosition)
-
-            bind.roomRecyclerview.adapter?.notifyItemMoved(fromPosition, toPosition)
-
-            return false
-        }
-
-        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
     }
 
     private fun showToast(message: String?) {
