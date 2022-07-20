@@ -226,8 +226,8 @@
                                 android:hint="00:00"
                                 android:inputType="none"
                                 android:paddingVertical="12dp"
-                                android:textSize="@dimen/_12ssp"
-                                android:textColor="@color/dark_red" />
+                                android:textColor="@color/dark_red"
+                                android:textSize="@dimen/_12ssp" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -286,6 +286,22 @@
                         android:layout_height="35dp"
                         android:buttonTint="@color/colorAccent"
                         android:text="Saturday" />
+
+                    <!-- Remove Time Button -->
+                    <TextView
+                        android:id="@+id/es_remove_timing_btn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/z_red_border"
+                        android:elevation="@dimen/_6sdp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:paddingVertical="@dimen/_8sdp"
+                        android:text="Remove Timing"
+                        android:textAllCaps="false"
+                        android:textColor="@color/dark_red" />
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>

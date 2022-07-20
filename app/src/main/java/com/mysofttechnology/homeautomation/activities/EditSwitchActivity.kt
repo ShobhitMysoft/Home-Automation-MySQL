@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.TypedArray
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ListView
 import android.widget.TimePicker
 import android.widget.Toast
@@ -15,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.LoadingDialog
 import com.mysofttechnology.homeautomation.R
 import com.mysofttechnology.homeautomation.StartActivity
+import com.mysofttechnology.homeautomation.StartActivity.Companion.BLANK
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.MON
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ONE
@@ -74,6 +76,8 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         switchId = intent.getStringExtra(SWITCH_ID)!!
         switchIdByApp = intent.getStringExtra(SWITCH_ID_BY_APP)!!
 
+        loadUIData()
+
         bind.esBackBtn.setOnClickListener {
             startActivity(Intent(this, StartActivity::class.java))
             finish()
@@ -90,6 +94,20 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         }
 
         bind.esSubmitBtn.setOnClickListener { checkData() }
+        bind.esRemoveTimingBtn.setOnClickListener { clearTiming() }
+    }
+
+    private fun clearTiming() {
+        bind.startTimeTv.text = BLANK
+        bind.stopTimeTv.text = BLANK
+
+        bind.sunCb.isChecked = false
+        bind.monCb.isChecked = false
+        bind.tueCb.isChecked = false
+        bind.wedCb.isChecked = false
+        bind.thuCb.isChecked = false
+        bind.friCb.isChecked = false
+        bind.satCb.isChecked = false
     }
 
     private fun setStartTime() {
@@ -117,8 +135,7 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
                     Snackbar.make(bind.esRootView, "Please select week day(s).",
                         Snackbar.LENGTH_LONG)
                         .setAction("Cancel") {
-                            bind.startTimeTv.text = ""
-                            bind.stopTimeTv.text = ""
+                            clearTiming()
                         }
                         .show()
                 }
@@ -299,11 +316,6 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
         finish()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        loadUIData()
     }
 
     private fun showToast(message: String?) {
