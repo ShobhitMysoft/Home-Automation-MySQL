@@ -67,6 +67,17 @@
                 android:paddingVertical="@dimen/_12sdp" />
         </soup.neumorphism.NeumorphCardView>
 
+        <TextView
+            android:id="@+id/vc_time_left_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginHorizontal="@dimen/_18sdp"
+            android:gravity="end"
+            android:text="Time left 00:00"
+            android:textColor="@color/secondary_text" />
+
         <soup.neumorphism.NeumorphCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

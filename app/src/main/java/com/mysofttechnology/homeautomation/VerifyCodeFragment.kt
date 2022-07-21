@@ -1,8 +1,10 @@
 package com.mysofttechnology.homeautomation
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +28,7 @@ private const val TAG = "VerifyCodeFragment"
 
 class VerifyCodeFragment : Fragment() {
 
+    private lateinit var builder: AlertDialog.Builder
     private var sharedPref: SharedPreferences? = null
     private var verificationId: String? = null
     private lateinit var fullName: String
@@ -68,8 +71,11 @@ class VerifyCodeFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
 
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+        builder = AlertDialog.Builder(requireActivity())
 
         if (authFlag == 0) { gotoRegistration() }
+
+        countDownTimer.start()
 
         binding.vcBackBtn.setOnClickListener {
             binding.vcBackBtn.isEnabled = false
@@ -87,7 +93,7 @@ class VerifyCodeFragment : Fragment() {
                     binding.vcVerifyBtn.isEnabled = true
                     verifyPhoneNumberWithCode(code)
                 } else {
-                    binding.vcVerifyBtn.error = "Enter a proper code"
+                    binding.vcVerifyBtn.error = "Enter a proper 6-digit code"
                     binding.vcVerifyBtn.isEnabled = true
                 }
             } else {
@@ -96,6 +102,27 @@ class VerifyCodeFragment : Fragment() {
             }
         }
     }
+
+    private val countDownTimer = object: CountDownTimer(50000, 1000) {
+        override fun onTick(t: Long) {
+            binding.vcTimeLeftTv.text = "Time left: ${t/1000} seconds"
+        }
+
+        override fun onFinish() {
+            builder.setCancelable(false)
+                .setTitle("Time out")
+                .setMessage("The maximum time for OTP verification is over. Please try again.")
+                .setPositiveButton("Ok"
+                ) { _, _ ->
+                    if (authFlag == 2) gotoLogin()
+                    else gotoRegistration()
+                }
+            builder.create()
+            builder.show()
+        }
+
+    }
+
 
     private fun verifyPhoneNumberWithCode(code: String) {
         val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
@@ -198,6 +225,11 @@ class VerifyCodeFragment : Fragment() {
 
     private fun gotoRegistration() {
         val action = VerifyCodeFragmentDirections.actionVerifyCodeFragmentToRegistrationFragment()
+        findNavController().navigate(action)
+    }
+
+    private fun gotoLogin() {
+        val action = VerifyCodeFragmentDirections.actionVerifyCodeFragmentToLoginFragment(phoneNumber)
         findNavController().navigate(action)
     }
 }
