@@ -229,7 +229,6 @@ class ScanDeviceFragment : Fragment() {
                 params["device_id"] = deviceId
                 params["user_id"] = currentUserId.toString()
                 params["room_name"] = "Room $deviceId"
-                params["power"] = ZERO
                 return params
             }
 
