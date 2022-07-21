@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.android.volley.toolbox.StringRequest
@@ -148,28 +149,85 @@ class ScanDeviceFragment : Fragment() {
                             gotoConnectDevice()
                         } else {
                             showToast("New device")
-                            addDevice(deviceId)
+                            checkParent(deviceId)
                         }
                         Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
                         showToast("New device")
-                        addDevice(deviceId)
+                        checkParent(deviceId)
                         Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
+                    binding.sdContinueBtn.isEnabled = true
                     Log.e(TAG, "Exception: $e")
                     showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
+                binding.sdContinueBtn.isEnabled = true
                 showToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
                 params["user_id"] = currentUserId.toString()
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(stringRequest)
+    }
+
+    private fun checkParent(deviceId: String) {
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val url = getString(R.string.base_url)+getString(R.string.url_check_child)
+
+        val stringRequest = object : StringRequest(Method.POST, url,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        val parentNum = mData.get("otpmobilenum").toString()
+                        if (parentNum.length == 10 && parentNum.isDigitsOnly()) {
+                            // TODO: Room has parent
+                            showToast("Device is already registered. You need to verify to use it.")
+//                            gotoConnectDevice()
+                        } else {
+                            showToast("New User")
+                            addDevice(deviceId)
+                        }
+                        Log.d(TAG, "checkParent: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        showToast("New User")
+                        addDevice(deviceId)
+                        Log.d(TAG, "checkParent: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    binding.sdContinueBtn.isEnabled = true
+                    Log.e(TAG, "Exception: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                binding.sdContinueBtn.isEnabled = true
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId
                 return params
             }
 
@@ -211,16 +269,19 @@ class ScanDeviceFragment : Fragment() {
                         Log.d(TAG, "addDevice: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
+                        binding.sdContinueBtn.isEnabled = true
                         showToast("unable to create room")
                         Log.e(TAG, "addDevice: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
+                    binding.sdContinueBtn.isEnabled = true
                     Log.e(TAG, "Exception: $e")
                     showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
+                binding.sdContinueBtn.isEnabled = true
                 showToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
@@ -257,16 +318,19 @@ class ScanDeviceFragment : Fragment() {
                         Log.d(TAG, "createSwitch: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
+                        binding.sdContinueBtn.isEnabled = true
                         showToast("Failed to get all data")
                         Log.e(TAG, "createSwitch: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
+                    binding.sdContinueBtn.isEnabled = true
                     Log.e(TAG, "Exception: $e")
                     showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
+                binding.sdContinueBtn.isEnabled = true
                 showToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {

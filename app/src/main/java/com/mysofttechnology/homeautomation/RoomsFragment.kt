@@ -32,7 +32,6 @@ class RoomsFragment : Fragment() {
     private lateinit var roomAdapter: RoomsRecyclerAdapter
 
     private lateinit var loadingDialog: LoadingDialog
-    private var currentUserId: String? = null
     private var sharedPref: SharedPreferences? = null
 
     private var _binding: FragmentRoomsBinding? = null
@@ -177,5 +176,9 @@ class RoomsFragment : Fragment() {
             }
         }
         return false
+    }
+
+    companion object {
+        var currentUserId: String? = null
     }
 }

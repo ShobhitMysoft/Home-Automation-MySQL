@@ -14,6 +14,8 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.toolbox.StringRequest
 import com.mysofttechnology.homeautomation.R
+import com.mysofttechnology.homeautomation.RoomsFragment
+import com.mysofttechnology.homeautomation.RoomsFragment.Companion.currentUserId
 import com.mysofttechnology.homeautomation.RoomsFragmentDirections
 import com.mysofttechnology.homeautomation.activities.DeletedActivity
 import com.mysofttechnology.homeautomation.models.RoomsViewModel
@@ -97,6 +99,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
                 params["device_id"] = deviceId
+                params["mobile"] = currentUserId.toString()
                 return params
             }
 
