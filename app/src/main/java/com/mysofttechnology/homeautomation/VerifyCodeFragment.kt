@@ -120,7 +120,6 @@ class VerifyCodeFragment : Fragment() {
             builder.create()
             builder.show()
         }
-
     }
 
 

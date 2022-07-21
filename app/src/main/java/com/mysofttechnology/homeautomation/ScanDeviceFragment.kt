@@ -149,13 +149,13 @@ class ScanDeviceFragment : Fragment() {
                             gotoConnectDevice()
                         } else {
                             showToast("New device")
-                            checkParent(deviceId)
+                            checkChild(deviceId)
                         }
                         Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
                         showToast("New device")
-                        checkParent(deviceId)
+                        checkChild(deviceId)
                         Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                     }
                 } catch (e: Exception) {
@@ -185,7 +185,7 @@ class ScanDeviceFragment : Fragment() {
         requestQueue.add(stringRequest)
     }
 
-    private fun checkParent(deviceId: String) {
+    private fun checkChild(deviceId: String) {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val url = getString(R.string.base_url)+getString(R.string.url_check_child)
 
@@ -206,12 +206,12 @@ class ScanDeviceFragment : Fragment() {
                             showToast("New User")
                             addDevice(deviceId)
                         }
-                        Log.d(TAG, "checkParent: Message - $msg")
+                        Log.d(TAG, "checkChild: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
                         showToast("New User")
                         addDevice(deviceId)
-                        Log.d(TAG, "checkParent: Message - $msg")
+                        Log.d(TAG, "checkChild: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()

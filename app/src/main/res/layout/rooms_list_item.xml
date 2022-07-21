@@ -55,10 +55,40 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/raleway"
+                    android:hint="room id"
                     android:textColor="@color/secondary_text"
                     android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/room_id"
+                    app:layout_constraintLeft_toRightOf="@id/room_id"
+                    app:layout_constraintTop_toTopOf="@+id/room_id" />
+
+                <TextView
+                    android:id="@+id/otp_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/_12sdp"
+                    android:fontFamily="@font/raleway"
+                    android:text="Your OTP"
+                    android:textColor="@color/primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toRightOf="@id/room_id" />
+                    app:layout_constraintEnd_toStartOf="@+id/delete_button"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:id="@+id/share_button"
+                    android:layout_width="@dimen/_22sdp"
+                    android:layout_height="@dimen/_30sdp"
+                    android:layout_marginEnd="@dimen/_12sdp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/ic_share"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/delete_button"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/delete_button"

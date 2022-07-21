@@ -169,12 +169,10 @@ class RoomControlsFragment : Fragment() {
                         loadingDialog.dismiss()
                         Log.e(TAG, "Exception: $e")
                         showToast(e.message)
-                        gotoAddDevice()
                     }
                 }, {
                     loadingDialog.dismiss()
                     showToast("Something went wrong.")
-                    gotoAddDevice()
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
                 override fun getParams(): Map<String, String> {
