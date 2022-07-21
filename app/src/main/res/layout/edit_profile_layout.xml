@@ -9,7 +9,7 @@
         android:id="@+id/user_name_et"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"
+        android:inputType="textCapWords"
         android:textSize="16sp"
         android:hint="Enter your name" />
 
@@ -17,7 +17,7 @@
         android:id="@+id/user_email_et"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"
+        android:inputType="textEmailAddress"
         android:textSize="16sp"
         android:layout_marginTop="10dp"
         android:hint="Enter your email address" />
