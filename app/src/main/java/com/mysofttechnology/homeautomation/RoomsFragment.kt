@@ -98,7 +98,8 @@ class RoomsFragment : Fragment() {
                                 val deviceName = device.get("room_name").toString()
                                 val deviceId = device.get("device_id").toString()
                                 val id = device.get("ID").toString()
-                                roomsData.add(RoomsViewModel(deviceName, deviceId, id))
+                                val userValid = device.get("uservalid").toString()
+                                roomsData.add(RoomsViewModel(deviceName, deviceId, id, userValid))
                                 roomAdapter.notifyDataSetChanged()
                             }
                             bind.msg.visibility = View.GONE

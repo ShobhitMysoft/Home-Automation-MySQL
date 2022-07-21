@@ -1,6 +1,7 @@
 package com.mysofttechnology.homeautomation
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -8,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.text.isDigitsOnly
@@ -17,10 +19,10 @@ import com.android.volley.toolbox.StringRequest
 import com.budiyev.android.codescanner.*
 import com.mysofttechnology.homeautomation.StartActivity.Companion.BLANK
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
-import com.mysofttechnology.homeautomation.StartActivity.Companion.START_TIME
-import com.mysofttechnology.homeautomation.StartActivity.Companion.STOP_TIME
 import com.mysofttechnology.homeautomation.StartActivity.Companion.MON
 import com.mysofttechnology.homeautomation.StartActivity.Companion.SAT
+import com.mysofttechnology.homeautomation.StartActivity.Companion.START_TIME
+import com.mysofttechnology.homeautomation.StartActivity.Companion.STOP_TIME
 import com.mysofttechnology.homeautomation.StartActivity.Companion.SUN
 import com.mysofttechnology.homeautomation.StartActivity.Companion.THU
 import com.mysofttechnology.homeautomation.StartActivity.Companion.TUE
@@ -37,6 +39,7 @@ class ScanDeviceFragment : Fragment() {
 
     private var currentUserId: String? = null
     private var sharedPref: SharedPreferences? = null
+    private var updateDialog: AlertDialog? = null
 
     private var _binding: FragmentScanDeviceBinding? = null
     private val binding get() = _binding!!
@@ -132,7 +135,7 @@ class ScanDeviceFragment : Fragment() {
 
     private fun checkDeviceAvailability(deviceId: String) {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
-        val url = getString(R.string.base_url)+getString(R.string.url_room_list)
+        val url = getString(R.string.base_url) + getString(R.string.url_room_list)
 
         val stringRequest = object : StringRequest(Method.POST, url,
             { response ->
@@ -187,7 +190,7 @@ class ScanDeviceFragment : Fragment() {
 
     private fun checkChild(deviceId: String) {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
-        val url = getString(R.string.base_url)+getString(R.string.url_check_child)
+        val url = getString(R.string.base_url) + getString(R.string.url_check_child)
 
         val stringRequest = object : StringRequest(Method.POST, url,
             { response ->
@@ -199,9 +202,7 @@ class ScanDeviceFragment : Fragment() {
                     if (resp == 1) {
                         val parentNum = mData.get("otpmobilenum").toString()
                         if (parentNum.length == 10 && parentNum.isDigitsOnly()) {
-                            // TODO: Room has parent
-                            showToast("Device is already registered. You need to verify to use it.")
-//                            gotoConnectDevice()
+                            showOtpVerificationDialog(deviceId)
                         } else {
                             showToast("New User")
                             addDevice(deviceId)
@@ -240,6 +241,106 @@ class ScanDeviceFragment : Fragment() {
         requestQueue.add(stringRequest)
     }
 
+    private fun showOtpVerificationDialog(deviceId: String) {
+        val builder = AlertDialog.Builder(requireActivity())
+        builder
+            .setTitle("Registered Device")
+            .setMessage("This device is already registered. You need to verify to use it.")
+            .setPositiveButton("Ok"
+            ) { _, _ ->
+                showVerifyOtpDialog(deviceId)
+                binding.sdContinueBtn.isEnabled = true
+            }
+            .setNegativeButton("Cancel") { _, _ -> }
+        builder.create()
+        builder.show()
+    }
+
+    private fun showVerifyOtpDialog(deviceId: String) {
+        val builder = AlertDialog.Builder(requireActivity())
+
+        val view = requireActivity().layoutInflater.inflate(R.layout.verify_otp_layout, null)
+
+        val otpET = view.findViewById<TextView>(R.id.verify_otp_et)
+        val submitBtn = view.findViewById<TextView>(R.id.vo_submit_btn)
+
+        builder.setView(view).setTitle("Verify OTP")
+
+        submitBtn.setOnClickListener {
+            val code = otpET.text.toString()
+
+            if (code.isNotEmpty() && code.length == 6 && code.isDigitsOnly()) {
+                verifyOtpCode(code, deviceId)
+            } else {
+                otpET.error = "Enter a proper 6-digit code"
+            }
+        }
+
+        updateDialog = builder.create()
+        updateDialog?.show()
+    }
+
+    private fun verifyOtpCode(code: String, deviceId: String) {
+        Log.d(TAG, "verifyOtpCode: deviceId - $deviceId")
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val getOtpUrl = getString(R.string.base_url) + getString(R.string.url_get_otp)
+
+        loadingDialog.show(childFragmentManager, TAG)
+
+        val getOtpRequest = object : StringRequest(Method.POST, getOtpUrl,
+            { response ->
+                Log.i(TAG, "verifyOtpCode: $response")
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        loadingDialog.dismiss()
+                        val otp = mData.getString("otp")
+                        if (otp.length == 6 && otp.isDigitsOnly()) {
+                            if (otp == code) {
+                                updateDialog?.dismiss()
+                                addDevice(deviceId)
+                                showToast("OTP verified.")
+                            } else {
+                                showToast("Wrong OTP")
+                            }
+                        } else {
+                            showToast("Please generate a otp first.")
+                        }
+
+                        Log.d(TAG, "verifyOtpCode: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        showToast("Please generate a otp first.")
+                        Log.e(TAG, "verifyOtpCode: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception in verifyOtpCode: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(getOtpRequest)
+    }
+
     private fun roomExists(roomListData: JSONArray, deviceId: String): Boolean {
         var flag = false
         for (i in 0 until roomListData.length()) {
@@ -253,7 +354,7 @@ class ScanDeviceFragment : Fragment() {
 
     private fun addDevice(deviceId: String) {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
-        val url = getString(R.string.base_url)+getString(R.string.url_room)
+        val url = getString(R.string.base_url) + getString(R.string.url_room)
 
         val stringRequest = object : StringRequest(Method.POST, url,
             { response ->
@@ -304,7 +405,7 @@ class ScanDeviceFragment : Fragment() {
 
     private fun createSwitch(deviceId: String, i: Int) {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
-        val url = getString(R.string.base_url)+getString(R.string.url_switch)
+        val url = getString(R.string.base_url) + getString(R.string.url_switch)
 
         val stringRequest = object : StringRequest(Method.POST, url,
             { response ->
@@ -314,7 +415,7 @@ class ScanDeviceFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        if (i>=5) gotoConnectDevice()
+                        if (i >= 5) gotoConnectDevice()
                         Log.d(TAG, "createSwitch: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
@@ -337,7 +438,7 @@ class ScanDeviceFragment : Fragment() {
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
                 params["device_id"] = deviceId
-                params["switch"] = if (i==5) "Fan" else "Switch $i"
+                params["switch"] = if (i == 5) "Fan" else "Switch $i"
                 params["icon"] = ZERO
                 params[START_TIME] = BLANK
                 params[STOP_TIME] = BLANK

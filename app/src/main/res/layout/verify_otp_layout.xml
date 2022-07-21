@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/_18sdp">
+
+    <EditText
+        android:id="@+id/verify_otp_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:textSize="16sp"
+        android:maxLength="6"
+        android:gravity="center"
+        android:hint="Enter OTP" />
+
+    <!--TODO: Implement this-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:visibility="gone"
+        android:paddingVertical="@dimen/_3sdp"
+        android:textColor="@color/colorAccent"
+        android:layout_gravity="end"
+        android:text="How to?" />
+
+    <!-- Submit Button -->
+    <Button
+        android:id="@+id/vo_submit_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:backgroundTint="@color/primary"
+        android:text="Submit"
+        android:textColor="@color/white"
+        android:theme="@style/Theme.Material3.Dark" />
+
+</LinearLayout>

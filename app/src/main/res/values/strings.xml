@@ -34,6 +34,7 @@
     <string name="url_profile_update">profile_update</string>
     <string name="url_check_child">check_child</string>
     <string name="url_create_opt">create_opt</string>
+    <string name="url_get_otp">get_otp</string>
 
     <integer-array name="icons_list">
         <item>@drawable/ic_light</item>
