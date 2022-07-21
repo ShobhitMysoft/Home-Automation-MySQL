@@ -102,11 +102,12 @@ class RoomsFragment : Fragment() {
                                 roomsData.add(RoomsViewModel(deviceName, deviceId, id))
                                 roomAdapter.notifyDataSetChanged()
                             }
+                            bind.msg.visibility = View.GONE
                             loadingDialog.dismiss()
 
                             Log.d(TAG, "checkDatabase: Message - $msg")
                         } else {
-                            showLSnackbar("Couldn't find any room.")
+                            bind.msg.visibility = View.VISIBLE
                             loadingDialog.dismiss()
                             Log.d(TAG, "checkDatabase: Message - $msg")
                         }
@@ -149,7 +150,7 @@ class RoomsFragment : Fragment() {
             Snackbar.make(bind.roomsRootView, msg, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") {
                     if (isOnline()) roomsData()
-                    else showLSnackbar(msg)
+                    else showLSnackbar("No internet")
                 }
                 .show()
         } else {
