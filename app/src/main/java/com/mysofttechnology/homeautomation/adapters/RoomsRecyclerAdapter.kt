@@ -37,7 +37,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
         holder.roomName.text = room.roomName
         holder.roomID.text = room.deviceId
 
-        if (room.userValid == "1") holder.shareBtn.visibility = View.VISIBLE
+        if (room.userValid == "0") holder.shareBtn.visibility = View.VISIBLE
         else holder.shareBtn.visibility = View.GONE
 
         holder.deleteBtn.setOnClickListener {

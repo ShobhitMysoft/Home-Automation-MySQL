@@ -60,7 +60,7 @@ class ConnectDeviceFragment : Fragment() {
         bind.backBtn.setOnClickListener {
             bind.backBtn.isEnabled = false
             Navigation.findNavController(it)
-                .navigate(R.id.action_connectDeviceFragment_to_scanDeviceFragment)
+                .navigate(R.id.action_connectDeviceFragment_to_roomsFragment)
         }
 
         bind.devicesLv.setOnItemClickListener { _, _, position, _ ->
@@ -122,7 +122,7 @@ class ConnectDeviceFragment : Fragment() {
             .setNeutralButton("Go back") { _, _ ->
                 // TODO: Handle LOOP
                 Navigation.findNavController(requireView())
-                    .navigate(R.id.action_connectDeviceFragment_to_scanDeviceFragment)
+                    .navigate(R.id.action_connectDeviceFragment_to_roomsFragment)
             }
         builder.create()
         builder.show()

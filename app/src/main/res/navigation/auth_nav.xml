@@ -140,13 +140,13 @@
             android:label="fragment_connect_device"
             tools:layout="@layout/fragment_connect_device" >
             <action
-                android:id="@+id/action_connectDeviceFragment_to_scanDeviceFragment"
-                app:destination="@id/scanDeviceFragment"
-                app:popUpTo="@id/scanDeviceFragment"
-                app:popUpToInclusive="true" />
-            <action
                 android:id="@+id/action_connectDeviceFragment_to_fillWifiDetailFragment"
                 app:destination="@id/fillWifiDetailFragment" />
+            <action
+                android:id="@+id/action_connectDeviceFragment_to_roomsFragment"
+                app:destination="@id/roomsFragment"
+                app:popUpTo="@id/roomsFragment"
+                app:popUpToInclusive="true" />
         </fragment>
         <fragment
             android:id="@+id/fillWifiDetailFragment"
