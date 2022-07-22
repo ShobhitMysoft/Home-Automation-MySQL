@@ -59,6 +59,7 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private var liveFanSpeed: Int = 0
     private var SWITCH1: String? = null
     private var SWITCH2: String? = null
     private var SWITCH3: String? = null
@@ -167,14 +168,12 @@ class RoomControlsFragment : Fragment() {
                         }
                     } catch (e: Exception) {
                         loadingDialog.dismiss()
-                        Log.e(TAG, "Exception: $e")
-                        showToast(e.message)
-                        gotoAddDevice()
+                        Log.e(TAG, "Exception in checkDatabase: $e")
+                        showLToast(e.message)
                     }
                 }, {
                     loadingDialog.dismiss()
-                    showToast("Something went wrong.")
-                    gotoAddDevice()
+                    showLToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
                 override fun getParams(): Map<String, String> {
@@ -192,7 +191,7 @@ class RoomControlsFragment : Fragment() {
             requestQueue.add(stringRequest)
         } else {
             loadingDialog.dismiss()
-            showLSnackbar("No internet connection")
+            showPSnackbar("No internet connection")
         }
     }
 
@@ -241,19 +240,19 @@ class RoomControlsFragment : Fragment() {
                         if (checkWifi && wifi == "0") showDeviceOfflineDialog()
                         else {
                             updateLive("0", "wifi")
-                            val fanSpeed = fan.toInt()
+                            liveFanSpeed = fan.toInt()
 
                             binding.switch1Switch.isChecked = app1Val == ONE
                             binding.switch2Switch.isChecked = app2Val == ONE
                             binding.switch3Switch.isChecked = app3Val == ONE
                             binding.switch4Switch.isChecked = app4Val == ONE
 
-                            if (fanSpeed == 0) {
+                            if (liveFanSpeed == 0) {
                                 binding.fanSpeedSlider.value = 0.0f
                                 binding.fanSpeedTv.text = ZERO
                                 if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
                             } else {
-                                binding.fanSpeedSlider.value = fanSpeed.toFloat()
+                                binding.fanSpeedSlider.value = liveFanSpeed.toFloat()
                                 binding.fanSpeedTv.text = fan
                                 if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
                             }
@@ -265,19 +264,17 @@ class RoomControlsFragment : Fragment() {
                         Log.d(TAG, "updateUI: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        // TODO: Show snackbar to retry
-                        showToast("unable to get data")
-//                        showErrorScreen()
+                        showPSnackbar("Failed to get room data")
                         Log.e(TAG, "updateUI: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in updateUI: $e")
-                    showToast(e.message)
+                    showLToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
-                showToast("Something went wrong.")
+                showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -295,7 +292,7 @@ class RoomControlsFragment : Fragment() {
 
         val switchListRequest = object : StringRequest(Method.POST, switchListUrl,
             { response ->
-                Log.i(TAG, "updateUI: $response")
+                Log.i(TAG, "switchList: $response")
                 try {
                     val mData = JSONObject(response.toString())
                     val resp = mData.get("response") as Int
@@ -308,22 +305,20 @@ class RoomControlsFragment : Fragment() {
                             if (switchData.get("switch_id_by_app").toString() != "5")
                                 loadSwitch(switchData.get("switch_id_by_app").toString(), switchData)
                         }
-                        Log.d(TAG, "updateUI: Message - $msg")
+                        Log.d(TAG, "switchList: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        // TODO: Show snackbar to retry
-//                        showToast("unable to get data")
-//                        showErrorScreen()
-                        Log.e(TAG, "switch updateUI: Message - $msg")
+                        showPSnackbar("Failed to get room data")
+                        Log.e(TAG, "switch switchList: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in switch updateUI: $e")
-                    showToast(e.message)
+                    showLToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
-                showToast("Something went wrong.")
+                showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -507,12 +502,12 @@ class RoomControlsFragment : Fragment() {
                         Log.d(TAG, "updateSwitch: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        showToast("unable to create room")
+                        showLToast("unable to create room")
                         Log.e(TAG, "updateSwitch: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
-                    Log.e(TAG, "Exception: $e")
+                    Log.e(TAG, "Exception in updateSwitch: $e")
                 }
             }, {
                 loadingDialog.dismiss()
@@ -583,7 +578,7 @@ class RoomControlsFragment : Fragment() {
             if (!isChecked) {
                 updateLive(ZERO, FAN)
             } else {
-                var oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)", "1")
+                val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)", liveFanSpeed.toString())
                 updateLive(oldFanSpeed.toString(), FAN)
             }
         }
@@ -654,19 +649,17 @@ class RoomControlsFragment : Fragment() {
                         Log.d(TAG, "updateLive: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        // TODO: Show snackbar to retry
-//                        showToast("unable to get data")
-//                        showErrorScreen()
+                        showPSnackbar("Failed to update room")
                         Log.e(TAG, "updateLive: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in updateLive: $e")
-                    showToast(e.message)
+                    showLToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
-                showToast("Something went wrong.")
+                showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -743,19 +736,17 @@ class RoomControlsFragment : Fragment() {
                         Log.d(TAG, "updateLive: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        // TODO: Show snackbar to retry
-//                        showToast("unable to get data")
-//                        showErrorScreen()
+                        showPSnackbar("Failed to update room")
                         Log.e(TAG, "updateLive: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in updateLive: $e")
-                    showToast(e.message)
+                    showLToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
-                showToast("Something went wrong.")
+                showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -825,7 +816,7 @@ class RoomControlsFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {}
 
     private fun disableUI() {
-        if (!isOnline()) showLSnackbar("No Internet Connection")
+        if (!isOnline()) showPSnackbar("No Internet Connection")
         else waitSnackbar.show()
         binding.powerBtn.isClickable = false
         binding.powerBtn.isEnabled = false
@@ -861,7 +852,7 @@ class RoomControlsFragment : Fragment() {
             binding.switch3Switch.isEnabled = true
             binding.switch4Switch.isClickable = true
             binding.switch4Switch.isEnabled = true
-        } else showLSnackbar("No Internet Connection")
+        } else showPSnackbar("No Internet Connection")
     }
 
     private fun isOnline(): Boolean {
@@ -886,7 +877,7 @@ class RoomControlsFragment : Fragment() {
         return false
     }
 
-    private fun showToast(message: String?) {
+    private fun showLToast(message: String?) {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
@@ -903,16 +894,16 @@ class RoomControlsFragment : Fragment() {
             .show()
     }*/
 
-    private fun showLSnackbar(msg: String = "Something went wrong.") {
+    private fun showPSnackbar(msg: String = "Something went wrong.") {
         if (context != null) {
             Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") {
                     if (isOnline()) refreshUI()
-                    else showLSnackbar(msg)
+                    else showPSnackbar(msg)
                 }
                 .show()
         } else {
-            Log.e(TAG, "showLSnackbar: Contect Error - $context")
+            Log.e(TAG, "showPSnackbar: Contect Error - $context")
             checkDatabase()
         }
     }

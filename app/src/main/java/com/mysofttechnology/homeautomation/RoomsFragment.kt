@@ -32,7 +32,6 @@ class RoomsFragment : Fragment() {
     private lateinit var roomAdapter: RoomsRecyclerAdapter
 
     private lateinit var loadingDialog: LoadingDialog
-    private var currentUserId: String? = null
     private var sharedPref: SharedPreferences? = null
 
     private var _binding: FragmentRoomsBinding? = null
@@ -58,11 +57,6 @@ class RoomsFragment : Fragment() {
 
 
         roomAdapter = RoomsRecyclerAdapter(requireActivity(), roomsData())
-
-        // TODO: Show msg if empty
-//        if (roomsData().isEmpty()) {
-//            bind.msg.visibility = View.VISIBLE
-//        } else bind.msg.visibility = View.GONE
 
         bind.roomsBackBtn.setOnClickListener {
             bind.roomsBackBtn.isEnabled = false
@@ -99,7 +93,8 @@ class RoomsFragment : Fragment() {
                                 val deviceName = device.get("room_name").toString()
                                 val deviceId = device.get("device_id").toString()
                                 val id = device.get("ID").toString()
-                                roomsData.add(RoomsViewModel(deviceName, deviceId, id))
+                                val userValid = device.get("uservalid").toString()
+                                roomsData.add(RoomsViewModel(deviceName, deviceId, id, userValid))
                                 roomAdapter.notifyDataSetChanged()
                             }
                             bind.msg.visibility = View.GONE
@@ -113,7 +108,7 @@ class RoomsFragment : Fragment() {
                         }
                     } catch (e: Exception) {
                         loadingDialog.dismiss()
-                        Log.e(TAG, "Exception: $e")
+                        Log.e(TAG, "Exception in roomsData: $e")
                         showToast(e.message)
                     }
                 }, {
@@ -177,5 +172,9 @@ class RoomsFragment : Fragment() {
             }
         }
         return false
+    }
+
+    companion object {
+        var currentUserId: String? = null
     }
 }

@@ -2,24 +2,24 @@ package com.mysofttechnology.homeautomation
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.android.volley.toolbox.StringRequest
-import com.mysofttechnology.homeautomation.activities.WorkDoneActivity
+import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.databinding.FragmentProfileBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONObject
 
 private const val TAG = "ProfileFragment"
+
 class ProfileFragment : Fragment() {
 
     private var spEditor: SharedPreferences.Editor? = null
@@ -57,10 +57,13 @@ class ProfileFragment : Fragment() {
 
         bind.profileBackBtn.setOnClickListener {
             bind.profileBackBtn.isEnabled = false
-            Navigation.findNavController(it).navigate(R.id.action_profileFragment_to_dashbordFragment)
+            Navigation.findNavController(it)
+                .navigate(R.id.action_profileFragment_to_dashbordFragment)
         }
 
-        bind.editProfileFab.setOnClickListener { showEditProfileDialog(currentUserName.toString(), currentUserEmail.toString()) }
+        bind.editProfileFab.setOnClickListener {
+            showEditProfileDialog(currentUserName.toString(), currentUserEmail.toString())
+        }
 
         bind.fullName.text = currentUserName
         bind.emailAddress.text = currentUserEmail
@@ -88,17 +91,22 @@ class ProfileFragment : Fragment() {
                         bind.fullName.text = mData.getString("name")
                         bind.emailAddress.text = mData.getString("email")
 
-                        spEditor?.putString(getString(R.string.current_user_name), mData.getString("name"))
-                        spEditor?.putString(getString(R.string.current_user_email), mData.getString("email"))
+                        spEditor?.putString(getString(R.string.current_user_name),
+                            mData.getString("name"))
+                        spEditor?.putString(getString(R.string.current_user_email),
+                            mData.getString("email"))
                         spEditor?.apply()
 
                         loadingDialog.dismiss()
 
                         Log.d(TAG, "loadProfile: Message - $msg")
                     } else {
-                        // TODO: Show snackbar to retry
-//                        showToast("Profile data re.")
-//                        showErrorScreen()
+                        Snackbar.make(bind.pfRootView, "Failed to load profile",
+                            Snackbar.LENGTH_LONG)
+                            .setAction("Retry") {
+                                loadProfile()
+                            }
+                            .show()
                         loadingDialog.dismiss()
                         Log.e(TAG, "loadProfile: Message - $msg")
                     }
@@ -182,9 +190,7 @@ class ProfileFragment : Fragment() {
                         Log.d(TAG, "updateProfile: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        // TODO: Show snackbar to retry
-                        showToast("Unable to update room.")
-//                        showErrorScreen()
+                        showToast("Failed to update profile.")
                         Log.e(TAG, "updateProfile: Message - $msg")
                     }
                 } catch (e: Exception) {

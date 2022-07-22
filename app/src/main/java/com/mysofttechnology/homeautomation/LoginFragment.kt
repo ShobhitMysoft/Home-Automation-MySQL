@@ -120,7 +120,7 @@ class LoginFragment : Fragment() {
                         Log.d(TAG, "checkUserData: Message - $msg")
                     }
                 } catch (e: Exception) {
-                    Log.d(TAG, "Exception: $e")
+                    Log.d(TAG, "Exception in checkUserData: $e")
                 }
             }, {
                 loadingDialog.dismiss()
@@ -142,7 +142,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun loginUser(fullName: String, email: String, phoneNumber: String) {
-        // TODO:  inform user that they might receive an SMS message for verification and standard rates apply
+        //  inform user that they might receive an SMS message for verification and standard rates apply
 
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 

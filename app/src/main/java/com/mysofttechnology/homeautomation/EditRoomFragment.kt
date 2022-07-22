@@ -124,7 +124,6 @@ class EditRoomFragment : Fragment() {
                         requireContext().startActivity(intent)
                     } else {
                         loadingDialog.dismiss()
-                        // TODO: Show snackbar to retry
                         showToast("Unable to update room.")
 //                        showErrorScreen()
                         Log.e(TAG, "updateRoom: Message - $msg")

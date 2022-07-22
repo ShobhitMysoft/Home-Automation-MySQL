@@ -14,7 +14,7 @@ class LoadingDialog : DialogFragment() {
         val view = requireActivity().layoutInflater.inflate(R.layout.loading_dialog_layout, null)
 
         return activity?.let {
-            builder.setView(view).setCancelable(false)
+            builder.setView(view).setTitle(tag).setCancelable(false)
 
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")

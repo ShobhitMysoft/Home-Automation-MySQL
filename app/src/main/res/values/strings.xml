@@ -32,6 +32,9 @@
     <string name="current_user_email">current_user_email</string>
     <string name="current_user_name">current_user_name</string>
     <string name="url_profile_update">profile_update</string>
+    <string name="url_check_child">check_child</string>
+    <string name="url_create_opt">create_opt</string>
+    <string name="url_get_otp">get_otp</string>
 
     <integer-array name="icons_list">
         <item>@drawable/ic_light</item>

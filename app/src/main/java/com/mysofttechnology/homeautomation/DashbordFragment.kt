@@ -102,7 +102,7 @@ class DashbordFragment : Fragment() {
                         }
                     } catch (e: Exception) {
                         loadingDialog.dismiss()
-                        Log.d(TAG, "Exception: $e")
+                        Log.d(TAG, "Exception in checkDeviceAvailability: $e")
                         showToast(e.message)
                     }
                 }, {
@@ -213,7 +213,6 @@ class DashbordFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         val spEditor = sharedPref?.edit()
-//                                                                 TODO: ????
         spEditor?.putString(getString(R.string.current_user_id), cuPhoneNo)
         spEditor?.apply()
     }
