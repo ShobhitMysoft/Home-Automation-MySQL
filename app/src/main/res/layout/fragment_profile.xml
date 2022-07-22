@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey_50"
+    android:id="@+id/pf_root_view"
     android:orientation="vertical"
     tools:context=".ProfileFragment">
 
@@ -190,5 +191,32 @@
         android:tooltipText="Edit your detail"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <!--Bottom Branding-->
+    <LinearLayout
+        android:id="@+id/bottom_branding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingVertical="18dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/powered_by"
+            android:textSize="@dimen/_10ssp"
+            android:textColor="@color/secondary_text"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mysoft_technology"
+            android:textSize="@dimen/_12ssp"
+            android:textColor="@color/primary"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

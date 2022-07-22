@@ -88,8 +88,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
 
                         Log.d(TAG, "generateOTP: Message - $msg")
                     } else {
-                        // TODO: Show snackbar to retry
-                        showToast("Room deletion failed.")
+                        showToast("Problem generating OTP.")
 //                        showErrorScreen()
                         Log.e(TAG, "generateOTP: Message - $msg")
                     }
@@ -152,7 +151,6 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
 
                         Log.d(TAG, "deleteRoom: Message - $msg")
                     } else {
-                        // TODO: Show snackbar to retry
                         showToast("Room deletion failed.")
 //                        showErrorScreen()
                         Log.e(TAG, "deleteRoom: Message - $msg")

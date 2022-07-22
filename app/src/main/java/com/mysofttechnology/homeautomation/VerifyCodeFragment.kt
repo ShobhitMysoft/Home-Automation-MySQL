@@ -186,7 +186,7 @@ class VerifyCodeFragment : Fragment() {
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
-                    Log.d(TAG, "Exception: $e")
+                    Log.d(TAG, "Exception in createDatabase: $e")
                 }
             }, {
                 loadingDialog.dismiss()

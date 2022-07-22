@@ -168,7 +168,7 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
-                    Log.e(TAG, "Exception: $e")
+                    Log.e(TAG, "Exception in submitData: $e")
                     showToast(e.message)
                 }
             }, {

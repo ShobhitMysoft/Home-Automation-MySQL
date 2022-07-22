@@ -58,11 +58,6 @@ class RoomsFragment : Fragment() {
 
         roomAdapter = RoomsRecyclerAdapter(requireActivity(), roomsData())
 
-        // TODO: Show msg if empty
-//        if (roomsData().isEmpty()) {
-//            bind.msg.visibility = View.VISIBLE
-//        } else bind.msg.visibility = View.GONE
-
         bind.roomsBackBtn.setOnClickListener {
             bind.roomsBackBtn.isEnabled = false
             Navigation.findNavController(it).navigate(R.id.action_roomsFragment_to_dashbordFragment)
@@ -113,7 +108,7 @@ class RoomsFragment : Fragment() {
                         }
                     } catch (e: Exception) {
                         loadingDialog.dismiss()
-                        Log.e(TAG, "Exception: $e")
+                        Log.e(TAG, "Exception in roomsData: $e")
                         showToast(e.message)
                     }
                 }, {

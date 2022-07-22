@@ -147,7 +147,6 @@ class ScanDeviceFragment : Fragment() {
                     if (resp == 1) {
                         val roomListData = mData.get("data") as JSONArray
                         if (roomExists(roomListData, deviceId)) {
-                            // TODO: Room Already exists dialog(Choose continue to add wifi or finish)
                             showToast("Device already exists")
                             gotoConnectDevice()
                         } else {
@@ -164,7 +163,7 @@ class ScanDeviceFragment : Fragment() {
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     binding.sdContinueBtn.isEnabled = true
-                    Log.e(TAG, "Exception: $e")
+                    Log.e(TAG, "Exception in checkDeviceAvailability: $e")
                     showToast(e.message)
                 }
             }, {
@@ -202,6 +201,8 @@ class ScanDeviceFragment : Fragment() {
                     if (resp == 1) {
                         val parentNum = mData.get("otpmobilenum").toString()
                         if (parentNum.length == 10 && parentNum.isDigitsOnly()) {
+                            loadingDialog.dismiss()
+                            binding.sdContinueBtn.isEnabled = true
                             showOtpVerificationDialog(deviceId)
                         } else {
                             showToast("New User")
@@ -217,7 +218,7 @@ class ScanDeviceFragment : Fragment() {
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     binding.sdContinueBtn.isEnabled = true
-                    Log.e(TAG, "Exception: $e")
+                    Log.e(TAG, "Exception in checkChild: $e")
                     showToast(e.message)
                 }
             }, {
@@ -263,8 +264,14 @@ class ScanDeviceFragment : Fragment() {
 
         val otpET = view.findViewById<TextView>(R.id.verify_otp_et)
         val submitBtn = view.findViewById<TextView>(R.id.vo_submit_btn)
+        val howToBtn = view.findViewById<TextView>(R.id.how_to_tv_btn)
+        val howToDesc = view.findViewById<TextView>(R.id.how_to_desc_tv)
 
         builder.setView(view).setTitle("Verify OTP")
+
+        howToBtn.setOnClickListener {
+            howToDesc.visibility = View.VISIBLE
+        }
 
         submitBtn.setOnClickListener {
             val code = otpET.text.toString()
@@ -377,7 +384,7 @@ class ScanDeviceFragment : Fragment() {
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     binding.sdContinueBtn.isEnabled = true
-                    Log.e(TAG, "Exception: $e")
+                    Log.e(TAG, "Exception in addDevice: $e")
                     showToast(e.message)
                 }
             }, {
@@ -420,13 +427,13 @@ class ScanDeviceFragment : Fragment() {
                     } else {
                         loadingDialog.dismiss()
                         binding.sdContinueBtn.isEnabled = true
-                        showToast("Failed to get all data")
+                        showToast("Failed to create all data")
                         Log.e(TAG, "createSwitch: Message - $msg")
                     }
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     binding.sdContinueBtn.isEnabled = true
-                    Log.e(TAG, "Exception: $e")
+                    Log.e(TAG, "Exception in createSwitch: $e")
                     showToast(e.message)
                 }
             }, {
@@ -478,8 +485,6 @@ class ScanDeviceFragment : Fragment() {
             Toast.makeText(requireActivity(), "Camera permission not granted!", Toast.LENGTH_SHORT)
                 .show()
             binding.barcodeScanner.visibility = View.GONE
-            // TODO: Navigate Up
-//                Navigation.findNavController(requireView()).navigateUp()
         }
     }
 

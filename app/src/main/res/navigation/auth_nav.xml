@@ -193,10 +193,5 @@
                 android:name="roomID"
                 app:argType="string" />
         </fragment>
-        <activity
-            android:id="@+id/editSwitchActivity"
-            android:name="com.mysofttechnology.homeautomation.activities.EditSwitchActivity"
-            android:label="activity_edit_switch"
-            tools:layout="@layout/activity_edit_switch" />
     </navigation>
 </navigation>

@@ -67,8 +67,6 @@
                 android:layout_height="wrap_content"
                 app:neumorph_shapeType="pressed">
 
-                <!-- TODO: Add digit counter -->
-
                 <EditText
                     android:id="@+id/reg_phone_no"
                     android:layout_width="match_parent"
@@ -139,5 +137,31 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <!--Bottom Branding-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingVertical="18dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/powered_by"
+            android:textSize="@dimen/_10ssp"
+            android:textColor="@color/secondary_text"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mysoft_technology"
+            android:textSize="@dimen/_12ssp"
+            android:textColor="@color/primary"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

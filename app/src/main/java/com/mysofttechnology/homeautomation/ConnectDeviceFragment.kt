@@ -120,7 +120,6 @@ class ConnectDeviceFragment : Fragment() {
                 loadPairedDevices()
             }
             .setNeutralButton("Go back") { _, _ ->
-                // TODO: Handle LOOP
                 Navigation.findNavController(requireView())
                     .navigate(R.id.action_connectDeviceFragment_to_roomsFragment)
             }

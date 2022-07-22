@@ -53,7 +53,7 @@ class AddDeviceFragment : Fragment() {
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         }
                     } catch (e: Exception) {
-                        Log.d(TAG, "Exception: $e")
+                        Log.d(TAG, "Exception in checkDeviceAvailability: $e")
                     }
                 }, {
                     Log.e(TAG, "VollyError: ${it.message}")

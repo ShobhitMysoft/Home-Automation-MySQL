@@ -15,17 +15,6 @@
         android:gravity="center"
         android:hint="Enter OTP" />
 
-    <!--TODO: Implement this-->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:visibility="gone"
-        android:paddingVertical="@dimen/_3sdp"
-        android:textColor="@color/colorAccent"
-        android:layout_gravity="end"
-        android:text="How to?" />
-
     <!-- Submit Button -->
     <Button
         android:id="@+id/vo_submit_btn"
@@ -36,5 +25,27 @@
         android:text="Submit"
         android:textColor="@color/white"
         android:theme="@style/Theme.Material3.Dark" />
+
+    <TextView
+        android:id="@+id/how_to_tv_btn"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="18sp"
+        android:gravity="end"
+        android:paddingVertical="@dimen/_3sdp"
+        android:paddingStart="@dimen/_3sdp"
+        android:textColor="@color/colorAccent"
+        android:text="How to?" />
+
+    <TextView
+        android:id="@+id/how_to_desc_tv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="18sp"
+        android:visibility="gone"
+        android:paddingVertical="@dimen/_3sdp"
+        android:paddingStart="@dimen/_3sdp"
+        android:textColor="@color/secondary_text"
+        android:text="To get this OTP you need to open Smart Lit App in the parent user of this device.\nGo to their Rooms list (by clicking more button on the top-right corner then Rooms) and then click the share icon of the room with the same device/room id. " />
 
 </LinearLayout>
