@@ -63,6 +63,7 @@
                     android:id="@+id/bluetooth_btn"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    android:tooltipText="Bluetooth Status"
                     android:elevation="2dp"
                     android:src="@drawable/ic_bluetooth_off" />
             </soup.neumorphism.NeumorphCardView>

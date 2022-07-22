@@ -63,9 +63,10 @@ class FillWifiDetailFragment : Fragment() {
                     wifiManager!!.disconnect()
                 }
             }
-            val action =
-                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
-            findNavController().navigate(action)
+            Navigation.findNavController(requireView()).navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+//            val action =
+//                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
+//            findNavController().navigate(action)
         }
 
         callback.isEnabled = true
@@ -169,9 +170,10 @@ class FillWifiDetailFragment : Fragment() {
                 } else {
                     Toast.makeText(requireActivity(), "Location permission denied.",
                         Toast.LENGTH_SHORT).show()
-                    val action =
-                        FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
-                    findNavController().navigate(action)
+                    Navigation.findNavController(requireView()).navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+//                    val action =
+//                        FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
+//                    findNavController().navigate(action)
                 }
                 return
             }
