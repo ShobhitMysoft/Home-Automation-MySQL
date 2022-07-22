@@ -191,10 +191,10 @@
     </ScrollView>
 
     <!--Actionbar bottom shadow-->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:layout_margin="0dp"
-            android:background="@drawable/bottom_nav_shadow"
-            app:layout_constraintTop_toBottomOf="@id/main_toolbar" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_margin="0dp"
+        android:background="@drawable/bottom_nav_shadow"
+        app:layout_constraintTop_toBottomOf="@id/main_toolbar" />
 </androidx.constraintlayout.widget.ConstraintLayout>

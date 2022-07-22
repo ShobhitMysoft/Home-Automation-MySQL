@@ -534,14 +534,6 @@ class RoomControlsFragment : Fragment() {
         Log.d(TAG, "uiHandler: Called\n")
         val spEditor = sharedPref?.edit()
 
-        binding.refreshBtn.setOnClickListener {
-            if (!checkWifiIsRunning) {
-                checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-            }
-            checkDatabase()
-        }
-
         binding.powerBtn.setOnClickListener {
             loadingDialog.show(childFragmentManager, "$TAG powerBtn")
             if (!checkWifiIsRunning) {

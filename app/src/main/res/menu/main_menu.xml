@@ -2,6 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!--TODO: Implement Refresh-->
+    <item
+        android:id="@+id/refresh"
+        android:fontFamily="@font/raleway"
+        android:title="Refresh"
+        app:showAsAction="never" />
+
     <item
         android:id="@+id/profile"
         android:fontFamily="@font/raleway"

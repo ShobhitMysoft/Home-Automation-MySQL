@@ -156,6 +156,9 @@ class DashbordFragment : Fragment() {
         popup.menuInflater.inflate(R.menu.main_menu, popup.menu)
         popup.setOnMenuItemClickListener {
             when (it!!.itemId) {
+                R.id.refresh -> {
+                    checkDeviceAvailability()
+                }
                 R.id.profile -> {
                     val action = DashbordFragmentDirections.actionDashbordFragmentToProfileFragment()
                     findNavController().navigate(action)

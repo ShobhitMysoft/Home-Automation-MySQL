@@ -13,6 +13,8 @@ import android.view.ViewGroup
 import androidx.navigation.Navigation
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
+import com.mysofttechnology.homeautomation.databinding.FragmentAddDeviceBinding
+import com.mysofttechnology.homeautomation.databinding.FragmentDashbordBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONObject
 
@@ -22,11 +24,15 @@ class AddDeviceFragment : Fragment() {
     private var sharedPref: SharedPreferences? = null
     private var currentUserId: String? = null
 
+    private var _binding: FragmentAddDeviceBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_add_device, container, false)
+        _binding = FragmentAddDeviceBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -34,6 +40,8 @@ class AddDeviceFragment : Fragment() {
 
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
+
+        binding.adRefreshBtn.setOnClickListener { checkDeviceAvailability() }
     }
 
     private fun checkDeviceAvailability() {
@@ -51,6 +59,8 @@ class AddDeviceFragment : Fragment() {
                         if (resp == 1) {
                             Navigation.findNavController(requireView()).navigate(R.id.action_addDeviceFragment_to_roomControlsFragment)
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
+                        } else {
+                            binding.adRefreshBtn.visibility = View.GONE
                         }
                     } catch (e: Exception) {
                         Log.d(TAG, "Exception in checkDeviceAvailability: $e")

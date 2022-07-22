@@ -53,17 +53,17 @@
             <soup.neumorphism.NeumorphCardView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/primary"
+                android:background="@color/secondary_text"
                 android:clickable="true"
                 android:focusable="true"
                 app:neumorph_shadowElevation="@dimen/_3sdp">
 
                 <ImageView
-                    android:id="@+id/refresh_btn"
+                    android:id="@+id/bluetooth_btn"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:elevation="2dp"
-                    android:src="@drawable/ic_refresh" />
+                    android:src="@drawable/ic_bluetooth" />
             </soup.neumorphism.NeumorphCardView>
 
             <soup.neumorphism.NeumorphCardView
