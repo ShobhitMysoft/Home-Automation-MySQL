@@ -813,7 +813,7 @@ class RoomControlsFragment : Fragment() {
         popup.show()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {}
+//    override fun onSaveInstanceState(outState: Bundle) {}
 
     private fun disableUI() {
         if (!isOnline()) showPSnackbar("No Internet Connection")

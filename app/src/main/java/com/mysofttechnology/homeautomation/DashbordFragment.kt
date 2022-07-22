@@ -188,7 +188,7 @@ class DashbordFragment : Fragment() {
         FirebaseAuth.getInstance().signOut()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {}
+//    override fun onSaveInstanceState(outState: Bundle) {}
 
     private fun isOnline(context: Context = requireContext()): Boolean {
         val connectivityManager =
