@@ -37,6 +37,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
         holder.roomName.text = room.roomName
         holder.roomID.text = room.deviceId
 
+        Log.d(TAG, "onBindViewHolder: Room - $room\nRoom List - $roomList")
         if (room.userValid == "0") holder.shareBtn.visibility = View.VISIBLE
         else holder.shareBtn.visibility = View.GONE
 
