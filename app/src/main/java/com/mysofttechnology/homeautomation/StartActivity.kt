@@ -69,3 +69,8 @@ class StartActivity : AppCompatActivity() {
         const val NOTIFICATION = "notification"
     }
 }
+
+/**
+ * VERSION: 1
+ * This version is before adding bluetooth controls functionality.
+ * */
