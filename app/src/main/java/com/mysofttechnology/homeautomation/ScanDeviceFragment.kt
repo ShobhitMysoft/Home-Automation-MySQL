@@ -484,7 +484,7 @@ class ScanDeviceFragment : Fragment() {
         } else {
             Toast.makeText(requireActivity(), "Camera permission not granted!", Toast.LENGTH_SHORT)
                 .show()
-            binding.barcodeScanner.visibility = View.GONE
+//            binding.barcodeScanner.visibility = View.GONE
         }
     }
 

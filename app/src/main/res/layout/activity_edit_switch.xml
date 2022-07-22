@@ -29,8 +29,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edit Switch"
+            android:fontFamily="@font/raleway"
             android:paddingVertical="@dimen/_10sdp"
+            android:text="Edit Switch"
             android:textColor="@color/primary_text"
             android:textSize="@dimen/_22ssp"
             android:textStyle="bold" />
@@ -188,12 +189,14 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:fontFamily="@font/raleway"
                                 android:text="Start Time" />
 
                             <TextView
                                 android:id="@+id/start_time_tv"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:fontFamily="@font/raleway"
                                 android:gravity="center"
                                 android:hint="00:00"
                                 android:inputType="none"
@@ -216,12 +219,14 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:fontFamily="@font/raleway"
                                 android:text="Stop Time" />
 
                             <TextView
                                 android:id="@+id/stop_time_tv"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:fontFamily="@font/raleway"
                                 android:gravity="center"
                                 android:hint="00:00"
                                 android:inputType="none"
@@ -294,9 +299,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:background="@drawable/z_red_border"
-                        android:elevation="@dimen/_6sdp"
                         android:clickable="true"
+                        android:elevation="@dimen/_6sdp"
                         android:focusable="true"
+                        android:fontFamily="@font/raleway"
                         android:gravity="center"
                         android:paddingVertical="@dimen/_8sdp"
                         android:text="Remove Timing"
@@ -315,6 +321,7 @@
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="75dp"
                 android:backgroundTint="@color/primary"
+                android:fontFamily="@font/raleway"
                 android:text="Submit"
                 android:textColor="@color/white"
                 android:theme="@style/Theme.Material3.Dark" />

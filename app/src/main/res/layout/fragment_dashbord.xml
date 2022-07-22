@@ -2,9 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dash_root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/dash_root_view"
     android:background="@color/card_view_bg"
     tools:context=".DashbordFragment">
 
@@ -13,11 +13,11 @@
         android:id="@+id/main_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingVertical="8dp"
-        android:gravity="center"
         android:background="@color/white"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingVertical="8dp"
+        android:paddingStart="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -32,7 +32,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/sl_logo"/>
+                android:src="@drawable/sl_logo" />
         </LinearLayout>
 
         <FrameLayout
@@ -49,6 +49,7 @@
                 android:fontFamily="@font/raleway"
                 android:gravity="center"
                 android:text="Smart Lit"
+                android:textStyle="bold"
                 android:textColor="@color/primary_text"
                 android:textSize="18dp" />
 
@@ -79,6 +80,7 @@
         android:layout_marginHorizontal="@dimen/_30sdp"
         android:layout_marginBottom="@dimen/_30sdp"
         android:backgroundTint="@color/primary"
+        android:fontFamily="@font/raleway"
         android:paddingVertical="@dimen/_12sdp"
         android:text="+ Add a Room"
         android:textColor="@color/white"
@@ -95,6 +97,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_30sdp"
         android:layout_marginTop="154dp"
+        android:fontFamily="@font/raleway"
         android:gravity="center"
         android:padding="@dimen/_30sdp"
         android:text="Loading..."
@@ -127,8 +130,8 @@
                 android:layout_height="160dp"
                 android:background="@drawable/banner1"
                 android:orientation="vertical"
-                android:paddingVertical="@dimen/_16sdp"
-                android:paddingHorizontal="@dimen/_16sdp">
+                android:paddingHorizontal="@dimen/_16sdp"
+                android:paddingVertical="@dimen/_16sdp">
 
                 <TextView
                     android:layout_width="200dp"
@@ -138,9 +141,9 @@
                     android:fontFamily="@font/raleway"
                     android:text="WELCOME!"
                     android:textColor="@color/white"
-                    android:visibility="gone"
                     android:textSize="24dp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:visibility="gone" />
 
                 <TextView
                     android:layout_width="150dp"
@@ -156,11 +159,11 @@
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginTop="8dp"
                     android:fontFamily="@font/raleway"
                     android:text="A smart home with advanced features that you can control."
                     android:textColor="@color/white"
                     android:textSize="14dp"
-                    android:layout_marginTop="8dp"
                     android:textStyle="bold" />
 
             </LinearLayout>

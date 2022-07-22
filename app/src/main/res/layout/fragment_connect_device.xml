@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ConnectDeviceFragment">
 
     <LinearLayout
@@ -28,8 +28,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Connect Device"
+            android:fontFamily="@font/raleway"
             android:paddingVertical="@dimen/_10sdp"
+            android:text="Connect Device"
             android:textColor="@color/primary_text"
             android:textSize="@dimen/_22ssp"
             android:textStyle="bold" />
@@ -40,28 +41,28 @@
         android:id="@+id/available_devices"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Available Devices"
         android:layout_marginHorizontal="@dimen/_15sdp"
-        android:fontFamily="@font/raleway"
         android:layout_marginVertical="@dimen/_12sdp"
+        android:fontFamily="@font/raleway"
+        android:text="Available Devices"
         android:textColor="@color/secondary_text"
         android:textSize="14dp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/action_bar"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/action_bar" />
 
     <TextView
         android:id="@+id/scanning_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Scanning. . ."
         android:layout_marginHorizontal="@dimen/_15sdp"
-        android:fontFamily="@font/raleway"
         android:layout_marginVertical="@dimen/_12sdp"
+        android:fontFamily="@font/raleway"
+        android:text="Scanning. . ."
         android:textColor="@color/secondary_text"
         android:textSize="14dp"
-        app:layout_constraintTop_toBottomOf="@id/action_bar"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/action_bar" />
 
     <ListView
         android:id="@+id/devices_lv"
@@ -80,6 +81,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_30sdp"
+        android:fontFamily="@font/raleway"
         android:gravity="center"
         android:padding="@dimen/_20sdp"
         android:text="Make sure the device is already paired.\nGo to Settings > Bluetooth > Select the device to pair"
@@ -93,13 +95,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/_16sdp"
-        android:tooltipText="Scan new device"
+        android:backgroundTint="@color/primary"
+        android:contentDescription="Scan new devices"
         android:src="@drawable/ic_refresh"
         android:theme="@style/Theme.Material3.Dark"
-        android:backgroundTint="@color/primary"
+        android:tooltipText="Scan new device"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:contentDescription="Scan new devices" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

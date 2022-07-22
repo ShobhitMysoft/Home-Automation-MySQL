@@ -33,6 +33,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/raleway"
                 android:paddingVertical="@dimen/_10sdp"
                 android:text="Profile"
                 android:textColor="@color/primary_text"
@@ -205,6 +206,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/raleway"
             android:text="@string/powered_by"
             android:textColor="@color/secondary_text"
             android:textSize="@dimen/_10ssp" />
@@ -212,6 +214,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/raleway"
             android:text="@string/mysoft_technology"
             android:textColor="@color/primary"
             android:textSize="@dimen/_12ssp" />

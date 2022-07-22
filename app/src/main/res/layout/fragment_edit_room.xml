@@ -2,9 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/er_root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/er_root_view"
     android:background="@color/grey_50"
     tools:context=".EditRoomFragment">
 
@@ -29,6 +29,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/raleway"
             android:paddingVertical="@dimen/_10sdp"
             android:text="Edit Room"
             android:textColor="@color/primary_text"
@@ -126,6 +127,7 @@
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="15dp"
                 android:backgroundTint="@color/primary"
+                android:fontFamily="@font/raleway"
                 android:text="Submit"
                 android:textColor="@color/white"
                 android:theme="@style/Theme.Material3.Dark" />
@@ -137,13 +139,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
-                android:visibility="gone"
                 android:layout_marginBottom="15dp"
                 android:backgroundTint="@color/secondary_text"
-                android:text="Update Wifi"
                 android:enabled="false"
+                android:fontFamily="@font/raleway"
+                android:text="Update Wifi"
                 android:textColor="@color/white"
-                android:theme="@style/Theme.Material3.Dark" />
+                android:theme="@style/Theme.Material3.Dark"
+                android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 

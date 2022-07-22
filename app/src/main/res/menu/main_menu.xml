@@ -4,16 +4,19 @@
 
     <item
         android:id="@+id/profile"
+        android:fontFamily="@font/raleway"
         android:title="Profile"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/rooms"
+        android:fontFamily="@font/raleway"
         android:title="Rooms"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/logout"
+        android:fontFamily="@font/raleway"
         android:title="Logout"
         app:showAsAction="never" />
 

@@ -42,6 +42,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/raleway"
                     android:text="@string/log_in"
                     android:textColor="@color/primary_text"
                     android:textSize="@dimen/_22ssp"
@@ -60,6 +61,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
+                    android:fontFamily="@font/raleway"
                     android:hint="Phone number"
                     android:inputType="text"
                     android:maxLength="10"
@@ -81,6 +83,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/primary"
+                    android:fontFamily="@font/raleway"
                     android:gravity="center"
                     android:paddingHorizontal="@dimen/_14sdp"
                     android:paddingVertical="@dimen/_12sdp"
@@ -92,22 +95,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/primary"
-                app:neumorph_shapeType="basin"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                app:neumorph_shapeType="basin">
 
                 <LinearLayout
                     android:id="@+id/login_register_btn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
+                    android:orientation="horizontal"
                     android:paddingHorizontal="@dimen/_14sdp"
-                    android:paddingVertical="@dimen/_12sdp"
-                    android:orientation="horizontal">
+                    android:paddingVertical="@dimen/_12sdp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/raleway"
                         android:text="@string/dont_have_an_account"
                         android:textColor="@color/secondary_text"
                         android:textSize="@dimen/_12ssp" />
@@ -116,6 +120,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_4ssp"
+                        android:fontFamily="@font/raleway"
                         android:text="@string/register"
                         android:textColor="@color/primary_text"
                         android:textSize="@dimen/_12ssp" />
@@ -129,8 +134,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:gravity="center"
+        android:orientation="vertical"
         android:paddingVertical="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -139,16 +144,18 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/raleway"
             android:text="@string/powered_by"
-            android:textSize="@dimen/_10ssp"
-            android:textColor="@color/secondary_text"/>
+            android:textColor="@color/secondary_text"
+            android:textSize="@dimen/_10ssp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/raleway"
             android:text="@string/mysoft_technology"
-            android:textSize="@dimen/_12ssp"
-            android:textColor="@color/primary"/>
+            android:textColor="@color/primary"
+            android:textSize="@dimen/_12ssp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

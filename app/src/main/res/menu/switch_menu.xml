@@ -5,6 +5,7 @@
     <item
         android:id="@+id/edit"
         android:title="Edit"
+        android:fontFamily="@font/raleway"
         app:showAsAction="never" />
 
 </menu>
