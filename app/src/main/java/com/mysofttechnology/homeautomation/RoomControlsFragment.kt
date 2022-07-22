@@ -684,7 +684,7 @@ class RoomControlsFragment : Fragment() {
             try {
                 if (app1Val == ZERO && app2Val == ZERO && app3Val == ZERO && app4Val == ZERO && fan == ZERO) {
                     binding.powerBtn.setImageDrawable(
-                        context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
+                        context?.let { ContextCompat.getDrawable(it, R.drawable.ic_powddr_btn_off) })
                     enableUI()
                     loadingDialog.dismiss()
                 } else {
