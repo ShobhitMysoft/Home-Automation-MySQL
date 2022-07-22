@@ -16,7 +16,7 @@
         android:gravity="center"
         android:padding="@dimen/_30sdp"
         android:text="You have not connected any device yet! Add your first device right now and enjoy."
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_12ssp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -7,14 +7,11 @@
 
     <EditText
         android:id="@+id/verify_otp_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/raleway"
+        style="@style/EdittextStyle"
         android:gravity="center"
         android:hint="Enter OTP"
         android:inputType="number"
-        android:maxLength="6"
-        android:textSize="16sp" />
+        android:maxLength="6" />
 
     <!-- Submit Button -->
     <Button
@@ -26,6 +23,7 @@
         android:fontFamily="@font/raleway"
         android:text="Submit"
         android:textColor="@color/white"
+        android:textSize="@dimen/_12ssp"
         android:theme="@style/Theme.Material3.Dark" />
 
     <TextView

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Home Automation</string>
+    <string name="app_name">Smart Lit</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="powered_by">Powered By</string>
@@ -14,8 +14,6 @@
     <string name="forgot_password">Forgot Password</string>
     <string name="verifiy_code">Verifiy Code</string>
     <string name="verify">Verify</string>
-    <string name="channel1Name">Home Automation</string>
-    <string name="channel1ID">myNotificationChannel</string>
     <!-- DATABASE -->
     <string name="base_url">https://mysofttechnology.com/homeautomation/admin/api/</string>
     <string name="url_register">register</string>

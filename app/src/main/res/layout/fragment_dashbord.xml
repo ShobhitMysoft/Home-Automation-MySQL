@@ -49,9 +49,9 @@
                 android:fontFamily="@font/raleway"
                 android:gravity="center"
                 android:text="Smart Lit"
-                android:textStyle="bold"
                 android:textColor="@color/primary_text"
-                android:textSize="18dp" />
+                android:textSize="18dp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="50dp"
@@ -84,6 +84,7 @@
         android:paddingVertical="@dimen/_12sdp"
         android:text="+ Add a Room"
         android:textColor="@color/white"
+        android:textSize="@dimen/_12ssp"
         android:theme="@style/Theme.Material3.Dark"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -101,7 +102,7 @@
         android:gravity="center"
         android:padding="@dimen/_30sdp"
         android:text="Loading..."
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_12ssp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

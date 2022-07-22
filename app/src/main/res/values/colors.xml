@@ -12,7 +12,7 @@
     <color name="light_blue_A100">#B3E5FC</color>
     <color name="light_blue_A200">#FF40C4FF</color>
     <color name="light_blue_A400">#FF00B0FF</color>
-    <color name="black_overlay">#66000000</color>
+    <color name="black_overlay">#99000000</color>
 
     <!--Custom colors-->
     <color name="primary">#0c83e5</color>

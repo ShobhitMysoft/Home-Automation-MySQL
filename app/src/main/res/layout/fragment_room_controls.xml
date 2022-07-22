@@ -1023,7 +1023,7 @@
         android:gravity="center"
         android:padding="@dimen/_30sdp"
         android:text="Room doesn't exists."
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_12ssp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

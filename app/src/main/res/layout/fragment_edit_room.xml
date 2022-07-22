@@ -105,13 +105,9 @@
 
                         <EditText
                             android:id="@+id/room_name_et"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/raleway"
+                            style="@style/EdittextStyle"
                             android:hint="room name"
-                            android:inputType="textCapWords"
-                            android:textColor="#000000"
-                            android:textSize="@dimen/_12sdp" />
+                            android:inputType="textCapWords" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -130,6 +126,7 @@
                 android:fontFamily="@font/raleway"
                 android:text="Submit"
                 android:textColor="@color/white"
+                android:textSize="@dimen/_12ssp"
                 android:theme="@style/Theme.Material3.Dark" />
 
             <!-- Update Button -->
@@ -145,6 +142,7 @@
                 android:fontFamily="@font/raleway"
                 android:text="Update Wifi"
                 android:textColor="@color/white"
+                android:textSize="@dimen/_12ssp"
                 android:theme="@style/Theme.Material3.Dark"
                 android:visibility="gone" />
         </LinearLayout>

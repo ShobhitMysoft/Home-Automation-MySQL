@@ -113,7 +113,7 @@ class ConnectDeviceFragment : Fragment() {
     private fun showDialog() {
         val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle("Bluetooth not available")
-            .setMessage("Please turn on the bluetooth in order to connect to a home automation device.")
+            .setMessage("Please turn on the bluetooth in order to connect to a ${getString(R.string.app_name)} device.")
             .setPositiveButton(
                 "Try again"
             ) { _, _ ->

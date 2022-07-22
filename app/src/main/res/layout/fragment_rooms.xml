@@ -48,7 +48,7 @@
         android:gravity="center"
         android:padding="@dimen/_30sdp"
         android:text="You have not connected any room yet! Add your first room right now and enjoy."
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_12ssp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

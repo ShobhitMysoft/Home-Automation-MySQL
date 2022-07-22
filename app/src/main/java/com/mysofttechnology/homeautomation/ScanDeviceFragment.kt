@@ -67,8 +67,12 @@ class ScanDeviceFragment : Fragment() {
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
 
-        activityResultLauncher.launch(Manifest.permission.CAMERA)
+        checkCameraPermission()
         codeScanner()
+
+        binding.sdAllowBtn.setOnClickListener {
+            checkCameraPermission()
+        }
 
         binding.backBtn.setOnClickListener {
             binding.backBtn.isEnabled = false
@@ -91,6 +95,10 @@ class ScanDeviceFragment : Fragment() {
                 binding.sdContinueBtn.isEnabled = true
             }
         }
+    }
+
+    private fun checkCameraPermission() {
+        activityResultLauncher.launch(Manifest.permission.CAMERA)
     }
 
     private fun codeScanner() {
@@ -481,10 +489,11 @@ class ScanDeviceFragment : Fragment() {
         // Handle Permission granted/rejected
         if (isGranted) {
             binding.barcodeScanner.visibility = View.VISIBLE
+            binding.permNotAllowedLayout.visibility = View.GONE
         } else {
             Toast.makeText(requireActivity(), "Camera permission not granted!", Toast.LENGTH_SHORT)
                 .show()
-//            binding.barcodeScanner.visibility = View.GONE
+            binding.permNotAllowedLayout.visibility = View.VISIBLE
         }
     }
 

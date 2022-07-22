@@ -85,7 +85,7 @@
         android:gravity="center"
         android:padding="@dimen/_20sdp"
         android:text="Make sure the device is already paired.\nGo to Settings > Bluetooth > Select the device to pair"
-        android:textSize="@dimen/_16ssp"
+        android:textSize="@dimen/_12ssp"
         app:layout_constraintBottom_toTopOf="@+id/refresh_fab"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

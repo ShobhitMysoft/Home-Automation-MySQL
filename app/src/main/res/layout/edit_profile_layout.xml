@@ -7,22 +7,16 @@
 
     <EditText
         android:id="@+id/user_name_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/raleway"
+        style="@style/EdittextStyle"
         android:hint="Enter your name"
-        android:inputType="textCapWords"
-        android:textSize="16sp" />
+        android:inputType="textCapWords" />
 
     <EditText
         android:id="@+id/user_email_et"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        style="@style/EdittextStyle"
         android:layout_marginTop="10dp"
-        android:fontFamily="@font/raleway"
         android:hint="Enter your email address"
-        android:inputType="textEmailAddress"
-        android:textSize="16sp" />
+        android:inputType="textEmailAddress" />
 
     <!-- Submit Button -->
     <Button
@@ -34,6 +28,7 @@
         android:fontFamily="@font/raleway"
         android:text="Submit"
         android:textColor="@color/white"
+        android:textSize="@dimen/_12ssp"
         android:theme="@style/Theme.Material3.Dark" />
 
 </LinearLayout>
