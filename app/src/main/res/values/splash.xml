@@ -10,7 +10,7 @@
         <!-- Required for animated icons -->
 <!--        <item name="windowSplashScreenAnimationDuration">200</item>-->
 
-<!--        <item name="android:windowSplashScreenBrandingImage" tools:targetApi="s">@drawable/splash_bg3</item>-->
+        <item name="android:windowSplashScreenBrandingImage" tools:targetApi="s">@drawable/splash_screen_brand_img</item>
 
         <!-- Set the theme of the Activity that directly follows your splash screen. -->
         <!-- Required -->
