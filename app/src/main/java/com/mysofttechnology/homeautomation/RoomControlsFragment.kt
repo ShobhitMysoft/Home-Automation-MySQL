@@ -29,6 +29,7 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL1
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL2
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL3
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL4
+import com.mysofttechnology.homeautomation.StartActivity.Companion.DEVICEIDSSET
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FAN
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
@@ -74,6 +75,8 @@ class RoomControlsFragment : Fragment() {
 
     private var currentDeviceId: String? = null
     private var currentUserId: String? = null
+    private var currentBtDeviceId: String? = null
+    private lateinit var deviceIdsSet: HashSet<String>
 
     private var _binding: FragmentRoomControlsBinding? = null
     private val binding get() = _binding!!
@@ -112,20 +115,23 @@ class RoomControlsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.i(TAG, "onViewCreated: Called")
 
         requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
-
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
+        deviceIdsSet = sharedPref!!.getStringSet(DEVICEIDSSET, HashSet<String>()) as HashSet<String>
+        if (deviceIdsSet.isNotEmpty())
+            currentBtDeviceId = sharedPref!!.getString(deviceIdsSet.first(), "")
+
         Log.d(TAG, "onViewCreated: $currentUserId")
+        Log.d(TAG, "onViewCreated: deviceIdsSet = $deviceIdsSet")
+        Log.d(TAG, "onViewCreated: currentBtDeviceId = $currentBtDeviceId")
 
         toggleWifi = Handler()
         waitSnackbar =
             Snackbar.make(requireActivity().findViewById(android.R.id.content), "Please wait...",
                 Snackbar.LENGTH_INDEFINITE)
-
-        Log.d(TAG, "onViewCreated: currentDeviceId - $currentDeviceId")
 
         binding.currentRoomTv.setOnClickListener {
             showChooseRoomDialog()

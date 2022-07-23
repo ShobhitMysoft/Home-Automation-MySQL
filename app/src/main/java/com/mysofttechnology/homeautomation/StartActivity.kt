@@ -41,18 +41,9 @@ class StartActivity : AppCompatActivity() {
         const val APPL3 = "appliance3"
         const val APPL4 = "appliance4"
         const val FAN = "fan"
-        const val POWER = "power"
 
-        const val SWITCH1 = "switch1"
-        const val SWITCH2 = "switch2"
-        const val SWITCH3 = "switch3"
-        const val SWITCH4 = "switch4"
-
-        const val DEVICES = "devices"
         const val ZERO = "0"
         const val ONE = "1"
-        const val ON = "ON"
-        const val OFF = "OFF"
 
         const val BLANK = ""
         const val SWITCH = "switch"
@@ -67,6 +58,7 @@ class StartActivity : AppCompatActivity() {
         const val FRI = "fri"
         const val SAT = "sat"
         const val NOTIFICATION = "notification"
+        const val DEVICEIDSSET = "deviceIdsSet"
     }
 }
 

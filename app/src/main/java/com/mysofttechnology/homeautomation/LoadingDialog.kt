@@ -15,7 +15,7 @@ class LoadingDialog : DialogFragment() {
 
         return activity?.let {
             builder.setView(view)
-//                .setTitle(tag)
+                .setTitle(tag)
                 .setCancelable(false)
 
             builder.create()

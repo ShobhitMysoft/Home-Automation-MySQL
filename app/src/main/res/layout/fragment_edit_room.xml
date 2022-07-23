@@ -131,20 +131,18 @@
 
             <!-- Update Button -->
             <Button
-                android:id="@+id/update_btn"
+                android:id="@+id/update_wifi_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="15dp"
                 android:backgroundTint="@color/secondary_text"
-                android:enabled="false"
                 android:fontFamily="@font/raleway"
                 android:text="Update Wifi"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_12ssp"
-                android:theme="@style/Theme.Material3.Dark"
-                android:visibility="gone" />
+                android:theme="@style/Theme.Material3.Dark" />
         </LinearLayout>
     </ScrollView>
 

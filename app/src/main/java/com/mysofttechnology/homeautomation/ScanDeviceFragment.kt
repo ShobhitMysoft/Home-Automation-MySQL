@@ -482,7 +482,7 @@ class ScanDeviceFragment : Fragment() {
 
     private fun gotoConnectDevice() {
             val action =
-                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment(deviceId)
+                ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
             findNavController().navigate(action)
         loadingDialog.dismiss()
     }

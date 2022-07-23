@@ -169,6 +169,9 @@
             <argument
                 android:name="btDevice"
                 app:argType="string" />
+            <argument
+                android:name="deviceId"
+                app:argType="string" />
         </fragment>
         <fragment
             android:id="@+id/editRoomFragment"
