@@ -10,6 +10,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -76,7 +77,8 @@ class RoomControlsFragment : Fragment() {
     private var currentDeviceId: String? = null
     private var currentUserId: String? = null
     private var currentBtDeviceId: String? = null
-    private lateinit var deviceIdsSet: HashSet<String>
+//    private lateinit var deviceIdsSet: HashSet<String>
+    private lateinit var deviceIdsList: List<String>
 
     private var _binding: FragmentRoomControlsBinding? = null
     private val binding get() = _binding!!
@@ -120,15 +122,17 @@ class RoomControlsFragment : Fragment() {
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
 
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
-        deviceIdsSet = sharedPref!!.getStringSet(DEVICEIDSSET, HashSet<String>()) as HashSet<String>
-        if (deviceIdsSet.isNotEmpty())
-            currentBtDeviceId = sharedPref!!.getString(deviceIdsSet.first(), "")
+
+//        deviceIdsSet = sharedPref!!.getStringSet(DEVICEIDSSET, HashSet<String>()) as HashSet<String>
+        deviceIdsList = (sharedPref!!.getStringSet(DEVICEIDSSET, HashSet<String>()) as HashSet<String>).filter { it != "null" }
+        if (deviceIdsList.isNotEmpty())
+            currentBtDeviceId = sharedPref!!.getString(deviceIdsList[0], "")
 
         Log.d(TAG, "onViewCreated: $currentUserId")
-        Log.d(TAG, "onViewCreated: deviceIdsSet = $deviceIdsSet")
+        Log.d(TAG, "onViewCreated: deviceIdsSet = $deviceIdsList")
         Log.d(TAG, "onViewCreated: currentBtDeviceId = $currentBtDeviceId")
 
-        toggleWifi = Handler()
+        toggleWifi = Handler(Looper.getMainLooper())
         waitSnackbar =
             Snackbar.make(requireActivity().findViewById(android.R.id.content), "Please wait...",
                 Snackbar.LENGTH_INDEFINITE)
