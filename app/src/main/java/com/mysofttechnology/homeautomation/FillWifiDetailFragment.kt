@@ -4,15 +4,14 @@ import android.Manifest
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -26,6 +25,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.mysofttechnology.homeautomation.StartActivity.Companion.DEVICEIDSSET
 import com.mysofttechnology.homeautomation.databinding.FragmentFillWifiDetailBinding
 import java.io.IOException
 import java.io.OutputStream
@@ -37,13 +37,15 @@ class FillWifiDetailFragment : Fragment() {
     private var wifiManager: WifiManager? = null
     private var snackbar: Snackbar? = null
     private lateinit var loadingDialog: LoadingDialog
-    private lateinit var dialog: AlertDialog
 
-    private lateinit var btSocket: BluetoothSocket
+    private var btSocket: BluetoothSocket? = null
+    private var sharedPref: SharedPreferences? = null
 
     private lateinit var ssid: String
     private val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     private lateinit var btDevice: String
+    private lateinit var deviceId: String
+    private lateinit var deviceIdsSet: HashSet<String>
 
     private var wifiSSIDList: ArrayList<String> = arrayListOf()
     private lateinit var listAdapter: ArrayAdapter<String>
@@ -55,7 +57,7 @@ class FillWifiDetailFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            snackbar?.dismiss()
+            snackbar?.dismiss()     // onBackPressedDispatcher
 
             wifiManager?.let {
                 if (wifiManager!!.isWifiEnabled) {
@@ -63,15 +65,18 @@ class FillWifiDetailFragment : Fragment() {
                     wifiManager!!.disconnect()
                 }
             }
-            val action =
-                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
-            findNavController().navigate(action)
+            Navigation.findNavController(requireView())
+                .navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+//            val action =
+//                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
+//            findNavController().navigate(action)
         }
 
         callback.isEnabled = true
 
         arguments?.let {
             btDevice = it.getString("btDevice").toString()
+            deviceId = it.getString("deviceId").toString()
         }
     }
 
@@ -89,16 +94,17 @@ class FillWifiDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+        deviceIdsSet = sharedPref!!.getStringSet(DEVICEIDSSET, HashSet<String>()) as HashSet<String>
+        Log.d(TAG, "onViewCreated: deviceIdsSet - $deviceIdsSet")
+
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
-        loadingDialog.show(parentFragmentManager, "Loading Dialog")
+        loadingDialog.show(parentFragmentManager, TAG)
 
-        snackbar = Snackbar.make(bind.rootView, "Make sure the device is On(Blue Light).",
-            Snackbar.LENGTH_LONG)
-            .setAction("Retry") {
-                connectToBtDevice()
-            }
-            .setAnchorView(bind.refreshFab)
+        snackbar = Snackbar.make(bind.fwRootView,
+            "Timeout! Make sure you are close to the ${getString(R.string.app_name)} device.",
+            Snackbar.LENGTH_LONG).setAnchorView(bind.refreshFab)
 
         bind.backBtn.setOnClickListener {
             bind.backBtn.isEnabled = false
@@ -107,14 +113,18 @@ class FillWifiDetailFragment : Fragment() {
         }
 
         bind.wifiLv.setOnItemClickListener { _, _, pos, _ ->
+            loadingDialog.show(parentFragmentManager, TAG)
             ssid = wifiSSIDList[pos]
             Toast.makeText(requireActivity(), ssid, Toast.LENGTH_SHORT).show()
-            sendSSIDToDevice()
-            showWifiPasswordDialog()
+            if (btSocket != null && btSocket!!.isConnected) {
+                sendSSIDToDevice()
+                showWifiPasswordDialog()
+            } else connectToBtDevice()
         }
 
         bind.refreshFab.setOnClickListener { getWifiDetails() }
 
+        getWifiDetails()
         checkSettings()
 //        connectToBtDevice()
     }
@@ -142,15 +152,17 @@ class FillWifiDetailFragment : Fragment() {
             }
             return
         }
-        loadingDialog.dismiss()
 
         if (!locationManager.isLocationEnabled) {
+//            loadingDialog.dismiss()
             showTurnOnGPSDialog()
         } else {
             if (!wifiManager.isWifiEnabled) {
                 showTurnOnWifiDialog()
-            } else connectToBtDevice()
+            }
+//            else connectToBtDevice()
         }
+        loadingDialog.dismiss()
     }
 
     override fun onRequestPermissionsResult(
@@ -169,9 +181,11 @@ class FillWifiDetailFragment : Fragment() {
                 } else {
                     Toast.makeText(requireActivity(), "Location permission denied.",
                         Toast.LENGTH_SHORT).show()
-                    val action =
-                        FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
-                    findNavController().navigate(action)
+                    Navigation.findNavController(requireView())
+                        .navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+//                    val action =
+//                        FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
+//                    findNavController().navigate(action)
                 }
                 return
             }
@@ -213,7 +227,7 @@ class FillWifiDetailFragment : Fragment() {
 
         Log.d(TAG, "sendSSIDToDevice: $wifiSSID")
         try {
-            val ssidOutputStream: OutputStream = btSocket.outputStream
+            val ssidOutputStream: OutputStream = btSocket!!.outputStream
             ssidOutputStream.write(wifiSSID.toByteArray())
 
 //            closeSocket()
@@ -223,14 +237,23 @@ class FillWifiDetailFragment : Fragment() {
     }
 
     private fun sendPasswordToDevice(password: String) {
+        loadingDialog.show(childFragmentManager, TAG)
         // TODO: If anything goes wrong try to remove space at the end
         val wifiPassword = "PASS:$password "
+        val spEditor = sharedPref?.edit()
 
         Log.d(TAG, "sendPasswordToDevice: $wifiPassword")
         try {
-            val passwordOutputStream: OutputStream = btSocket.outputStream
+            val passwordOutputStream: OutputStream = btSocket!!.outputStream
             passwordOutputStream.write(wifiPassword.toByteArray())
 
+            spEditor?.putString(deviceId, btDevice)
+
+            deviceIdsSet.add(deviceId)
+            spEditor?.putStringSet(DEVICEIDSSET, deviceIdsSet)
+            spEditor?.apply()
+
+            loadingDialog.dismiss()
             closeSocket()
         } catch (e: IOException) {
             e.printStackTrace()
@@ -239,16 +262,14 @@ class FillWifiDetailFragment : Fragment() {
 
     private fun closeSocket() {
         try {
-            btSocket.close()
+            btSocket?.close()
         } catch (e: IOException) {
             Log.e(TAG, "connectToBtDevice: Socket Close Error : ", e)
         }
     }
 
     private fun connectToBtDevice() {
-
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
-
         val remoteDevice = btAdapter.getRemoteDevice(btDevice)
 
         Toast.makeText(requireActivity(), "Device Name - ${remoteDevice.name}", Toast.LENGTH_SHORT)
@@ -257,21 +278,32 @@ class FillWifiDetailFragment : Fragment() {
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
         try {
             Log.i(TAG, "connectToBtDevice: Trying to connect socket.")
-            btSocket.connect()
-            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket.isConnected}")
-        } catch (e: IOException) {
+            btSocket!!.connect()
+            sendSSIDToDevice()
+            showWifiPasswordDialog()
+            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
+            loadingDialog.dismiss()
+        } catch (e: Exception) {
+            Snackbar.make(bind.fwRootView,
+                "Timeout! Make sure you are close to the ${getString(R.string.app_name)} device.",
+                Snackbar.LENGTH_LONG).setAnchorView(bind.refreshFab).show()
             Log.e(TAG, "connectToBtDevice: Socket Connect Error : ", e)
-            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket.isConnected}")
-            snackbar?.show()
+            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
+            loadingDialog.dismiss()
+            closeSocket()
         }
 
-        if (btSocket.isConnected) {
+        if (btSocket?.isConnected == true) {
             getWifiDetails()
         } else snackbar?.show()
     }
 
     private fun getWifiDetails() {
         Log.d(TAG, "getWifiDetails: Socket is connected.")
+        bind.refreshFab.visibility = View.GONE
+        Handler(Looper.getMainLooper()).postDelayed({
+            bind.refreshFab.visibility = View.VISIBLE
+        }, 10000)
 
         wifiManager = requireContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
 

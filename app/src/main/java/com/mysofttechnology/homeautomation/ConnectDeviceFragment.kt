@@ -1,34 +1,28 @@
 package com.mysofttechnology.homeautomation
 
 import android.app.AlertDialog
-import android.bluetooth.*
-import android.content.BroadcastReceiver
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.location.LocationManager
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.mysofttechnology.homeautomation.databinding.FragmentConnectDeviceBinding
-import java.io.IOException
-import java.net.SocketException
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 private const val TAG = "ConnectDeviceFragment"
 
 class ConnectDeviceFragment : Fragment() {
 
+    private var deviceId: String? = null
     private var _binding: FragmentConnectDeviceBinding? = null
     private val bind get() = _binding!!
 
@@ -37,6 +31,14 @@ class ConnectDeviceFragment : Fragment() {
     private var deviceNameList: ArrayList<String> = arrayListOf()
     private var btDeviceList: ArrayList<BluetoothDevice> = arrayListOf()
     private lateinit var listAdapter: ArrayAdapter<String>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        arguments?.let {
+            deviceId = it.getString("deviceId").toString()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,7 +73,7 @@ class ConnectDeviceFragment : Fragment() {
 
             val action =
                 ConnectDeviceFragmentDirections.actionConnectDeviceFragmentToFillWifiDetailFragment(
-                    btDeviceList[position].toString()
+                    btDeviceList[position].toString(), deviceId.toString()
                 )
             findNavController().navigate(action)
 
@@ -102,7 +104,7 @@ class ConnectDeviceFragment : Fragment() {
                     listAdapter.notifyDataSetChanged()
                 }
 
-                Log.d(TAG, "loadPairedDevices: $deviceName")
+                Log.d(TAG, "loadPairedDevices: $deviceName | $device")
             }
             bind.scanningTv.visibility = View.GONE
             bind.refreshFab.visibility = View.VISIBLE
@@ -113,7 +115,9 @@ class ConnectDeviceFragment : Fragment() {
     private fun showDialog() {
         val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle("Bluetooth not available")
-            .setMessage("Please turn on the bluetooth in order to connect to a ${getString(R.string.app_name)} device.")
+            .setMessage("Please turn on the bluetooth in order to connect to a ${
+                getString(R.string.app_name)
+            } device.")
             .setPositiveButton(
                 "Try again"
             ) { _, _ ->

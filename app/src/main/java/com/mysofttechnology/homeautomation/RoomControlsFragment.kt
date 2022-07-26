@@ -1,6 +1,8 @@
 package com.mysofttechnology.homeautomation
 
 import android.app.AlertDialog
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -10,6 +12,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +32,7 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL1
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL2
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL3
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL4
+import com.mysofttechnology.homeautomation.StartActivity.Companion.DEVICEIDSSET
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FAN
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
@@ -54,10 +58,16 @@ import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBindi
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
+import java.io.OutputStream
+import java.util.*
 
 private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
+
+    private var btSocket: BluetoothSocket? = null
+    private val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
     private var liveFanSpeed: Int = 0
     private var SWITCH1: String? = null
@@ -74,6 +84,10 @@ class RoomControlsFragment : Fragment() {
 
     private var currentDeviceId: String? = null
     private var currentUserId: String? = null
+    private var currentBtDeviceId: String? = null
+
+    //    private lateinit var deviceIdsSet: HashSet<String>
+    private lateinit var deviceIdsList: List<String>
 
     private var _binding: FragmentRoomControlsBinding? = null
     private val binding get() = _binding!!
@@ -112,20 +126,26 @@ class RoomControlsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.i(TAG, "onViewCreated: Called")
 
         requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
-
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
-        currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
-        Log.d(TAG, "onViewCreated: $currentUserId")
 
-        toggleWifi = Handler()
+        currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
+
+//        deviceIdsSet = sharedPref!!.getStringSet(DEVICEIDSSET, HashSet<String>()) as HashSet<String>
+        deviceIdsList = (sharedPref!!.getStringSet(DEVICEIDSSET,
+            HashSet<String>()) as HashSet<String>).filter { it != "null" }
+        if (deviceIdsList.isNotEmpty())
+            currentBtDeviceId = sharedPref!!.getString(deviceIdsList[1], "")
+
+        Log.d(TAG, "onViewCreated: $currentUserId")
+        Log.d(TAG, "onViewCreated: deviceIdsSet = $deviceIdsList")
+        Log.d(TAG, "onViewCreated: currentBtDeviceId = $currentBtDeviceId")
+
+        toggleWifi = Handler(Looper.getMainLooper())
         waitSnackbar =
             Snackbar.make(requireActivity().findViewById(android.R.id.content), "Please wait...",
                 Snackbar.LENGTH_INDEFINITE)
-
-        Log.d(TAG, "onViewCreated: currentDeviceId - $currentDeviceId")
 
         binding.currentRoomTv.setOnClickListener {
             showChooseRoomDialog()
@@ -137,6 +157,46 @@ class RoomControlsFragment : Fragment() {
         }
 
         uiHandler()
+        connectToBtDevice()
+    }
+
+    private fun connectToBtDevice() {
+        val btAdapter = BluetoothAdapter.getDefaultAdapter()
+        val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
+
+        Toast.makeText(requireActivity(), "Device Name - ${remoteDevice.name}", Toast.LENGTH_SHORT)
+            .show()
+
+        btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
+        try {
+            Log.i(TAG, "connectToBtDevice: Trying to connect socket.")
+            btSocket!!.connect()
+            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
+//            loadingDialog.dismiss()
+        } catch (e: Exception) {
+            Snackbar.make(binding.rcRootView,
+                "Timeout! Make sure you are close to the ${getString(R.string.app_name)} device.",
+                Snackbar.LENGTH_LONG)
+//                .setAnchorView(binding.refreshFab)
+                .show()
+            Log.e(TAG, "connectToBtDevice: Socket Connect Error : ", e)
+            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
+//            loadingDialog.dismiss()
+//            closeSocket()
+        }
+
+        if (btSocket?.isConnected == true) {
+            showLToast("Bluetooth is connected")
+//            getWifiDetails()
+        } else showLToast("Bluetooth is not connected")
+    }
+
+    private fun closeSocket() {
+        try {
+            btSocket?.close()
+        } catch (e: IOException) {
+            Log.e(TAG, "connectToBtDevice: Socket Close Error : ", e)
+        }
     }
 
     private fun checkDatabase() {
@@ -303,7 +363,8 @@ class RoomControlsFragment : Fragment() {
                         for (i in 0..4) {
                             val switchData = switchListData.getJSONObject(i)
                             if (switchData.get("switch_id_by_app").toString() != "5")
-                                loadSwitch(switchData.get("switch_id_by_app").toString(), switchData)
+                                loadSwitch(switchData.get("switch_id_by_app").toString(),
+                                    switchData)
                         }
                         Log.d(TAG, "switchList: Message - $msg")
                     } else {
@@ -471,7 +532,8 @@ class RoomControlsFragment : Fragment() {
             satTv.typeface = Typeface.DEFAULT_BOLD
         }
 
-        checkForNotification(switch.get("id").toString(), switch.getString(SWITCH), switch.getString(NOTIFICATION))
+        checkForNotification(switch.get("id").toString(), switch.getString(SWITCH),
+            switch.getString(NOTIFICATION))
     }
 
     private fun checkForNotification(switchId: String, switchName: String, notif: String) {
@@ -570,45 +632,50 @@ class RoomControlsFragment : Fragment() {
             if (!isChecked) {
                 updateLive(ZERO, FAN)
             } else {
-                val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)", liveFanSpeed.toString())
+                val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
+                    liveFanSpeed.toString())
                 updateLive(oldFanSpeed.toString(), FAN)
             }
         }
 
         binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (!checkWifiIsRunning) {
-                checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-            }
-            updateLive(if (isChecked) ONE else ZERO, APPL1)
+//            disableUI()
+//            if (!checkWifiIsRunning) {
+//                checkWifiIsRunning = true
+//                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+//            }
+            sendDataToBT(if (isChecked) "A" else "a")
+//            updateLive(if (isChecked) ONE else ZERO, APPL1)
         }
 
         binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (!checkWifiIsRunning) {
-                checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-            }
-            updateLive(if (isChecked) ONE else ZERO, APPL2)
+//            disableUI()
+//            if (!checkWifiIsRunning) {
+//                checkWifiIsRunning = true
+//                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+//            }
+            sendDataToBT(if (isChecked) "B" else "b")
+//            updateLive(if (isChecked) ONE else ZERO, APPL2)
         }
 
         binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (!checkWifiIsRunning) {
-                checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-            }
-            updateLive(if (isChecked) ONE else ZERO, APPL3)
+//            disableUI()
+//            if (!checkWifiIsRunning) {
+//                checkWifiIsRunning = true
+//                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+//            }
+            sendDataToBT(if (isChecked) "C" else "c")
+//            updateLive(if (isChecked) ONE else ZERO, APPL3)
         }
 
         binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (!checkWifiIsRunning) {
-                checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-            }
-            updateLive(if (isChecked) ONE else ZERO, APPL4)
+//            disableUI()
+//            if (!checkWifiIsRunning) {
+//                checkWifiIsRunning = true
+//                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+//            }
+            sendDataToBT(if (isChecked) "D" else "d")
+//            updateLive(if (isChecked) ONE else ZERO, APPL4)
         }
 
         binding.switch1MoreBtn.setOnClickListener {
@@ -623,6 +690,19 @@ class RoomControlsFragment : Fragment() {
         binding.switch4MoreBtn.setOnClickListener {
             SWITCH4?.let { id -> showPopupMenu(it, id, "4") }
         }
+    }
+
+    private fun sendDataToBT(signal: String) {
+        // TODO: If anything goes wrong try to remove space at the end
+        try {
+            val ssidOutputStream: OutputStream = btSocket!!.outputStream
+            ssidOutputStream.write(signal.toByteArray())
+
+//            closeSocket()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
     }
 
     private fun updateLive(value: String, appl: String) {

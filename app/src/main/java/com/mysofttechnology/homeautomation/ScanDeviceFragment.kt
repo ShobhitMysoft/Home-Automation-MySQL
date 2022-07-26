@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.android.volley.toolbox.StringRequest
 import com.budiyev.android.codescanner.*
 import com.mysofttechnology.homeautomation.StartActivity.Companion.BLANK
@@ -37,6 +38,7 @@ private const val TAG = "ScanDeviceFragment"
 
 class ScanDeviceFragment : Fragment() {
 
+    private lateinit var deviceId: String
     private var currentUserId: String? = null
     private var sharedPref: SharedPreferences? = null
     private var updateDialog: AlertDialog? = null
@@ -82,7 +84,7 @@ class ScanDeviceFragment : Fragment() {
 
         binding.sdContinueBtn.setOnClickListener {
             binding.sdContinueBtn.isEnabled = false
-            val deviceId = binding.deviceIdEt.text.toString()
+            deviceId = binding.deviceIdEt.text.toString()
             if (deviceId.isNotEmpty()) {
                 loadingDialog.show(childFragmentManager, TAG)
                 checkDeviceAvailability(deviceId)
@@ -123,7 +125,8 @@ class ScanDeviceFragment : Fragment() {
                     Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
                     binding.deviceIdEt.setText(it.toString())
                     loadingDialog.show(childFragmentManager, TAG)
-                    checkDeviceAvailability(it.toString())
+                    deviceId = it.toString()
+                    checkDeviceAvailability(deviceId)
                 }
             }
 
@@ -478,8 +481,9 @@ class ScanDeviceFragment : Fragment() {
     }
 
     private fun gotoConnectDevice() {
-        Navigation.findNavController(requireView())
-            .navigate(R.id.action_scanDeviceFragment_to_connectDeviceFragment)
+            val action =
+                ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+            findNavController().navigate(action)
         loadingDialog.dismiss()
     }
 

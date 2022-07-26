@@ -137,7 +137,7 @@ class RoomsFragment : Fragment() {
     }
 
     private fun showToast(message: String?) {
-        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
+        if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
     private fun showLSnackbar(msg: String = "Something went wrong.") {
