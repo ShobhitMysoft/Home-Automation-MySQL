@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.Navigation
 import com.android.volley.toolbox.StringRequest
-import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONObject
 

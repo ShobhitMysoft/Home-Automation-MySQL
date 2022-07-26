@@ -13,6 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -21,6 +23,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.mysofttechnology.homeautomation.databinding.FragmentDashbordBinding
+import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONObject
 
@@ -92,11 +95,11 @@ class DashbordFragment : Fragment() {
                         val msg = mData.get("msg")
 
                         if (resp == 1) {
-                            updateUI(true)
+                            updateUI(true, mData)
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         } else {
                             loadingDialog.dismiss()
-                            updateUI(false)
+                            updateUI(false, mData)
 //                            showToast("No user found. Please register first.")
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         }
@@ -129,11 +132,25 @@ class DashbordFragment : Fragment() {
                 .setAction("Retry") {
                     checkDeviceAvailability()
                 }.show()
+
+            loadOfflineDb()
         }
     }
 
-    private fun updateUI(flag: Boolean) {
+    private fun loadOfflineDb() {
+        val x = ViewModelProvider(this).get(DeviceViewModel::class.java)
+        x.readAllData.observe(viewLifecycleOwner) { device ->
+            device.forEach {
+                Log.d(TAG, "loadOfflineDb: ${it.name}")
+            }
+        }
+    }
+
+    private fun updateUI(flag: Boolean, mData: JSONObject) {
         if (flag) {
+
+            // TODO: Set local database from online database
+
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.GONE
             binding.fragmentContainerView2.findNavController().navigate(R.id.roomControlsFragment)

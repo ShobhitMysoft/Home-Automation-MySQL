@@ -3,8 +3,6 @@ package com.mysofttechnology.homeautomation
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 
 class LoadingDialog : DialogFragment() {

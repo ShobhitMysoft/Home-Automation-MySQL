@@ -22,10 +22,13 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.StartActivity.Companion.DEVICEIDSSET
+import com.mysofttechnology.homeautomation.database.Device
+import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.databinding.FragmentFillWifiDetailBinding
 import java.io.IOException
 import java.io.OutputStream
@@ -243,6 +246,7 @@ class FillWifiDetailFragment : Fragment() {
         val spEditor = sharedPref?.edit()
 
         Log.d(TAG, "sendPasswordToDevice: $wifiPassword")
+        // TODO: Show a waiting dialog. In that check if wifi is online on the SL device
         try {
             val passwordOutputStream: OutputStream = btSocket!!.outputStream
             passwordOutputStream.write(wifiPassword.toByteArray())

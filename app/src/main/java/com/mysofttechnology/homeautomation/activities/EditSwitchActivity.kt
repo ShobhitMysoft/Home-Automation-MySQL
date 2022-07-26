@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.res.TypedArray
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.ListView
 import android.widget.TimePicker
 import android.widget.Toast
