@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
@@ -54,7 +55,9 @@ import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Compani
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.SWITCH_ID
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.SWITCH_ID_BY_APP
 import com.mysofttechnology.homeautomation.activities.ErrorActivity
+import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBinding
+import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONArray
 import org.json.JSONObject
@@ -66,6 +69,9 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private var isBTConnected: Boolean = false
+    private lateinit var deviceViewModel: DeviceViewModel
+    private lateinit var allData: List<Device>
     private var btSocket: BluetoothSocket? = null
     private val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
@@ -83,6 +89,7 @@ class RoomControlsFragment : Fragment() {
     private lateinit var waitSnackbar: Snackbar
 
     private var currentDeviceId: String? = null
+    private lateinit var cd: Device
     private var currentUserId: String? = null
     private var currentBtDeviceId: String? = null
 
@@ -121,6 +128,8 @@ class RoomControlsFragment : Fragment() {
 
         iconsList = resources.obtainTypedArray(R.array.icons_list)
 
+        deviceViewModel = ViewModelProvider(this).get(DeviceViewModel::class.java)
+
         return binding.root
     }
 
@@ -157,10 +166,57 @@ class RoomControlsFragment : Fragment() {
         }
 
         uiHandler()
+//        connectToBtDevice()
+    }
+
+    private fun checkLocalDatabase() {                                                              // TODO: Step 4
+        val allData = deviceViewModel.readAllData
+
+        allData.observe(viewLifecycleOwner) { deviceList ->
+            deviceList.forEach {
+                Log.d(TAG, "checkLocalDatabase: $it | ${it.name} | ${it.bluetoothId}")
+                roomsList.add(it.name)
+                deviceIDList.add(it.deviceId)
+            }
+
+            if (deviceIDList.size > 0) {
+                try {
+                    cd = allData.value?.get(selectedRoomIndex)!!
+                    currentDeviceId = cd.deviceId
+                    currentBtDeviceId = cd.bluetoothId
+                    binding.currentRoomTv.text = cd.name
+                    updateUIWithLocalDB()
+                } catch (e: Exception) {
+                    Log.i(TAG, "checkLocalDatabase: $roomsList\n$deviceIDList")
+                    Log.e(TAG, "checkLocalDatabase: Error", e)
+                }
+            }
+        }
+    }
+
+    private fun updateUIWithLocalDB() {                                                             // TODO: Step 5
+
+        binding.switch1Switch.isChecked = cd.s1State == 1
+        binding.switch2Switch.isChecked = cd.s2State == 1
+        binding.switch3Switch.isChecked = cd.s3State == 1
+        binding.switch4Switch.isChecked = cd.s4State == 1
+
+        if (cd.fanSpeed == 0) {
+            binding.fanSpeedSlider.value = 0.0f
+            binding.fanSpeedTv.text = ZERO
+            if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
+        } else {
+            binding.fanSpeedSlider.value = cd.fanSpeed.toFloat()
+            binding.fanSpeedTv.text = cd.fanSpeed.toString()
+            if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+        }
+
+        showLToast("Data updated from Local")
+        togglePower(cd.s1State.toString(), cd.s2State.toString(), cd.s3State.toString(), cd.s4State.toString(), cd.fanSpeed.toString())
         connectToBtDevice()
     }
 
-    private fun connectToBtDevice() {
+    private fun connectToBtDevice() {                                                               // TODO: Step 6
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
 
@@ -185,10 +241,33 @@ class RoomControlsFragment : Fragment() {
 //            closeSocket()
         }
 
-        if (btSocket?.isConnected == true) {
+        if (btSocket?.isConnected == true) {                                                        // TODO: Step 7
             showLToast("Bluetooth is connected")
-//            getWifiDetails()
-        } else showLToast("Bluetooth is not connected")
+            isBTConnected = true
+            try {
+                binding.bluetoothBtn.setImageDrawable(
+                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
+                enableUI()
+                loadingDialog.dismiss()
+            } catch (e: Exception) {
+                Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
+            }
+        } else {                                                                                    // TODO: Step 9
+            showLToast("Bluetooth is not connected")
+            isBTConnected = false
+            try {
+                binding.bluetoothBtn.setImageDrawable(
+                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_off) })
+                enableUI()
+                loadingDialog.dismiss()
+            } catch (e: Exception) {
+                Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
+            }
+
+            if (isOnline()) {                                                                       // TODO: Step 9.1
+
+            }
+        }
     }
 
     private fun closeSocket() {
@@ -251,7 +330,7 @@ class RoomControlsFragment : Fragment() {
             requestQueue.add(stringRequest)
         } else {
             loadingDialog.dismiss()
-            showPSnackbar("No internet connection")
+            showLToast("No internet connection")
         }
     }
 
@@ -264,7 +343,7 @@ class RoomControlsFragment : Fragment() {
 
         currentDeviceId = deviceIDList[selectedRoomIndex]
         binding.currentRoomTv.text = roomsList[selectedRoomIndex]
-        updateUI()
+        updateUIWithLocalDB()
     }
 
     private fun showErrorScreen() {
@@ -609,15 +688,22 @@ class RoomControlsFragment : Fragment() {
             override fun onStartTrackingTouch(slider: Slider) {}
 
             override fun onStopTrackingTouch(slider: Slider) {
-                disableUI()
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                }
                 val speed = slider.value
-
-                updateLive(speed.toInt().toString(), FAN)
-
+                disableUI()
+                if (isBTConnected) sendDataToBT(when (speed) {
+                    1.0f -> "F"
+                    2.0f -> "G"
+                    3.0f -> "H"
+                    4.0f -> "I"
+                    else -> "E"
+                })
+                else {
+                    if (!checkWifiIsRunning) {
+                        checkWifiIsRunning = true
+                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                    }
+                    updateLive(speed.toInt().toString(), FAN)
+                }
                 spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
                 spEditor?.apply()
             }
@@ -625,57 +711,85 @@ class RoomControlsFragment : Fragment() {
 
         binding.fanSwitch.setOnCheckedChangeListener { _, isChecked ->
             disableUI()
-            if (!checkWifiIsRunning) {
-                checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-            }
-            if (!isChecked) {
-                updateLive(ZERO, FAN)
+            if (isBTConnected) {
+                if (!isChecked) {
+                    sendDataToBT("E")
+                } else {
+                    val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
+                        liveFanSpeed.toString())
+                    sendDataToBT(when (oldFanSpeed) {
+                        "1" -> "F"
+                        "2" -> "G"
+                        "3" -> "H"
+                        "4" -> "I"
+                        else -> "E"
+                    })
+                }
             } else {
-                val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
-                    liveFanSpeed.toString())
-                updateLive(oldFanSpeed.toString(), FAN)
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                }
+                if (!isChecked) {
+                    updateLive(ZERO, FAN)
+                } else {
+                    val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
+                        liveFanSpeed.toString())
+                    updateLive(oldFanSpeed.toString(), FAN)
+                }
             }
         }
 
         binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
-//            disableUI()
-//            if (!checkWifiIsRunning) {
-//                checkWifiIsRunning = true
-//                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-//            }
-            sendDataToBT(if (isChecked) "A" else "a")
-//            updateLive(if (isChecked) ONE else ZERO, APPL1)
+            disableUI()
+            if (isBTConnected) sendDataToBT(
+                if (isChecked) "A" else "a")                            // TODO: Step 8
+            else {
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                }
+                updateLive(if (isChecked) ONE else ZERO, APPL1)
+            }
         }
 
         binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
-//            disableUI()
-//            if (!checkWifiIsRunning) {
-//                checkWifiIsRunning = true
-//                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-//            }
-            sendDataToBT(if (isChecked) "B" else "b")
-//            updateLive(if (isChecked) ONE else ZERO, APPL2)
+            disableUI()
+            if (isBTConnected) sendDataToBT(
+                if (isChecked) "B" else "b")                            // TODO: Step 8
+            else {
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                }
+                updateLive(if (isChecked) ONE else ZERO, APPL2)
+            }
         }
 
         binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
-//            disableUI()
-//            if (!checkWifiIsRunning) {
-//                checkWifiIsRunning = true
-//                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-//            }
-            sendDataToBT(if (isChecked) "C" else "c")
-//            updateLive(if (isChecked) ONE else ZERO, APPL3)
+            disableUI()
+            if (isBTConnected) sendDataToBT(
+                if (isChecked) "C" else "c")                            // TODO: Step 8
+            else {
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                }
+                updateLive(if (isChecked) ONE else ZERO, APPL3)
+            }
         }
 
         binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
-//            disableUI()
-//            if (!checkWifiIsRunning) {
-//                checkWifiIsRunning = true
-//                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-//            }
-            sendDataToBT(if (isChecked) "D" else "d")
-//            updateLive(if (isChecked) ONE else ZERO, APPL4)
+            disableUI()
+            if (isBTConnected) sendDataToBT(
+                if (isChecked) "D" else "d")                            // TODO: Step 8
+            else {
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                }
+                updateLive(if (isChecked) ONE else ZERO, APPL4)
+            }
         }
 
         binding.switch1MoreBtn.setOnClickListener {
@@ -698,6 +812,36 @@ class RoomControlsFragment : Fragment() {
             val ssidOutputStream: OutputStream = btSocket!!.outputStream
             ssidOutputStream.write(signal.toByteArray())
 
+            when (signal) {
+                "F" -> {
+                    binding.fanSpeedSlider.value = 1.0f
+                    binding.fanSpeedTv.text = "1"
+                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                }
+                "G" -> {
+                    binding.fanSpeedSlider.value = 2.0f
+                    binding.fanSpeedTv.text = "2"
+                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                }
+                "H" -> {
+                    binding.fanSpeedSlider.value = 3.0f
+                    binding.fanSpeedTv.text = "3"
+                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                }
+                "I" -> {
+                    binding.fanSpeedSlider.value = 4.0f
+                    binding.fanSpeedTv.text = "4"
+                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                }
+                "E" -> {
+                    binding.fanSpeedSlider.value = 0.0f
+                    binding.fanSpeedTv.text = "0"
+                    if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
+                }
+            }
+
+            enableUI()
+
 //            closeSocket()
         } catch (e: IOException) {
             e.printStackTrace()
@@ -706,50 +850,52 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun updateLive(value: String, appl: String) {
-        val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
+        if (isOnline()) {
+            val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
 
-        val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
-            { response ->
-                Log.i(TAG, "updateUI: $response")
-                try {
-                    val mData = JSONObject(response.toString())
-                    val resp = mData.get("response") as Int
-                    val msg = mData.get("msg")
+            val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
+                { response ->
+                    Log.i(TAG, "updateUI: $response")
+                    try {
+                        val mData = JSONObject(response.toString())
+                        val resp = mData.get("response") as Int
+                        val msg = mData.get("msg")
 
-                    if (resp == 1) {
-                        if (appl != "wifi") updateUI()
-                        Log.d(TAG, "updateLive: Message - $msg")
-                    } else {
+                        if (resp == 1) {
+                            if (appl != "wifi") updateUI()
+                            Log.d(TAG, "updateLive: Message - $msg")
+                        } else {
+                            loadingDialog.dismiss()
+                            showPSnackbar("Failed to update room")
+                            Log.e(TAG, "updateLive: Message - $msg")
+                        }
+                    } catch (e: Exception) {
                         loadingDialog.dismiss()
-                        showPSnackbar("Failed to update room")
-                        Log.e(TAG, "updateLive: Message - $msg")
+                        Log.e(TAG, "Exception in updateLive: $e")
+                        showLToast(e.message)
                     }
-                } catch (e: Exception) {
+                }, {
                     loadingDialog.dismiss()
-                    Log.e(TAG, "Exception in updateLive: $e")
-                    showLToast(e.message)
+                    showLToast("Something went wrong.")
+                    Log.e(TAG, "VollyError: ${it.message}")
+                }) {
+                override fun getParams(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    params["device_id"] = currentDeviceId.toString()
+                    params["appliance"] = appl
+                    params["data"] = value
+                    return params
                 }
-            }, {
-                loadingDialog.dismiss()
-                showLToast("Something went wrong.")
-                Log.e(TAG, "VollyError: ${it.message}")
-            }) {
-            override fun getParams(): Map<String, String> {
-                val params = HashMap<String, String>()
-                params["device_id"] = currentDeviceId.toString()
-                params["appliance"] = appl
-                params["data"] = value
-                return params
+
+                override fun getHeaders(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["Content-Type"] = "application/x-www-form-urlencoded"
+                    return params
+                }
             }
 
-            override fun getHeaders(): MutableMap<String, String> {
-                val params = HashMap<String, String>()
-                params["Content-Type"] = "application/x-www-form-urlencoded"
-                return params
-            }
-        }
-
-        requestQueue.add(liveUpdateRequest)
+            requestQueue.add(liveUpdateRequest)
+        } else enableUI()
     }
 
     val wifiRunnable = Runnable {
@@ -786,8 +932,34 @@ class RoomControlsFragment : Fragment() {
                 && !binding.switch2Switch.isChecked && !binding.switch3Switch.isChecked
                 && !binding.switch4Switch.isChecked
 
-        for (appl in appliances) {
-            updatePowerLive(if (toggleFlag) ONE else ZERO, appl)
+        if (isBTConnected) {
+            for (i in 0..4) {
+                sendDataToBT(when (i) {
+                    0 -> if (toggleFlag) "A" else "a"
+                    1 -> if (toggleFlag) "B" else "b"
+                    2 -> if (toggleFlag) "C" else "c"
+                    3 -> if (toggleFlag) "D" else "d"
+                    else -> if (toggleFlag) {
+                        val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
+                            liveFanSpeed.toString())
+                        val fanSpeed = when (oldFanSpeed) {
+                            "1" -> "F"
+                            "2" -> "G"
+                            "3" -> "H"
+                            "4" -> "I"
+                            else -> "E"
+                        }
+                        fanSpeed
+                    } else "E"
+                })
+            }
+        } else if (isOnline()) {
+            for (appl in appliances) {
+                updatePowerLive(if (toggleFlag) ONE else ZERO, appl)
+            }
+        } else {
+            showLToast("You are not connected.")
+            loadingDialog.dismiss()
         }
     }
 
@@ -859,7 +1031,8 @@ class RoomControlsFragment : Fragment() {
             .setPositiveButton("OK") { _, _ ->
                 binding.currentRoomTv.text = selectedRoom
                 currentDeviceId = selectedDevice
-                checkDatabase()
+//                checkDatabase()
+                checkLocalDatabase()
 //                uiHandler()
             }
             .setNeutralButton("Cancel") { _, _ -> }
@@ -888,8 +1061,12 @@ class RoomControlsFragment : Fragment() {
 //    override fun onSaveInstanceState(outState: Bundle) {}
 
     private fun disableUI() {
-        if (!isOnline()) showPSnackbar("No Internet Connection")
-        else waitSnackbar.show()
+//        if (!isOnline()) {
+//            showLToast("No Internet Connection")
+//            enableUI()
+//        }
+//        else
+        waitSnackbar.show()
         binding.powerBtn.isClickable = false
         binding.powerBtn.isEnabled = false
         binding.fanSwitch.isClickable = false
@@ -907,24 +1084,24 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun enableUI() {
-        if (isOnline()) {
-            waitSnackbar.dismiss()
+//        if (isOnline()) {
+        waitSnackbar.dismiss()
 //            loadingDialog.dismiss()
-            binding.powerBtn.isClickable = true
-            binding.powerBtn.isEnabled = true
-            binding.fanSwitch.isClickable = true
-            binding.fanSwitch.isEnabled = true
-            binding.fanSpeedSlider.isClickable = true
-            binding.fanSpeedSlider.isEnabled = true
-            binding.switch1Switch.isClickable = true
-            binding.switch1Switch.isEnabled = true
-            binding.switch2Switch.isClickable = true
-            binding.switch2Switch.isEnabled = true
-            binding.switch3Switch.isClickable = true
-            binding.switch3Switch.isEnabled = true
-            binding.switch4Switch.isClickable = true
-            binding.switch4Switch.isEnabled = true
-        } else showPSnackbar("No Internet Connection")
+        binding.powerBtn.isClickable = true
+        binding.powerBtn.isEnabled = true
+        binding.fanSwitch.isClickable = true
+        binding.fanSwitch.isEnabled = true
+        binding.fanSpeedSlider.isClickable = true
+        binding.fanSpeedSlider.isEnabled = true
+        binding.switch1Switch.isClickable = true
+        binding.switch1Switch.isEnabled = true
+        binding.switch2Switch.isClickable = true
+        binding.switch2Switch.isEnabled = true
+        binding.switch3Switch.isClickable = true
+        binding.switch3Switch.isEnabled = true
+        binding.switch4Switch.isClickable = true
+        binding.switch4Switch.isEnabled = true
+//        } else showLToast("No Internet Connection")
     }
 
     private fun isOnline(): Boolean {
@@ -976,7 +1153,8 @@ class RoomControlsFragment : Fragment() {
                 .show()
         } else {
             Log.e(TAG, "showPSnackbar: Contect Error - $context")
-            checkDatabase()
+//            checkDatabase()
+            checkLocalDatabase()
         }
     }
 
@@ -984,8 +1162,10 @@ class RoomControlsFragment : Fragment() {
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
 
-        if (!currentDeviceId.isNullOrBlank() || !currentDeviceId.equals("null")) checkDatabase()
-        else {
+        if (!currentDeviceId.isNullOrBlank() || !currentDeviceId.equals("null")) {
+//            checkDatabase()
+            checkLocalDatabase()
+        } else {
             Log.i(TAG, "onViewCreated: ~~~~ $currentDeviceId is not present")
         }
     }
@@ -993,6 +1173,7 @@ class RoomControlsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         Log.i(TAG, "onResume: Called $currentDeviceId")
+        if (!isOnline()) showSToast("No Internet Connection")
         refreshUI()
     }
 }

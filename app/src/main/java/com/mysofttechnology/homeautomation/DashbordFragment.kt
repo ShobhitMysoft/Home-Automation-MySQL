@@ -150,10 +150,10 @@ class DashbordFragment : Fragment() {
         } else {
             loadingDialog.dismiss()
             // TODO: Change this working
-            Snackbar.make(binding.dashRootView, "No internet.", Snackbar.LENGTH_INDEFINITE)
-                .setAction("Retry") {
-                    checkDeviceAvailability()
-                }.show()
+//            Snackbar.make(binding.dashRootView, "No internet.", Snackbar.LENGTH_INDEFINITE)
+//                .setAction("Retry") {
+//                    checkDeviceAvailability()
+//                }.show()
 
             viewLocalDb()
             checkLocalDatabase()
@@ -164,7 +164,7 @@ class DashbordFragment : Fragment() {
         val x = ViewModelProvider(this).get(DeviceViewModel::class.java)
         x.readAllData.observe(viewLifecycleOwner) { device ->
             device.forEach {
-                Log.d(TAG, "loadOfflineDb: ${it.name}")
+                Log.d(TAG, "viewLocalDb: ${it.name}")
             }
         }
     }
@@ -270,7 +270,8 @@ class DashbordFragment : Fragment() {
         checkLocalDatabase()
     }
 
-    private fun getLiveStates(roomName: String, deviceId: String, bluetoothId: String) {                              // TODO: Step 3.2
+    private fun getLiveStates(roomName: String, deviceId: String,
+        bluetoothId: String) {                              // TODO: Step 3.2
 
         val getLiveUrl = getString(R.string.base_url) + getString(R.string.url_get_live)
 
@@ -290,8 +291,10 @@ class DashbordFragment : Fragment() {
 
                         // Creating local Database
                         val device =
-                            Device(0, roomName, deviceId, bluetoothId, s1Name, s1Icon, s1State.toInt(), s2Name, s2Icon, s2State.toInt(),
-                                s3Name, s3Icon, s3State.toInt(), s4Name, s4Icon, s4State.toInt(), 0, fan.toInt())
+                            Device(0, roomName, deviceId, bluetoothId, s1Name, s1Icon,
+                                s1State.toInt(), s2Name, s2Icon, s2State.toInt(),
+                                s3Name, s3Icon, s3State.toInt(), s4Name, s4Icon, s4State.toInt(), 0,
+                                fan.toInt())
                         deviceViewModel.addDevice(device)
                         Log.d(TAG, "createLocalDB: Created!")
 
@@ -329,17 +332,23 @@ class DashbordFragment : Fragment() {
     }
 
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
-        val deviceData = ViewModelProvider(this).get(DeviceViewModel::class.java)
-        val allData = deviceData.readAllData
-        Log.d(TAG, "checkLocalDatabase: deviceData size - ${allData.value?.isEmpty()}")
-        if (allData.value?.isEmpty() != true) {
-            loadingDialog.dismiss()
-            binding.addDeviceBtn.visibility = View.GONE
-            binding.fragmentContainerView2.findNavController().navigate(R.id.roomControlsFragment)
-        } else {
-            loadingDialog.dismiss()
-            binding.addDeviceBtn.visibility = View.VISIBLE
-            binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
+        val allData = deviceViewModel.readAllData
+        allData.observe(viewLifecycleOwner) {
+            try {
+                if (it.isNotEmpty()) {
+                    loadingDialog.dismiss()
+                    binding.addDeviceBtn.visibility = View.GONE
+                    binding.fragmentContainerView2.findNavController()
+                        .navigate(R.id.roomControlsFragment)
+                } else {
+                    loadingDialog.dismiss()
+                    binding.addDeviceBtn.visibility = View.VISIBLE
+                    binding.fragmentContainerView2.findNavController()
+                        .navigate(R.id.addDeviceFragment)
+                }
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "checkLocalDatabase: Error", e)
+            }
         }
     }
 

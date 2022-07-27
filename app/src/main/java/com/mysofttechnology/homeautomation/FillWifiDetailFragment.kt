@@ -255,6 +255,7 @@ class FillWifiDetailFragment : Fragment() {
             val passwordOutputStream: OutputStream = btSocket!!.outputStream
             passwordOutputStream.write(wifiPassword.toByteArray())
 
+            // TODO: Check Wifi
             addBluetoothId(deviceId, btDevice)
 
             spEditor?.putString(deviceId, btDevice)
