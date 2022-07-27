@@ -146,12 +146,14 @@ class DashbordFragment : Fragment() {
             requestQueue.add(stringRequest)
         } else {
             loadingDialog.dismiss()
+            // TODO: Change this working
             Snackbar.make(binding.dashRootView, "No internet.", Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") {
                     checkDeviceAvailability()
                 }.show()
 
             viewLocalDb()
+            checkLocalDatabase()
         }
     }
 
@@ -172,13 +174,8 @@ class DashbordFragment : Fragment() {
             // TODO: Set local database from online database
             val deviceListData = mData.get("data") as JSONArray
             createLocalDatabase(deviceListData)
-
-            loadingDialog.dismiss()
-            binding.addDeviceBtn.visibility = View.GONE
-            binding.fragmentContainerView2.findNavController().navigate(R.id.roomControlsFragment)
         } else {
             Log.d(TAG, "updateUI: No device available")
-            checkLocalDatabase()
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.VISIBLE
             binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
@@ -273,12 +270,18 @@ class DashbordFragment : Fragment() {
         checkLocalDatabase()
     }
 
-    private fun checkLocalDatabase() {
+    private fun checkLocalDatabase() {                                                              // TODO: Step 4
         val deviceData = ViewModelProvider(this).get(DeviceViewModel::class.java)
-        deviceData.readAllData.observe(viewLifecycleOwner) { device ->
-            device.forEach {
-                Log.d(TAG, "checkLocalDatabase: ${it.name}")
-            }
+        val allData = deviceData.readAllData
+        Log.d(TAG, "checkLocalDatabase: deviceData size - ${allData.value?.isEmpty()}")
+        if (allData.value?.isEmpty() != true) {
+            loadingDialog.dismiss()
+            binding.addDeviceBtn.visibility = View.GONE
+            binding.fragmentContainerView2.findNavController().navigate(R.id.roomControlsFragment)
+        } else {
+            loadingDialog.dismiss()
+            binding.addDeviceBtn.visibility = View.VISIBLE
+            binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
         }
     }
 
