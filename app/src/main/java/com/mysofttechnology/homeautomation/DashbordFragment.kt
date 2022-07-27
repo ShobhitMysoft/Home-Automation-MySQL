@@ -178,6 +178,7 @@ class DashbordFragment : Fragment() {
             binding.fragmentContainerView2.findNavController().navigate(R.id.roomControlsFragment)
         } else {
             Log.d(TAG, "updateUI: No device available")
+            checkLocalDatabase()
             loadingDialog.dismiss()
             binding.addDeviceBtn.visibility = View.VISIBLE
             binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
@@ -276,7 +277,7 @@ class DashbordFragment : Fragment() {
         val deviceData = ViewModelProvider(this).get(DeviceViewModel::class.java)
         deviceData.readAllData.observe(viewLifecycleOwner) { device ->
             device.forEach {
-                Log.d(TAG, "loadOfflineDb: ${it.name}")
+                Log.d(TAG, "checkLocalDatabase: ${it.name}")
             }
         }
     }

@@ -25,11 +25,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.StartActivity.Companion.DEVICEIDSSET
 import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.databinding.FragmentFillWifiDetailBinding
+import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.IOException
 import java.io.OutputStream
 import java.util.*
@@ -251,6 +255,8 @@ class FillWifiDetailFragment : Fragment() {
             val passwordOutputStream: OutputStream = btSocket!!.outputStream
             passwordOutputStream.write(wifiPassword.toByteArray())
 
+            addBluetoothId(deviceId, btDevice)
+
             spEditor?.putString(deviceId, btDevice)
 
             deviceIdsSet.add(deviceId)
@@ -262,6 +268,50 @@ class FillWifiDetailFragment : Fragment() {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+    }
+
+    private fun addBluetoothId(deviceId: String, bluetoothId: String) {
+        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        val addBluetoothUrl = getString(R.string.base_url) + getString(R.string.url_add_bleutooth)
+
+        val switchListRequest = object : StringRequest(Method.POST, addBluetoothUrl,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        Log.d(TAG, "addBluetoothId: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        Log.e(TAG, "addBluetoothId: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception in addBluetoothId: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId
+                params["bluetooth"] = bluetoothId
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+
+        requestQueue.add(switchListRequest)
     }
 
     private fun closeSocket() {
@@ -395,6 +445,10 @@ class FillWifiDetailFragment : Fragment() {
 
         builder.create()
         builder.show()
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
     /*private fun retryDialog() {
