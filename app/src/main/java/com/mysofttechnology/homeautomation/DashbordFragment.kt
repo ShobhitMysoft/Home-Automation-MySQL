@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
@@ -45,6 +46,7 @@ class DashbordFragment : Fragment() {
     private var s4Icon: Int = 0
 
     private lateinit var deviceViewModel: DeviceViewModel
+    private lateinit var requestQueue: RequestQueue
     private var sharedPref: SharedPreferences? = null
     private lateinit var auth: FirebaseAuth
 
@@ -82,6 +84,7 @@ class DashbordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref?.getString(getString(R.string.current_user_id), "")
 //        binding.actionbarTv.text = currentUserId
@@ -184,11 +187,12 @@ class DashbordFragment : Fragment() {
 
     private fun createLocalDatabase(
         deviceListData: JSONArray) {                                                                // TODO: Step 3.1
-        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+        requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val switchListUrl = getString(R.string.base_url) + getString(R.string.url_switch_list)
 
         for (i in 0 until deviceListData.length()) {
             val deviceData = deviceListData.getJSONObject(i)
+            val roomName = deviceData.get("room_name").toString()
             val deviceId = deviceData.get("device_id").toString()
             val bluetoothId = deviceData.get("bluetooth").toString()
 
@@ -227,11 +231,7 @@ class DashbordFragment : Fragment() {
                                 }
                             }
 
-                            val device =
-                                Device(0, "Room $deviceId", deviceId, bluetoothId, s1Name, s1Icon, 0, s2Name, s2Icon, 0,
-                                    s3Name, s3Icon, 0, s4Name, s4Icon, 0, 0, 0)
-                            deviceViewModel.addDevice(device)
-                            Log.d(TAG, "createLocalDB: Created!")
+                            getLiveStates(roomName, deviceId, bluetoothId)
 
                             Log.d(TAG, "switchList: Message - $msg")
                         } else {
@@ -268,6 +268,64 @@ class DashbordFragment : Fragment() {
 
         viewLocalDb()
         checkLocalDatabase()
+    }
+
+    private fun getLiveStates(roomName: String, deviceId: String, bluetoothId: String) {                              // TODO: Step 3.2
+
+        val getLiveUrl = getString(R.string.base_url) + getString(R.string.url_get_live)
+
+        val liveDataRequest = object : StringRequest(Method.POST, getLiveUrl,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        val s1State = mData.get(StartActivity.APPL1).toString()
+                        val s2State = mData.get(StartActivity.APPL2).toString()
+                        val s3State = mData.get(StartActivity.APPL3).toString()
+                        val s4State = mData.get(StartActivity.APPL4).toString()
+                        val fan = mData.get(StartActivity.FAN).toString()
+
+                        // Creating local Database
+                        val device =
+                            Device(0, roomName, deviceId, bluetoothId, s1Name, s1Icon, s1State.toInt(), s2Name, s2Icon, s2State.toInt(),
+                                s3Name, s3Icon, s3State.toInt(), s4Name, s4Icon, s4State.toInt(), 0, fan.toInt())
+                        deviceViewModel.addDevice(device)
+                        Log.d(TAG, "createLocalDB: Created!")
+
+                        Log.d(TAG, "getLiveStates: Message - $msg")
+                    } else {
+                        loadingDialog.dismiss()
+                        // TODO:
+//                        showPSnackbar("Failed to get room data")
+                        Log.e(TAG, "getLiveStates: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    loadingDialog.dismiss()
+                    Log.e(TAG, "Exception in getLiveStates: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = java.util.HashMap<String, String>()
+                params["device_id"] = deviceId
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = java.util.HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+
+        requestQueue.add(liveDataRequest)
     }
 
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
