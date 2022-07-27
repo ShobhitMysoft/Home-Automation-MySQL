@@ -26,4 +26,10 @@ class DeviceViewModel(application: Application): AndroidViewModel(application) {
             repository.addDevice(device)
         }
     }
+
+    fun clearDatabase() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteAll()
+        }
+    }
 }

@@ -14,4 +14,7 @@ interface DeviceDao {
 
     @Query("SELECT * FROM devices ORDER BY id ASC")
     fun allDevices(): LiveData<List<Device>>
+
+    @Query("DELETE FROM devices")
+    fun clearTable()
 }
