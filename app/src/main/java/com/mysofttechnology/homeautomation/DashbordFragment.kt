@@ -428,4 +428,9 @@ class DashbordFragment : Fragment() {
         spEditor?.putString(getString(R.string.current_user_id), cuPhoneNo)
         spEditor?.apply()
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

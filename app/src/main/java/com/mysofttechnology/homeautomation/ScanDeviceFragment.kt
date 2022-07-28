@@ -510,4 +510,9 @@ class ScanDeviceFragment : Fragment() {
 
         codeScanner.startPreview()
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

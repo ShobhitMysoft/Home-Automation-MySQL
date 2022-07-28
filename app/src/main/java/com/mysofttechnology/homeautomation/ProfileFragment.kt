@@ -223,4 +223,9 @@ class ProfileFragment : Fragment() {
     private fun showToast(message: String?) {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

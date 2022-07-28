@@ -1176,4 +1176,9 @@ class RoomControlsFragment : Fragment() {
         if (!isOnline()) showSToast("No Internet Connection")
         refreshUI()
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

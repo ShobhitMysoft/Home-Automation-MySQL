@@ -230,4 +230,9 @@ class VerifyCodeFragment : Fragment() {
         val action = VerifyCodeFragmentDirections.actionVerifyCodeFragmentToLoginFragment(phoneNumber)
         findNavController().navigate(action)
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

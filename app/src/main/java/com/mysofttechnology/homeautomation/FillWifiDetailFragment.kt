@@ -452,6 +452,11 @@ class FillWifiDetailFragment : Fragment() {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     /*private fun retryDialog() {
         val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle("Failed to connect")
