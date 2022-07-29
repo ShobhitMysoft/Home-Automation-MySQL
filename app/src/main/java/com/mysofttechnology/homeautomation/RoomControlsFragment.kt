@@ -2,6 +2,7 @@ package com.mysofttechnology.homeautomation
 
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.Intent
@@ -59,6 +60,9 @@ import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBinding
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -69,6 +73,7 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private var bluetoothAdapter: BluetoothAdapter? = null
     private var isBTConnected: Boolean = false
     private lateinit var deviceViewModel: DeviceViewModel
     private lateinit var allData: List<Device>
@@ -81,7 +86,9 @@ class RoomControlsFragment : Fragment() {
     private var SWITCH3: String? = null
     private var SWITCH4: String? = null
     private val CHECK_WIFI_DELAY_TIME: Long = 4000
+    private val CHECK_BT_DELAY_TIME: Long = 5000
     private lateinit var toggleWifi: Handler
+    private lateinit var btHandler: Handler
     private var checkWifiIsRunning: Boolean = false
     private var checkWifi: Boolean = false
     private var sharedPref: SharedPreferences? = null
@@ -152,9 +159,14 @@ class RoomControlsFragment : Fragment() {
         Log.d(TAG, "onViewCreated: currentBtDeviceId = $currentBtDeviceId")
 
         toggleWifi = Handler(Looper.getMainLooper())
+        btHandler = Handler(Looper.getMainLooper())
         waitSnackbar =
             Snackbar.make(requireActivity().findViewById(android.R.id.content), "Please wait...",
                 Snackbar.LENGTH_INDEFINITE)
+
+        val bluetoothManager =
+            activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothAdapter = bluetoothManager.adapter
 
         binding.currentRoomTv.setOnClickListener {
             showChooseRoomDialog()
@@ -170,11 +182,12 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
+        loadingDialog.show(childFragmentManager, "$TAG checkDatabase")
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
             deviceList.forEach {
-                Log.d(TAG, "checkLocalDatabase: $it | ${it.name} | ${it.bluetoothId}")
+                Log.d(TAG, "checkLocalDatabase: ${it.name} | ${it.bluetoothId}")
                 roomsList.add(it.name)
                 deviceIDList.add(it.deviceId)
             }
@@ -194,6 +207,7 @@ class RoomControlsFragment : Fragment() {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun updateUIWithLocalDB() {                                                             // TODO: Step 5
 
         binding.switch1Switch.isChecked = cd.s1State == 1
@@ -211,63 +225,69 @@ class RoomControlsFragment : Fragment() {
             if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
         }
 
-        showLToast("Data updated from Local")
-        togglePower(cd.s1State.toString(), cd.s2State.toString(), cd.s3State.toString(), cd.s4State.toString(), cd.fanSpeed.toString())
-        connectToBtDevice()
+        Log.i(TAG, "updateUIWithLocalDB: Data updated from Local")
+        togglePower(cd.s1State.toString(), cd.s2State.toString(), cd.s3State.toString(),
+            cd.s4State.toString(), cd.fanSpeed.toString())
+
+        if (bluetoothAdapter?.isEnabled == true) {
+            GlobalScope.launch {
+                connectToBtDevice()
+            }
+        } else connectToInternet()
     }
 
-    private fun connectToBtDevice() {                                                               // TODO: Step 6
+    private suspend fun connectToBtDevice() {                                                               // TODO: Step 6
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
 
-        Toast.makeText(requireActivity(), "Device Name - ${remoteDevice.name}", Toast.LENGTH_SHORT)
-            .show()
-
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
+
         try {
-            Log.i(TAG, "connectToBtDevice: Trying to connect socket.")
+            Log.i(TAG, "connectToBtDevice: Try ${Calendar.getInstance().time}")
+            btHandler.postDelayed(btRunnable, CHECK_BT_DELAY_TIME)
             btSocket!!.connect()
-            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
-//            loadingDialog.dismiss()
+            Log.i(TAG, "connectToBtDevice: Try complete ${Calendar.getInstance().time}")
         } catch (e: Exception) {
-            Snackbar.make(binding.rcRootView,
+            closeSocket()
+            /*Snackbar.make(binding.rcRootView,
                 "Timeout! Make sure you are close to the ${getString(R.string.app_name)} device.",
                 Snackbar.LENGTH_LONG)
-//                .setAnchorView(binding.refreshFab)
-                .show()
-            Log.e(TAG, "connectToBtDevice: Socket Connect Error : ", e)
-            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
-//            loadingDialog.dismiss()
-//            closeSocket()
+                .show()*/
         }
 
         if (btSocket?.isConnected == true) {                                                        // TODO: Step 7
-            showLToast("Bluetooth is connected")
             isBTConnected = true
             try {
-                binding.bluetoothBtn.setImageDrawable(
+                binding.connectionBtn.setImageDrawable(
                     context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
                 enableUI()
-                loadingDialog.dismiss()
+
+
             } catch (e: Exception) {
                 Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
-            }
-        } else {                                                                                    // TODO: Step 9
-            showLToast("Bluetooth is not connected")
-            isBTConnected = false
-            try {
-                binding.bluetoothBtn.setImageDrawable(
-                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_off) })
                 enableUI()
-                loadingDialog.dismiss()
+            }
+            loadingDialog.dismiss()
+        } else {
+            closeSocket()
+            connectToInternet()
+        }
+    }
+
+    private fun connectToInternet() {                                                               // TODO: Step 6
+        isBTConnected = false
+        if (isOnline()) {                                                                           // TODO: Step 9.1
+            try {
+                binding.connectionBtn.setImageDrawable(
+                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_network) })
+                enableUI()
+
+
             } catch (e: Exception) {
                 Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
-            }
-
-            if (isOnline()) {                                                                       // TODO: Step 9.1
-
             }
         }
+        loadingDialog.dismiss()
     }
 
     private fun closeSocket() {
@@ -300,18 +320,21 @@ class RoomControlsFragment : Fragment() {
 
                             Log.d(TAG, "checkDatabase: Message - $msg")
                         } else {
-                            loadingDialog.dismiss()
+
+
                             Log.d(TAG, "checkDatabase: Message - $msg")
 
                             gotoAddDevice()
                         }
                     } catch (e: Exception) {
-                        loadingDialog.dismiss()
+
+
                         Log.e(TAG, "Exception in checkDatabase: $e")
                         showLToast(e.message)
                     }
                 }, {
-                    loadingDialog.dismiss()
+
+
                     showLToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
@@ -329,8 +352,9 @@ class RoomControlsFragment : Fragment() {
             }
             requestQueue.add(stringRequest)
         } else {
-            loadingDialog.dismiss()
-            showLToast("No internet connection")
+
+
+//            showLToast("No internet connection")
         }
     }
 
@@ -402,17 +426,20 @@ class RoomControlsFragment : Fragment() {
 
                         Log.d(TAG, "updateUI: Message - $msg")
                     } else {
-                        loadingDialog.dismiss()
+
+
                         showPSnackbar("Failed to get room data")
                         Log.e(TAG, "updateUI: Message - $msg")
                     }
                 } catch (e: Exception) {
-                    loadingDialog.dismiss()
+
+
                     Log.e(TAG, "Exception in updateUI: $e")
                     showLToast(e.message)
                 }
             }, {
-                loadingDialog.dismiss()
+
+
                 showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
@@ -447,17 +474,20 @@ class RoomControlsFragment : Fragment() {
                         }
                         Log.d(TAG, "switchList: Message - $msg")
                     } else {
-                        loadingDialog.dismiss()
+
+
                         showPSnackbar("Failed to get room data")
                         Log.e(TAG, "switch switchList: Message - $msg")
                     }
                 } catch (e: Exception) {
-                    loadingDialog.dismiss()
+
+
                     Log.e(TAG, "Exception in switch updateUI: $e")
                     showLToast(e.message)
                 }
             }, {
-                loadingDialog.dismiss()
+
+
                 showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
@@ -480,7 +510,8 @@ class RoomControlsFragment : Fragment() {
 
     private fun showDeviceOfflineDialog() {
         checkWifi = false
-        loadingDialog.dismiss()
+
+
         val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle("Device Offline")
             .setMessage(
@@ -642,16 +673,19 @@ class RoomControlsFragment : Fragment() {
                     if (resp == 1) {
                         Log.d(TAG, "updateSwitch: Message - $msg")
                     } else {
-                        loadingDialog.dismiss()
+
+
                         showLToast("unable to create room")
                         Log.e(TAG, "updateSwitch: Message - $msg")
                     }
                 } catch (e: Exception) {
-                    loadingDialog.dismiss()
+
+
                     Log.e(TAG, "Exception in updateSwitch: $e")
                 }
             }, {
-                loadingDialog.dismiss()
+
+
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -865,17 +899,20 @@ class RoomControlsFragment : Fragment() {
                             if (appl != "wifi") updateUI()
                             Log.d(TAG, "updateLive: Message - $msg")
                         } else {
-                            loadingDialog.dismiss()
+
+
                             showPSnackbar("Failed to update room")
                             Log.e(TAG, "updateLive: Message - $msg")
                         }
                     } catch (e: Exception) {
-                        loadingDialog.dismiss()
+
+
                         Log.e(TAG, "Exception in updateLive: $e")
                         showLToast(e.message)
                     }
                 }, {
-                    loadingDialog.dismiss()
+
+
                     showLToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
@@ -904,6 +941,11 @@ class RoomControlsFragment : Fragment() {
         checkWifi = true
     }
 
+    val btRunnable = Runnable {
+        Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
+        closeSocket()
+    }
+
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
         fan: String) {
         if (isAdded) {
@@ -912,12 +954,14 @@ class RoomControlsFragment : Fragment() {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
                     enableUI()
-                    loadingDialog.dismiss()
+
+
                 } else {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
                     enableUI()
-                    loadingDialog.dismiss()
+
+                    Log.d(TAG, " ${Thread.currentThread().stackTrace[2].lineNumber - 1}")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "togglePower: Error", e)
@@ -959,7 +1003,8 @@ class RoomControlsFragment : Fragment() {
             }
         } else {
             showLToast("You are not connected.")
-            loadingDialog.dismiss()
+
+
         }
     }
 
@@ -979,17 +1024,20 @@ class RoomControlsFragment : Fragment() {
                         if (appl == FAN) updateUI()
                         Log.d(TAG, "updateLive: Message - $msg")
                     } else {
-                        loadingDialog.dismiss()
+
+
                         showPSnackbar("Failed to update room")
                         Log.e(TAG, "updateLive: Message - $msg")
                     }
                 } catch (e: Exception) {
-                    loadingDialog.dismiss()
+
+
                     Log.e(TAG, "Exception in updateLive: $e")
                     showLToast(e.message)
                 }
             }, {
-                loadingDialog.dismiss()
+
+
                 showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
@@ -1029,10 +1077,11 @@ class RoomControlsFragment : Fragment() {
                 selectedDevice = deviceIDList[which]
             }
             .setPositiveButton("OK") { _, _ ->
+                closeSocket()
                 binding.currentRoomTv.text = selectedRoom
                 currentDeviceId = selectedDevice
 //                checkDatabase()
-                checkLocalDatabase()
+                checkLocalDatabase()                                // ChooseRoomDialog
 //                uiHandler()
             }
             .setNeutralButton("Cancel") { _, _ -> }
@@ -1061,47 +1110,42 @@ class RoomControlsFragment : Fragment() {
 //    override fun onSaveInstanceState(outState: Bundle) {}
 
     private fun disableUI() {
-//        if (!isOnline()) {
-//            showLToast("No Internet Connection")
-//            enableUI()
-//        }
-//        else
         waitSnackbar.show()
-        binding.powerBtn.isClickable = false
-        binding.powerBtn.isEnabled = false
-        binding.fanSwitch.isClickable = false
-//        binding.fanSwitch.isEnabled = false
-        binding.fanSpeedSlider.isClickable = false
-        binding.fanSpeedSlider.isEnabled = false
-        binding.switch1Switch.isClickable = false
-        binding.switch1Switch.isEnabled = false
-        binding.switch2Switch.isClickable = false
-        binding.switch2Switch.isEnabled = false
-        binding.switch3Switch.isClickable = false
-        binding.switch3Switch.isEnabled = false
-        binding.switch4Switch.isClickable = false
-        binding.switch4Switch.isEnabled = false
+        if (isAdded) {
+            binding.powerBtn.isClickable = false
+            binding.powerBtn.isEnabled = false
+            binding.fanSwitch.isClickable = false
+            binding.fanSpeedSlider.isClickable = false
+            binding.fanSpeedSlider.isEnabled = false
+            binding.switch1Switch.isClickable = false
+            binding.switch1Switch.isEnabled = false
+            binding.switch2Switch.isClickable = false
+            binding.switch2Switch.isEnabled = false
+            binding.switch3Switch.isClickable = false
+            binding.switch3Switch.isEnabled = false
+            binding.switch4Switch.isClickable = false
+            binding.switch4Switch.isEnabled = false
+        }
     }
 
     private fun enableUI() {
-//        if (isOnline()) {
         waitSnackbar.dismiss()
-//            loadingDialog.dismiss()
-        binding.powerBtn.isClickable = true
-        binding.powerBtn.isEnabled = true
-        binding.fanSwitch.isClickable = true
-        binding.fanSwitch.isEnabled = true
-        binding.fanSpeedSlider.isClickable = true
-        binding.fanSpeedSlider.isEnabled = true
-        binding.switch1Switch.isClickable = true
-        binding.switch1Switch.isEnabled = true
-        binding.switch2Switch.isClickable = true
-        binding.switch2Switch.isEnabled = true
-        binding.switch3Switch.isClickable = true
-        binding.switch3Switch.isEnabled = true
-        binding.switch4Switch.isClickable = true
-        binding.switch4Switch.isEnabled = true
-//        } else showLToast("No Internet Connection")
+        if (isAdded) {
+            binding.powerBtn.isClickable = true
+            binding.powerBtn.isEnabled = true
+            binding.fanSwitch.isClickable = true
+            binding.fanSwitch.isEnabled = true
+            binding.fanSpeedSlider.isClickable = true
+            binding.fanSpeedSlider.isEnabled = true
+            binding.switch1Switch.isClickable = true
+            binding.switch1Switch.isEnabled = true
+            binding.switch2Switch.isClickable = true
+            binding.switch2Switch.isEnabled = true
+            binding.switch3Switch.isClickable = true
+            binding.switch3Switch.isEnabled = true
+            binding.switch4Switch.isClickable = true
+            binding.switch4Switch.isEnabled = true
+        }
     }
 
     private fun isOnline(): Boolean {
@@ -1154,7 +1198,7 @@ class RoomControlsFragment : Fragment() {
         } else {
             Log.e(TAG, "showPSnackbar: Contect Error - $context")
 //            checkDatabase()
-            checkLocalDatabase()
+            checkLocalDatabase()                                // Snack bar Retry
         }
     }
 
@@ -1164,7 +1208,7 @@ class RoomControlsFragment : Fragment() {
 
         if (!currentDeviceId.isNullOrBlank() || !currentDeviceId.equals("null")) {
 //            checkDatabase()
-            checkLocalDatabase()
+            checkLocalDatabase()                                // Refresh UI
         } else {
             Log.i(TAG, "onViewCreated: ~~~~ $currentDeviceId is not present")
         }
@@ -1173,7 +1217,7 @@ class RoomControlsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         Log.i(TAG, "onResume: Called $currentDeviceId")
-        if (!isOnline()) showSToast("No Internet Connection")
+//        if (!isOnline()) showSToast("No Internet Connection")
         refreshUI()
     }
 

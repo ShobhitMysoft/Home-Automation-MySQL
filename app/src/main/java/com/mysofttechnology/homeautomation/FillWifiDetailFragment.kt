@@ -413,7 +413,7 @@ class FillWifiDetailFragment : Fragment() {
 
         bind.wifiLv.adapter = listAdapter
         // TODO: May remove if something wrong happens, added extra
-        getWifiDetails()
+//        getWifiDetails()
     }
 
     private fun showTurnOnGPSDialog() {

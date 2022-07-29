@@ -5,8 +5,11 @@
       <map>
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/bottom_nav_shadow.xml" value="0.102" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/ic_edit.xml" value="0.1525" />
+        <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/ic_network.xml" value="0.1825" />
+        <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/ic_no_network.xml" value="0.1825" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/ic_power_off.xml" value="0.163" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/ic_power_on.xml" value="0.1825" />
+        <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/icon_bg.xml" value="0.1825" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/mysoft_symbol_background.xml" value="0.251" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/news_avd_v02.xml" value="0.251" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/drawable/z_black_rect_sharp.xml" value="0.1745" />
@@ -17,6 +20,7 @@
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/activity_splash_screen.xml" value="0.2179824561403509" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/activity_start.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/activity_work_done.xml" value="0.22982456140350876" />
+        <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/bt_loading_dialog_layout.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/edit_profile_layout.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/fragment_add_device.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/Home-Automation-Android-App - MySQL/app/src/main/res/layout/fragment_connect_device.xml" value="0.22982456140350876" />

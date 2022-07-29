@@ -57,12 +57,12 @@ class DashbordFragment : Fragment() {
     private var cuPhoneNo: String? = null
     private var currentUserId: String? = null
 
-    private lateinit var loadingDialog: LoadingDialog
+//    private lateinit var loadingDialog: LoadingDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadingDialog = LoadingDialog()
-        loadingDialog.isCancelable = false
+//        loadingDialog = LoadingDialog()
+//        loadingDialog.isCancelable = false
     }
 
     override fun onCreateView(
@@ -89,7 +89,7 @@ class DashbordFragment : Fragment() {
         currentUserId = sharedPref?.getString(getString(R.string.current_user_id), "")
 //        binding.actionbarTv.text = currentUserId
 
-        loadingDialog.show(childFragmentManager, TAG)
+//        loadingDialog.show(childFragmentManager, TAG)
 
         checkDeviceAvailability()
 
@@ -119,18 +119,18 @@ class DashbordFragment : Fragment() {
                             updateUI(true, mData)
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         } else {
-                            loadingDialog.dismiss()
+                            
                             updateUI(false, mData)
 //                            showToast("No user found. Please register first.")
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         }
                     } catch (e: Exception) {
-                        loadingDialog.dismiss()
+                        
                         Log.d(TAG, "Exception in checkDeviceAvailability: $e")
                         showToast(e.message)
                     }
                 }, {
-                    loadingDialog.dismiss()
+                    
                     showToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
@@ -148,7 +148,7 @@ class DashbordFragment : Fragment() {
             }
             requestQueue.add(stringRequest)
         } else {
-            loadingDialog.dismiss()
+            
             // TODO: Change this working
 //            Snackbar.make(binding.dashRootView, "No internet.", Snackbar.LENGTH_INDEFINITE)
 //                .setAction("Retry") {
@@ -179,7 +179,7 @@ class DashbordFragment : Fragment() {
             createLocalDatabase(deviceListData)
         } else {
             Log.d(TAG, "updateUI: No device available")
-            loadingDialog.dismiss()
+            
             binding.addDeviceBtn.visibility = View.VISIBLE
             binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
         }
@@ -235,18 +235,18 @@ class DashbordFragment : Fragment() {
 
                             Log.d(TAG, "switchList: Message - $msg")
                         } else {
-                            loadingDialog.dismiss()
+                            
                             // TODO: Failed to get room data
 //                            showPSnackbar("Failed to get room data")
                             Log.e(TAG, "switch switchList: Message - $msg")
                         }
                     } catch (e: Exception) {
-                        loadingDialog.dismiss()
+                        
                         Log.e(TAG, "Exception in switch updateUI: $e")
                         showToast(e.message)
                     }
                 }, {
-                    loadingDialog.dismiss()
+                    
                     showToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
@@ -300,18 +300,18 @@ class DashbordFragment : Fragment() {
 
                         Log.d(TAG, "getLiveStates: Message - $msg")
                     } else {
-                        loadingDialog.dismiss()
+                        
                         // TODO:
 //                        showPSnackbar("Failed to get room data")
                         Log.e(TAG, "getLiveStates: Message - $msg")
                     }
                 } catch (e: Exception) {
-                    loadingDialog.dismiss()
+                    
                     Log.e(TAG, "Exception in getLiveStates: $e")
                     showToast(e.message)
                 }
             }, {
-                loadingDialog.dismiss()
+                
                 showToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
@@ -336,12 +336,12 @@ class DashbordFragment : Fragment() {
         allData.observe(viewLifecycleOwner) {
             try {
                 if (it.isNotEmpty()) {
-                    loadingDialog.dismiss()
+                    
                     binding.addDeviceBtn.visibility = View.GONE
                     binding.fragmentContainerView2.findNavController()
                         .navigate(R.id.roomControlsFragment)
                 } else {
-                    loadingDialog.dismiss()
+                    
                     binding.addDeviceBtn.visibility = View.VISIBLE
                     binding.fragmentContainerView2.findNavController()
                         .navigate(R.id.addDeviceFragment)
@@ -379,12 +379,12 @@ class DashbordFragment : Fragment() {
                     builder.setTitle("Logout").setMessage("Are you sure you want to logout?")
                         .setPositiveButton("Yes"
                         ) { _, _ ->
-                            loadingDialog.show(childFragmentManager, TAG)
+//                            loadingDialog.show(childFragmentManager, TAG)
                             signOutUser()
                             val action =
                                 DashbordFragmentDirections.actionDashbordFragmentToRegistrationFragment()
                             findNavController().navigate(action)
-                            loadingDialog.dismiss()
+                            
                         }
                         .setNegativeButton("No") { _, _ -> }
                     builder.create()

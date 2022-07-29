@@ -8,7 +8,21 @@
     android:background="@color/card_view_bg"
     tools:context=".RoomControlsFragment">
 
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/anim_loading_view"
+        android:layout_width="@dimen/_200sdp"
+        android:layout_height="@dimen/_200sdp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/lotti_settings_loading" />
+
     <LinearLayout
+        android:id="@+id/controls_main_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -60,12 +74,12 @@
                 app:neumorph_shadowElevation="@dimen/_3sdp">
 
                 <ImageView
-                    android:id="@+id/bluetooth_btn"
+                    android:id="@+id/connection_btn"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:tooltipText="Bluetooth Status"
+                    android:tooltipText="Connection Status"
                     android:elevation="2dp"
-                    android:src="@drawable/ic_bluetooth_off" />
+                    android:src="@drawable/ic_no_network" />
             </soup.neumorphism.NeumorphCardView>
 
             <soup.neumorphism.NeumorphCardView
