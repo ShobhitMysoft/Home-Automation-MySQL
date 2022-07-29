@@ -73,6 +73,7 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private var powerBtnClicked: Boolean = false
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var isBTConnected: Boolean = false
     private lateinit var deviceViewModel: DeviceViewModel
@@ -119,8 +120,8 @@ class RoomControlsFragment : Fragment() {
         Log.i(TAG, "onCreate: Called")
 
         val exitAppDialog = ExitAppDialog()
-        loadingDialog = LoadingDialog()
-        loadingDialog.isCancelable = false
+//        loadingDialog = LoadingDialog()
+//        loadingDialog.isCancelable = false
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             exitAppDialog.show(childFragmentManager, "Exit App")
@@ -182,7 +183,7 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
-        loadingDialog.show(childFragmentManager, "$TAG checkDatabase")
+        loadingDialog.show(childFragmentManager, "$TAG checkLocalDatabase")
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
@@ -261,8 +262,6 @@ class RoomControlsFragment : Fragment() {
                 binding.connectionBtn.setImageDrawable(
                     context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
                 enableUI()
-
-
             } catch (e: Exception) {
                 Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
                 enableUI()
@@ -284,7 +283,7 @@ class RoomControlsFragment : Fragment() {
 
 
             } catch (e: Exception) {
-                Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
+                Log.e(TAG, "connectToInternet: Error", e)
             }
         }
         loadingDialog.dismiss()
@@ -296,86 +295,6 @@ class RoomControlsFragment : Fragment() {
         } catch (e: IOException) {
             Log.e(TAG, "connectToBtDevice: Socket Close Error : ", e)
         }
-    }
-
-    private fun checkDatabase() {
-        loadingDialog.show(childFragmentManager, "$TAG checkDatabase")
-        val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
-        val url = getString(R.string.base_url) + getString(R.string.url_room_list)
-
-        if (isOnline()) {
-            roomsList.clear()
-            deviceIDList.clear()
-
-            val stringRequest = object : StringRequest(Method.POST, url,
-                { response ->
-                    try {
-                        val mData = JSONObject(response.toString())
-                        val resp = mData.get("response") as Int
-                        val msg = mData.get("msg")
-
-                        if (resp == 1) {
-                            val roomListData = mData.get("data") as JSONArray
-                            createRoom(roomListData)
-
-                            Log.d(TAG, "checkDatabase: Message - $msg")
-                        } else {
-
-
-                            Log.d(TAG, "checkDatabase: Message - $msg")
-
-                            gotoAddDevice()
-                        }
-                    } catch (e: Exception) {
-
-
-                        Log.e(TAG, "Exception in checkDatabase: $e")
-                        showLToast(e.message)
-                    }
-                }, {
-
-
-                    showLToast("Something went wrong.")
-                    Log.e(TAG, "VollyError: ${it.message}")
-                }) {
-                override fun getParams(): Map<String, String> {
-                    val params = HashMap<String, String>()
-                    params["user_id"] = currentUserId.toString()
-                    return params
-                }
-
-                override fun getHeaders(): MutableMap<String, String> {
-                    val params = HashMap<String, String>()
-                    params["Content-Type"] = "application/x-www-form-urlencoded"
-                    return params
-                }
-            }
-            requestQueue.add(stringRequest)
-        } else {
-
-
-//            showLToast("No internet connection")
-        }
-    }
-
-    private fun createRoom(roomListData: JSONArray) {
-        for (i in 0 until roomListData.length()) {
-            val device = roomListData.getJSONObject(i)
-            roomsList.add(device.get("room_name").toString())
-            deviceIDList.add(device.get("device_id").toString())
-        }
-
-        currentDeviceId = deviceIDList[selectedRoomIndex]
-        binding.currentRoomTv.text = roomsList[selectedRoomIndex]
-        updateUIWithLocalDB()
-    }
-
-    private fun showErrorScreen() {
-        if (isAdded) {
-            val intent = Intent(context, ErrorActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            context?.startActivity(intent)
-        } else Log.e(TAG, "showErrorScreen: RoomControlsFragment is not attached to an activity.")
     }
 
     private fun updateUI() {
@@ -710,6 +629,7 @@ class RoomControlsFragment : Fragment() {
         val spEditor = sharedPref?.edit()
 
         binding.powerBtn.setOnClickListener {
+            powerBtnClicked = true
             loadingDialog.show(childFragmentManager, "$TAG powerBtn")
             if (!checkWifiIsRunning) {
                 checkWifiIsRunning = true
@@ -1003,8 +923,10 @@ class RoomControlsFragment : Fragment() {
             }
         } else {
             showLToast("You are not connected.")
-
-
+        }
+        if (powerBtnClicked) {
+            powerBtnClicked = false
+            loadingDialog.dismiss()
         }
     }
 
@@ -1170,22 +1092,13 @@ class RoomControlsFragment : Fragment() {
         return false
     }
 
-    private fun showLToast(message: String?) {
+    private fun showLToast(message: String? = "Message") {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
-    private fun showSToast(message: String?) {
+    private fun showSToast(message: String? = "Message") {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
     }
-
-    /*private fun showSSnackbar(msg: String = "Please wait...") {
-        Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_SHORT)
-            .setAnchorView(binding.rcRootView)
-//            .setAction("Retry") {
-//
-//            }
-            .show()
-    }*/
 
     private fun showPSnackbar(msg: String = "Something went wrong.") {
         if (context != null) {

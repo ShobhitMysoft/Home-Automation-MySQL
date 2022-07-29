@@ -155,17 +155,7 @@ class DashbordFragment : Fragment() {
 //                    checkDeviceAvailability()
 //                }.show()
 
-            viewLocalDb()
             checkLocalDatabase()
-        }
-    }
-
-    private fun viewLocalDb() {
-        val x = ViewModelProvider(this).get(DeviceViewModel::class.java)
-        x.readAllData.observe(viewLifecycleOwner) { device ->
-            device.forEach {
-                Log.d(TAG, "viewLocalDb: ${it.name}")
-            }
         }
     }
 
@@ -265,8 +255,6 @@ class DashbordFragment : Fragment() {
 
             requestQueue.add(switchListRequest)
         }
-
-        viewLocalDb()
         checkLocalDatabase()
     }
 
