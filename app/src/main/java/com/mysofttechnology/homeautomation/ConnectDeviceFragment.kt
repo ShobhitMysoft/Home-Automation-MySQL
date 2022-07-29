@@ -1,16 +1,19 @@
 package com.mysofttechnology.homeautomation
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
@@ -89,7 +92,8 @@ class ConnectDeviceFragment : Fragment() {
 
         deviceNameList.clear()
         if (bluetoothAdapter?.isEnabled == false) {
-            showDialog()
+//            showDialog()
+            registerForResult.launch(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
         } else {
 
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
@@ -111,16 +115,16 @@ class ConnectDeviceFragment : Fragment() {
         }
     }
 
-    private fun showDialog() {
+    /*private fun showDialog() {
         val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle("Bluetooth not available")
             .setMessage("Please turn on the bluetooth in order to connect to a ${
                 getString(R.string.app_name)
             } device.")
             .setPositiveButton(
-                "Try again"
+                "Ok"
             ) { _, _ ->
-                loadPairedDevices()
+
             }
             .setNeutralButton("Go back") { _, _ ->
                 Navigation.findNavController(requireView())
@@ -128,6 +132,14 @@ class ConnectDeviceFragment : Fragment() {
             }
         builder.create()
         builder.show()
+    }*/
+
+    private val registerForResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            loadPairedDevices()
+        } else Navigation.findNavController(requireView()).navigate(R.id.action_connectDeviceFragment_to_roomsFragment)
     }
 
     override fun onDestroyView() {

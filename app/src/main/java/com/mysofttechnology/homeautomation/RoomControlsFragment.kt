@@ -249,7 +249,7 @@ class RoomControlsFragment : Fragment() {
             btSocket!!.connect()
             Log.i(TAG, "connectToBtDevice: Try complete ${Calendar.getInstance().time}")
         } catch (e: Exception) {
-            closeSocket()
+//            closeSocket()   // failed to connectToBtDevice
             /*Snackbar.make(binding.rcRootView,
                 "Timeout! Make sure you are close to the ${getString(R.string.app_name)} device.",
                 Snackbar.LENGTH_LONG)
@@ -268,7 +268,7 @@ class RoomControlsFragment : Fragment() {
             }
             loadingDialog.dismiss()
         } else {
-            closeSocket()
+//            closeSocket()       // Bluetooth is not connected
             connectToInternet()
         }
     }
@@ -762,44 +762,46 @@ class RoomControlsFragment : Fragment() {
 
     private fun sendDataToBT(signal: String) {
         // TODO: If anything goes wrong try to remove space at the end
-        try {
-            val ssidOutputStream: OutputStream = btSocket!!.outputStream
-            ssidOutputStream.write(signal.toByteArray())
+        if (btSocket?.isConnected == true) {
+            try {
+                val ssidOutputStream: OutputStream = btSocket!!.outputStream
+                ssidOutputStream.write(signal.toByteArray())
 
-            when (signal) {
-                "F" -> {
-                    binding.fanSpeedSlider.value = 1.0f
-                    binding.fanSpeedTv.text = "1"
-                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                when (signal) {
+                    "F" -> {
+                        binding.fanSpeedSlider.value = 1.0f
+                        binding.fanSpeedTv.text = "1"
+                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                    }
+                    "G" -> {
+                        binding.fanSpeedSlider.value = 2.0f
+                        binding.fanSpeedTv.text = "2"
+                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                    }
+                    "H" -> {
+                        binding.fanSpeedSlider.value = 3.0f
+                        binding.fanSpeedTv.text = "3"
+                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                    }
+                    "I" -> {
+                        binding.fanSpeedSlider.value = 4.0f
+                        binding.fanSpeedTv.text = "4"
+                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                    }
+                    "E" -> {
+                        binding.fanSpeedSlider.value = 0.0f
+                        binding.fanSpeedTv.text = "0"
+                        if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
+                    }
                 }
-                "G" -> {
-                    binding.fanSpeedSlider.value = 2.0f
-                    binding.fanSpeedTv.text = "2"
-                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                }
-                "H" -> {
-                    binding.fanSpeedSlider.value = 3.0f
-                    binding.fanSpeedTv.text = "3"
-                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                }
-                "I" -> {
-                    binding.fanSpeedSlider.value = 4.0f
-                    binding.fanSpeedTv.text = "4"
-                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                }
-                "E" -> {
-                    binding.fanSpeedSlider.value = 0.0f
-                    binding.fanSpeedTv.text = "0"
-                    if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
-                }
-            }
 
-            enableUI()
+                enableUI()
 
 //            closeSocket()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        } else showSToast("Bluetooth not connected.")
 
     }
 
@@ -863,7 +865,7 @@ class RoomControlsFragment : Fragment() {
 
     val btRunnable = Runnable {
         Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
-        closeSocket()
+//        closeSocket()
     }
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
@@ -999,12 +1001,10 @@ class RoomControlsFragment : Fragment() {
                 selectedDevice = deviceIDList[which]
             }
             .setPositiveButton("OK") { _, _ ->
-                closeSocket()
+//                closeSocket()
                 binding.currentRoomTv.text = selectedRoom
                 currentDeviceId = selectedDevice
-//                checkDatabase()
                 checkLocalDatabase()                                // ChooseRoomDialog
-//                uiHandler()
             }
             .setNeutralButton("Cancel") { _, _ -> }
             .show()
@@ -1137,5 +1137,6 @@ class RoomControlsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        closeSocket()
     }
 }
