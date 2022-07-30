@@ -171,11 +171,25 @@ class RoomControlsFragment : Fragment() {
 //        connectToBtDevice()
     }
 
+    private fun loadUi() {
+        loadingDialog = LoadingDialog()
+        loadingDialog.isCancelable = false
+
+        if (!currentDeviceId.isNullOrBlank() || !currentDeviceId.equals("null")) {
+//            checkDatabase()
+            checkLocalDatabase()                                // Refresh UI
+        } else {
+            Log.i(TAG, "onViewCreated: ~~~~ $currentDeviceId is not present")
+        }
+    }
+
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
         binding.mainControlsView.visibility = View.INVISIBLE
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
+            roomsList.clear()
+            deviceIDList.clear()
             deviceList.forEach {
                 Log.d(TAG, "checkLocalDatabase: ${it.name} | ${it.bluetoothId}")
                 roomsList.add(it.name)
@@ -184,6 +198,7 @@ class RoomControlsFragment : Fragment() {
 
             if (deviceIDList.size > 0) {
                 try {
+                    Log.d(TAG, "checkLocalDatabase: ${allData.value}")
                     cd = allData.value?.get(selectedRoomIndex)!!
                     currentDeviceId = cd.deviceId
                     currentBtDeviceId = cd.bluetoothId
@@ -769,7 +784,7 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun sendDataToBT(signal: String) {
-        // TODO: If anything goes wrong try to remove space at the end
+        Log.d(TAG, "sendDataToBT: Called $signal")
         if (btSocket?.isConnected == true) {
             try {
                 val ssidOutputStream: OutputStream = btSocket!!.outputStream
@@ -1121,18 +1136,6 @@ class RoomControlsFragment : Fragment() {
             Log.e(TAG, "showPSnackbar: Contect Error - $context")
 //            checkDatabase()
             checkLocalDatabase()                                // Snack bar Retry
-        }
-    }
-
-    private fun loadUi() {
-        loadingDialog = LoadingDialog()
-        loadingDialog.isCancelable = false
-
-        if (!currentDeviceId.isNullOrBlank() || !currentDeviceId.equals("null")) {
-//            checkDatabase()
-            checkLocalDatabase()                                // Refresh UI
-        } else {
-            Log.i(TAG, "onViewCreated: ~~~~ $currentDeviceId is not present")
         }
     }
 
