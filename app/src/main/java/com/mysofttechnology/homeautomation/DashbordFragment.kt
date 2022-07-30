@@ -36,6 +36,7 @@ private const val TAG = "DashbordFragment"
 
 class DashbordFragment : Fragment() {
 
+    private var devicesLen: Int = 0
     private var s1Name: String = "Switch 1"
     private var s2Name: String = "Switch 2"
     private var s3Name: String = "Switch 3"
@@ -148,14 +149,7 @@ class DashbordFragment : Fragment() {
             }
             requestQueue.add(stringRequest)
         } else {
-            
-            // TODO: Change this working
-//            Snackbar.make(binding.dashRootView, "No internet.", Snackbar.LENGTH_INDEFINITE)
-//                .setAction("Retry") {
-//                    checkDeviceAvailability()
-//                }.show()
-
-            checkLocalDatabase()
+            checkLocalDatabase()            // Not Online
         }
     }
 
@@ -180,7 +174,9 @@ class DashbordFragment : Fragment() {
         requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val switchListUrl = getString(R.string.base_url) + getString(R.string.url_switch_list)
 
-        for (i in 0 until deviceListData.length()) {
+        devicesLen = deviceListData.length()
+
+        for (i in 0 until devicesLen) {
             val deviceData = deviceListData.getJSONObject(i)
             val roomName = deviceData.get("room_name").toString()
             val deviceId = deviceData.get("device_id").toString()
@@ -196,8 +192,8 @@ class DashbordFragment : Fragment() {
 
                         if (resp == 1) {
                             val switchListData = mData.get("data") as JSONArray
-                            for (i in 0..4) {
-                                val switchData = switchListData.getJSONObject(i)
+                            for (j in 0..4) {
+                                val switchData = switchListData.getJSONObject(j)
                                 val switchId = switchData.get("switch_id_by_app").toString()
                                 if (switchId != "5") {
                                     when (switchId) {
@@ -255,7 +251,6 @@ class DashbordFragment : Fragment() {
 
             requestQueue.add(switchListRequest)
         }
-        checkLocalDatabase()
     }
 
     private fun getLiveStates(roomName: String, deviceId: String,
@@ -288,18 +283,18 @@ class DashbordFragment : Fragment() {
 
                         Log.d(TAG, "getLiveStates: Message - $msg")
                     } else {
-                        
+
                         // TODO:
 //                        showPSnackbar("Failed to get room data")
                         Log.e(TAG, "getLiveStates: Message - $msg")
                     }
                 } catch (e: Exception) {
-                    
+
                     Log.e(TAG, "Exception in getLiveStates: $e")
                     showToast(e.message)
                 }
             }, {
-                
+
                 showToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
