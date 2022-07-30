@@ -1,7 +1,6 @@
 package com.mysofttechnology.homeautomation
 
 import android.Manifest
-import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
 import android.content.*
@@ -20,18 +19,25 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.StartActivity.Companion.DEVICEIDSSET
+import com.mysofttechnology.homeautomation.activities.WorkDoneActivity
 import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.databinding.FragmentFillWifiDetailBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -41,6 +47,8 @@ import java.util.*
 private const val TAG = "FillWifiDetailFragment"
 
 class FillWifiDetailFragment : Fragment() {
+    private lateinit var requestQueue: RequestQueue
+    private lateinit var waitDialog: AlertDialog
     private var wifiManager: WifiManager? = null
     private var snackbar: Snackbar? = null
     private lateinit var loadingDialog: LoadingDialog
@@ -109,6 +117,8 @@ class FillWifiDetailFragment : Fragment() {
         loadingDialog.isCancelable = false
         loadingDialog.show(parentFragmentManager, TAG)
 
+        requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+
         snackbar = Snackbar.make(bind.fwRootView,
             "Timeout! Make sure you are close to the ${getString(R.string.app_name)} device.",
             Snackbar.LENGTH_LONG).setAnchorView(bind.refreshFab)
@@ -120,13 +130,22 @@ class FillWifiDetailFragment : Fragment() {
         }
 
         bind.wifiLv.setOnItemClickListener { _, _, pos, _ ->
-            loadingDialog.show(parentFragmentManager, TAG)
             ssid = wifiSSIDList[pos]
             Toast.makeText(requireActivity(), ssid, Toast.LENGTH_SHORT).show()
             if (btSocket != null && btSocket!!.isConnected) {
                 sendSSIDToDevice()
                 showWifiPasswordDialog()
-            } else connectToBtDevice()
+            } else {
+                waitDialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Please wait")
+                    .setMessage("Trying to connect to the device...")
+                    .setCancelable(false)
+                    .create()
+                waitDialog.show()
+                GlobalScope.launch(Dispatchers.IO) {
+                    connectToBtDevice()
+                }
+            }
         }
 
         bind.refreshFab.setOnClickListener { getWifiDetails() }
@@ -244,7 +263,12 @@ class FillWifiDetailFragment : Fragment() {
     }
 
     private fun sendPasswordToDevice(password: String) {
-        loadingDialog.show(childFragmentManager, TAG)
+        waitDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Please wait")
+            .setMessage("Sending data to the device...")
+            .setCancelable(false)
+            .create()
+        waitDialog.show()
         // TODO: If anything goes wrong try to remove space at the end
         val wifiPassword = "PASS:$password "
         val spEditor = sharedPref?.edit()
@@ -255,6 +279,8 @@ class FillWifiDetailFragment : Fragment() {
             val passwordOutputStream: OutputStream = btSocket!!.outputStream
             passwordOutputStream.write(wifiPassword.toByteArray())
 
+            updateLive("0", "wifi")
+
             // TODO: Check Wifi
             addBluetoothId(deviceId, btDevice)
 
@@ -264,11 +290,96 @@ class FillWifiDetailFragment : Fragment() {
             spEditor?.putStringSet(DEVICEIDSSET, deviceIdsSet)
             spEditor?.apply()
 
-            loadingDialog.dismiss()
             closeSocket()
         } catch (e: IOException) {
             e.printStackTrace()
         }
+    }
+
+    private fun updateLive(value: String, appl: String) {
+            val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
+
+            val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
+                { response ->
+                    Log.i(TAG, "updateUI: $response")
+                    try {
+                        val mData = JSONObject(response.toString())
+                        val resp = mData.get("response") as Int
+                        val msg = mData.get("msg")
+
+                        if (resp == 1) {
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                verifyWifi()
+                            }, 5000)
+                            Log.d(TAG, "updateLive: Message - $msg")
+                        } else {
+
+                            Log.e(TAG, "updateLive: Message - $msg")
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Exception in updateLive: $e")
+                    }
+                }, {
+                    Log.e(TAG, "VollyError: ${it.message}")
+                }) {
+                override fun getParams(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    params["device_id"] = deviceId
+                    params["appliance"] = appl
+                    params["data"] = value
+                    return params
+                }
+
+                override fun getHeaders(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["Content-Type"] = "application/x-www-form-urlencoded"
+                    return params
+                }
+            }
+            requestQueue.add(liveUpdateRequest)
+    }
+
+    private fun verifyWifi() {
+        val getLiveUrl = getString(R.string.base_url) + getString(R.string.url_get_live)
+
+        val switchListRequest = object : StringRequest(Method.POST, getLiveUrl,
+            { response ->
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
+
+                    if (resp == 1) {
+                        startActivity(Intent(requireContext(), WorkDoneActivity::class.java))
+
+                        Log.d(TAG, "verifyWifi: Message - $msg")
+                    } else {
+                        Log.e(TAG, "verifyWifi: Message - $msg")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception in verifyWifi: $e")
+                    showToast(e.message)
+                }
+            }, {
+                loadingDialog.dismiss()
+                showToast("Something went wrong.")
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId
+                return params
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+
+        requestQueue.add(switchListRequest)
+        waitDialog.dismiss()
     }
 
     private fun addBluetoothId(deviceId: String, bluetoothId: String) {
@@ -323,29 +434,32 @@ class FillWifiDetailFragment : Fragment() {
         }
     }
 
-    private fun connectToBtDevice() {
+    private suspend fun connectToBtDevice() {
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(btDevice)
-
-        Toast.makeText(requireActivity(), "Device Name - ${remoteDevice.name}", Toast.LENGTH_SHORT)
-            .show()
 
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
         try {
             Log.i(TAG, "connectToBtDevice: Trying to connect socket.")
             btSocket!!.connect()
-            sendSSIDToDevice()
-            showWifiPasswordDialog()
+            requireActivity().runOnUiThread {
+                waitDialog.dismiss()
+                sendSSIDToDevice()
+                showWifiPasswordDialog()
+            }
             Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
-            loadingDialog.dismiss()
         } catch (e: Exception) {
-            Snackbar.make(bind.fwRootView,
-                "Timeout! Make sure you are close to the ${getString(R.string.app_name)} device.",
-                Snackbar.LENGTH_LONG).setAnchorView(bind.refreshFab).show()
-            Log.e(TAG, "connectToBtDevice: Socket Connect Error : ", e)
-            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
-            loadingDialog.dismiss()
-            closeSocket()
+            requireActivity().runOnUiThread {
+                waitDialog.dismiss()
+                Snackbar.make(bind.fwRootView,
+                    "Timeout! Make sure you are close to the ${
+                        getString(R.string.app_name)
+                    } device.",
+                    Snackbar.LENGTH_LONG).setAnchorView(bind.refreshFab).show()
+                Log.e(TAG, "connectToBtDevice: Socket Connect Error : ", e)
+                Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
+                closeSocket()
+            }
         }
 
         if (btSocket?.isConnected == true) {

@@ -55,12 +55,12 @@ import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Compani
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.ROOM_NAME
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.SWITCH_ID
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.SWITCH_ID_BY_APP
-import com.mysofttechnology.homeautomation.activities.ErrorActivity
 import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBinding
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -178,6 +178,7 @@ class RoomControlsFragment : Fragment() {
             true
         }
 
+        loadUi()
         uiHandler()
 //        connectToBtDevice()
     }
@@ -234,7 +235,7 @@ class RoomControlsFragment : Fragment() {
 
         if (bluetoothAdapter?.isEnabled == true) {
             binding.mainControlsView.visibility = View.VISIBLE
-            GlobalScope.launch {
+            GlobalScope.launch(Dispatchers.IO) {
                 connectToBtDevice()
             }
         } else connectToInternet()
@@ -252,7 +253,7 @@ class RoomControlsFragment : Fragment() {
             btSocket!!.connect()
             Log.i(TAG, "connectToBtDevice: Try complete ${Calendar.getInstance().time}")
         } catch (e: Exception) {
-//            closeSocket()   // failed to connectToBtDevice
+            closeSocket()   // failed to connectToBtDevice
             /*Snackbar.make(binding.rcRootView,
                 "Timeout! Make sure you are close to the ${getString(R.string.app_name)} device.",
                 Snackbar.LENGTH_LONG)
@@ -276,13 +277,15 @@ class RoomControlsFragment : Fragment() {
             }
         } else {
 //            closeSocket()       // Bluetooth is not connected
-            connectToInternet()
+            requireActivity().runOnUiThread {
+                connectToInternet()
+            }
         }
     }
 
     private fun connectToInternet() {                                                               // TODO: Step 6
         isBTConnected = false
-        binding.mainControlsView.visibility = View.VISIBLE
+        if (bluetoothAdapter?.isEnabled == false) binding.mainControlsView.visibility = View.VISIBLE
         if (isOnline()) {                                                                           // TODO: Step 9.1
             try {
                 binding.connectionBtn.setImageDrawable(
@@ -883,7 +886,7 @@ class RoomControlsFragment : Fragment() {
     val btRunnable = Runnable {
         Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
 //        closeSocket()
-        connectToInternet()
+//        connectToInternet()
     }
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
@@ -1122,7 +1125,7 @@ class RoomControlsFragment : Fragment() {
         if (context != null) {
             Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") {
-                    if (isOnline()) refreshUI()
+                    if (isOnline()) loadUi()
                     else showPSnackbar(msg)
                 }
                 .show()
@@ -1133,7 +1136,7 @@ class RoomControlsFragment : Fragment() {
         }
     }
 
-    private fun refreshUI() {
+    private fun loadUi() {
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
 
@@ -1145,16 +1148,20 @@ class RoomControlsFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.i(TAG, "onResume: Called $currentDeviceId")
-//        if (!isOnline()) showSToast("No Internet Connection")
-        refreshUI()
-    }
+//    override fun onResume() {
+//        super.onResume()
+//        Log.i(TAG, "onResume: Called $currentDeviceId")
+////        if (!isOnline()) showSToast("No Internet Connection")
+//    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        closeSocket()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         closeSocket()
     }
 }

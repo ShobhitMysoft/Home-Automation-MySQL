@@ -148,14 +148,7 @@ class DashbordFragment : Fragment() {
             }
             requestQueue.add(stringRequest)
         } else {
-            
-            // TODO: Change this working
-//            Snackbar.make(binding.dashRootView, "No internet.", Snackbar.LENGTH_INDEFINITE)
-//                .setAction("Retry") {
-//                    checkDeviceAvailability()
-//                }.show()
-
-            checkLocalDatabase()
+            checkLocalDatabase()            // Not Online
         }
     }
 
@@ -288,18 +281,18 @@ class DashbordFragment : Fragment() {
 
                         Log.d(TAG, "getLiveStates: Message - $msg")
                     } else {
-                        
+
                         // TODO:
 //                        showPSnackbar("Failed to get room data")
                         Log.e(TAG, "getLiveStates: Message - $msg")
                     }
                 } catch (e: Exception) {
-                    
+
                     Log.e(TAG, "Exception in getLiveStates: $e")
                     showToast(e.message)
                 }
             }, {
-                
+
                 showToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
