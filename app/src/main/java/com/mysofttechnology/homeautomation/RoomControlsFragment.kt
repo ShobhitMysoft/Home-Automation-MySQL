@@ -183,7 +183,7 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
-        loadingDialog.show(childFragmentManager, "$TAG checkLocalDatabase")
+        binding.mainControlsView.visibility = View.INVISIBLE
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
@@ -210,6 +210,8 @@ class RoomControlsFragment : Fragment() {
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun updateUIWithLocalDB() {                                                             // TODO: Step 5
+        binding.connectionBtn.visibility = View.INVISIBLE
+        binding.statusPb.visibility = View.VISIBLE
 
         binding.switch1Switch.isChecked = cd.s1State == 1
         binding.switch2Switch.isChecked = cd.s2State == 1
@@ -231,6 +233,7 @@ class RoomControlsFragment : Fragment() {
             cd.s4State.toString(), cd.fanSpeed.toString())
 
         if (bluetoothAdapter?.isEnabled == true) {
+            binding.mainControlsView.visibility = View.VISIBLE
             GlobalScope.launch {
                 connectToBtDevice()
             }
@@ -258,15 +261,19 @@ class RoomControlsFragment : Fragment() {
 
         if (btSocket?.isConnected == true) {                                                        // TODO: Step 7
             isBTConnected = true
-            try {
-                binding.connectionBtn.setImageDrawable(
-                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
-                enableUI()
-            } catch (e: Exception) {
-                Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
-                enableUI()
+            requireActivity().runOnUiThread {
+                try {
+                    binding.connectionBtn.setImageDrawable(
+                        context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
+                    binding.statusPb.visibility = View.INVISIBLE
+                    binding.connectionBtn.visibility = View.VISIBLE
+                    enableUI()
+                } catch (e: Exception) {
+                    Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
+                    enableUI()
+                }
+                binding.mainControlsView.visibility = View.VISIBLE
             }
-            loadingDialog.dismiss()
         } else {
 //            closeSocket()       // Bluetooth is not connected
             connectToInternet()
@@ -275,18 +282,28 @@ class RoomControlsFragment : Fragment() {
 
     private fun connectToInternet() {                                                               // TODO: Step 6
         isBTConnected = false
+        binding.mainControlsView.visibility = View.VISIBLE
         if (isOnline()) {                                                                           // TODO: Step 9.1
             try {
                 binding.connectionBtn.setImageDrawable(
                     context?.let { ContextCompat.getDrawable(it, R.drawable.ic_network) })
                 enableUI()
-
-
+                binding.statusPb.visibility = View.INVISIBLE
+                binding.connectionBtn.visibility = View.VISIBLE
+            } catch (e: Exception) {
+                Log.e(TAG, "connectToInternet: Error", e)
+            }
+        } else {                                                                           // TODO: Step 9.1
+            try {
+                binding.connectionBtn.setImageDrawable(
+                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
+                enableUI()
+                binding.statusPb.visibility = View.INVISIBLE
+                binding.connectionBtn.visibility = View.VISIBLE
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
             }
         }
-        loadingDialog.dismiss()
     }
 
     private fun closeSocket() {
@@ -1032,7 +1049,7 @@ class RoomControlsFragment : Fragment() {
 //    override fun onSaveInstanceState(outState: Bundle) {}
 
     private fun disableUI() {
-        waitSnackbar.show()
+//        waitSnackbar.show()
         if (isAdded) {
             binding.powerBtn.isClickable = false
             binding.powerBtn.isEnabled = false
@@ -1051,7 +1068,7 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun enableUI() {
-        waitSnackbar.dismiss()
+//        waitSnackbar.dismiss()
         if (isAdded) {
             binding.powerBtn.isClickable = true
             binding.powerBtn.isEnabled = true

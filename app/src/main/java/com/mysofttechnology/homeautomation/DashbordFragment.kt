@@ -326,13 +326,13 @@ class DashbordFragment : Fragment() {
                 if (it.isNotEmpty()) {
                     
                     binding.addDeviceBtn.visibility = View.GONE
-                    binding.fragmentContainerView2.findNavController()
-                        .navigate(R.id.roomControlsFragment)
+//                    binding.fragmentContainerView2.findNavController()
+//                        .navigate(R.id.roomControlsFragment)
                 } else {
                     
                     binding.addDeviceBtn.visibility = View.VISIBLE
-                    binding.fragmentContainerView2.findNavController()
-                        .navigate(R.id.addDeviceFragment)
+//                    binding.fragmentContainerView2.findNavController()
+//                        .navigate(R.id.addDeviceFragment)
                 }
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG, "checkLocalDatabase: Error", e)
