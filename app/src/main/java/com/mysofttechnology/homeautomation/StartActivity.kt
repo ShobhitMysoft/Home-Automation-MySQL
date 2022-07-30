@@ -63,6 +63,6 @@ class StartActivity : AppCompatActivity() {
 }
 
 /**
- * VERSION: 1
- * This version is before adding bluetooth controls functionality.
+ * VERSION: 2
+ * This version is after adding bluetooth + wifi + room db functionality.
  * */
