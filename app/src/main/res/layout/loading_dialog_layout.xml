@@ -11,12 +11,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <com.airbnb.lottie.LottieAnimationView
+        <ProgressBar
             android:layout_width="@dimen/_50sdp"
-            android:layout_height="@dimen/_50sdp"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/waiting" />
+            android:layout_height="@dimen/_50sdp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -25,7 +22,6 @@
             android:fontFamily="@font/raleway"
             android:gravity="center"
             android:text="Please wait . . ."
-            android:textColor="@color/primary"
             android:textSize="18dp" />
 
     </LinearLayout>

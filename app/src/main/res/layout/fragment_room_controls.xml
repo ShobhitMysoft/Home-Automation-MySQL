@@ -8,10 +8,27 @@
     android:background="@color/card_view_bg"
     tools:context=".RoomControlsFragment">
 
+    <TextView
+        android:id="@+id/loading_msg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/card_view_bg"
+        android:fontFamily="@font/raleway"
+        android:gravity="center"
+        android:text="Loading..."
+        android:textColor="@color/primary_text"
+        android:textSize="@dimen/_14ssp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
+        android:id="@+id/main_controls_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:background="@color/card_view_bg"
         android:paddingBottom="@dimen/_20sdp">
 
         <LinearLayout
@@ -59,13 +76,20 @@
                 android:focusable="true"
                 app:neumorph_shadowElevation="@dimen/_3sdp">
 
-                <ImageView
-                    android:id="@+id/bluetooth_btn"
+                <ProgressBar
+                    android:id="@+id/status_pb"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:tooltipText="Bluetooth Status"
-                    android:elevation="2dp"
-                    android:src="@drawable/ic_bluetooth_off" />
+                    android:padding="5dp"
+                    android:tooltipText="Connection Status"
+                    android:src="@drawable/ic_no_network" />
+
+                <ImageView
+                    android:id="@+id/connection_btn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:tooltipText="Connection Status"
+                    android:elevation="2dp" />
             </soup.neumorphism.NeumorphCardView>
 
             <soup.neumorphism.NeumorphCardView

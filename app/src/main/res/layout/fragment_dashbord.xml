@@ -129,7 +129,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="160dp"
-                android:background="@drawable/banner1"
+                android:background="@drawable/banner1_min"
                 android:orientation="vertical"
                 android:paddingHorizontal="@dimen/_16sdp"
                 android:paddingVertical="@dimen/_16sdp">

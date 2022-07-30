@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.android.volley.toolbox.StringRequest
 import com.google.firebase.FirebaseException
@@ -220,5 +219,10 @@ class RegistrationFragment : Fragment() {
                 RegistrationFragmentDirections.actionRegistrationFragmentToDashbordFragment()
             findNavController().navigate(action)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

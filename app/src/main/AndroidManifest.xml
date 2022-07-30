@@ -31,19 +31,19 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".activities.EditSwitchActivity"
+            android:name="com.mysofttechnology.homeautomation.activities.EditSwitchActivity"
             android:exported="false"
             android:theme="@style/Theme.HomeAutomation" />
         <activity
-            android:name=".activities.WorkDoneActivity"
+            android:name="com.mysofttechnology.homeautomation.activities.WorkDoneActivity"
             android:exported="false"
             android:theme="@style/Theme.HomeAutomation" />
         <activity
-            android:name=".activities.ErrorActivity"
+            android:name="com.mysofttechnology.homeautomation.activities.ErrorActivity"
             android:exported="false"
             android:theme="@style/Theme.HomeAutomation" />
         <activity
-            android:name=".activities.DeletedActivity"
+            android:name="com.mysofttechnology.homeautomation.activities.DeletedActivity"
             android:exported="false"
             android:theme="@style/Theme.HomeAutomation" />
 
@@ -52,7 +52,7 @@
             android:value="barcode" />
 
         <activity
-            android:name=".StartActivity"
+            android:name="com.mysofttechnology.homeautomation.StartActivity"
             android:exported="true"
             android:theme="@style/Theme.App.Starting">
             <intent-filter>
