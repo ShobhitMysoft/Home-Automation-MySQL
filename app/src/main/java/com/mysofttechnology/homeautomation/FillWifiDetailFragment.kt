@@ -29,16 +29,12 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.mysofttechnology.homeautomation.StartActivity.Companion.DEVICEIDSSET
 import com.mysofttechnology.homeautomation.activities.WorkDoneActivity
-import com.mysofttechnology.homeautomation.database.Device
-import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.databinding.FragmentFillWifiDetailBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.io.OutputStream
@@ -54,13 +50,11 @@ class FillWifiDetailFragment : Fragment() {
     private lateinit var loadingDialog: LoadingDialog
 
     private var btSocket: BluetoothSocket? = null
-    private var sharedPref: SharedPreferences? = null
 
     private lateinit var ssid: String
     private val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     private lateinit var btDevice: String
     private lateinit var deviceId: String
-    private lateinit var deviceIdsSet: HashSet<String>
 
     private var wifiSSIDList: ArrayList<String> = arrayListOf()
     private lateinit var listAdapter: ArrayAdapter<String>
@@ -108,10 +102,6 @@ class FillWifiDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
-        deviceIdsSet = sharedPref!!.getStringSet(DEVICEIDSSET, HashSet<String>()) as HashSet<String>
-        Log.d(TAG, "onViewCreated: deviceIdsSet - $deviceIdsSet")
 
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
@@ -269,26 +259,17 @@ class FillWifiDetailFragment : Fragment() {
             .setCancelable(false)
             .create()
         waitDialog.show()
-        // TODO: If anything goes wrong try to remove space at the end
+
+        // If anything goes wrong try to remove space at the end
         val wifiPassword = "PASS:$password "
-        val spEditor = sharedPref?.edit()
 
         Log.d(TAG, "sendPasswordToDevice: $wifiPassword")
-        // TODO: Show a waiting dialog. In that check if wifi is online on the SL device
         try {
             val passwordOutputStream: OutputStream = btSocket!!.outputStream
             passwordOutputStream.write(wifiPassword.toByteArray())
 
-            updateLive("0", "wifi")
-
-            // TODO: Check Wifi
             addBluetoothId(deviceId, btDevice)
-
-            spEditor?.putString(deviceId, btDevice)
-
-            deviceIdsSet.add(deviceId)
-            spEditor?.putStringSet(DEVICEIDSSET, deviceIdsSet)
-            spEditor?.apply()
+            updateLive("0", "wifi")
 
             closeSocket()
         } catch (e: IOException) {
@@ -308,9 +289,11 @@ class FillWifiDetailFragment : Fragment() {
                         val msg = mData.get("msg")
 
                         if (resp == 1) {
+                            showToast("0 sent!")
                             Handler(Looper.getMainLooper()).postDelayed({
+                                showToast("Handler called")
                                 verifyWifi()
-                            }, 5000)
+                            }, 15000)
                             Log.d(TAG, "updateLive: Message - $msg")
                         } else {
 
@@ -350,7 +333,9 @@ class FillWifiDetailFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        startActivity(Intent(requireContext(), WorkDoneActivity::class.java))
+                        showToast("Received 1")
+                        if (mData.get("wifi") == "1") startActivity(Intent(requireContext(), WorkDoneActivity::class.java))
+                        else btSocket = null
 
                         Log.d(TAG, "verifyWifi: Message - $msg")
                     } else {
@@ -380,6 +365,7 @@ class FillWifiDetailFragment : Fragment() {
 
         requestQueue.add(switchListRequest)
         waitDialog.dismiss()
+        closeSocket()
     }
 
     private fun addBluetoothId(deviceId: String, bluetoothId: String) {
@@ -450,6 +436,7 @@ class FillWifiDetailFragment : Fragment() {
             Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
         } catch (e: Exception) {
             requireActivity().runOnUiThread {
+                showToast("Failed to connect")
                 waitDialog.dismiss()
                 Snackbar.make(bind.fwRootView,
                     "Timeout! Make sure you are close to the ${

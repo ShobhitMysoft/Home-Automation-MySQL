@@ -58,7 +58,6 @@ class StartActivity : AppCompatActivity() {
         const val FRI = "fri"
         const val SAT = "sat"
         const val NOTIFICATION = "notification"
-        const val DEVICEIDSSET = "deviceIdsSet"
     }
 }
 

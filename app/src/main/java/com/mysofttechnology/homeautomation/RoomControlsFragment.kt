@@ -34,7 +34,6 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL1
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL2
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL3
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL4
-import com.mysofttechnology.homeautomation.StartActivity.Companion.DEVICEIDSSET
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FAN
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
@@ -101,9 +100,6 @@ class RoomControlsFragment : Fragment() {
     private var currentUserId: String? = null
     private var currentBtDeviceId: String? = null
 
-    //    private lateinit var deviceIdsSet: HashSet<String>
-    private lateinit var deviceIdsList: List<String>
-
     private var _binding: FragmentRoomControlsBinding? = null
     private val binding get() = _binding!!
 
@@ -149,15 +145,7 @@ class RoomControlsFragment : Fragment() {
 
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
 
-//        deviceIdsSet = sharedPref!!.getStringSet(DEVICEIDSSET, HashSet<String>()) as HashSet<String>
-        deviceIdsList = (sharedPref!!.getStringSet(DEVICEIDSSET,
-            HashSet<String>()) as HashSet<String>).filter { it != "null" }
-        if (deviceIdsList.isNotEmpty())
-            currentBtDeviceId = sharedPref!!.getString(deviceIdsList[1], "")
-
         Log.d(TAG, "onViewCreated: $currentUserId")
-        Log.d(TAG, "onViewCreated: deviceIdsSet = $deviceIdsList")
-        Log.d(TAG, "onViewCreated: currentBtDeviceId = $currentBtDeviceId")
 
         toggleWifi = Handler(Looper.getMainLooper())
         btHandler = Handler(Looper.getMainLooper())
