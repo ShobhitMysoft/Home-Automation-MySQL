@@ -883,6 +883,7 @@ class RoomControlsFragment : Fragment() {
     val btRunnable = Runnable {
         Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
 //        closeSocket()
+        connectToInternet()
     }
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
