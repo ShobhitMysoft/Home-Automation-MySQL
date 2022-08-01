@@ -383,7 +383,7 @@ class ScanDeviceFragment : Fragment() {
 
                     if (resp == 1) {
                         // TODO: Check if single switch device or not
-                        if (deviceId == "has_single_switch") createSwitch(deviceId, 6)
+                        if (deviceId.elementAt(2).toString() == "1") createSwitch(deviceId, 6)
                          else {
                             for (i in 1..5) createSwitch(deviceId, i)
                         }
@@ -411,6 +411,8 @@ class ScanDeviceFragment : Fragment() {
                 params["device_id"] = deviceId
                 params["user_id"] = currentUserId.toString()
                 params["room_name"] = "Room $deviceId"
+                // TODO: Type of device
+//                params["switch_count"] = deviceId.elementAt(2).toString()
                 return params
             }
 

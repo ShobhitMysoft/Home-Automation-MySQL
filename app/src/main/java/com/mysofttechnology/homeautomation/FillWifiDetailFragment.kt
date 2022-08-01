@@ -138,7 +138,10 @@ class FillWifiDetailFragment : Fragment() {
             }
         }
 
-        bind.refreshFab.setOnClickListener { getWifiDetails() }
+        bind.refreshFab.setOnClickListener {
+            bind.refreshFab.visibility = View.GONE
+            getWifiDetails()
+        }
 
         getWifiDetails()
         checkSettings()
@@ -456,10 +459,9 @@ class FillWifiDetailFragment : Fragment() {
 
     private fun getWifiDetails() {
         Log.d(TAG, "getWifiDetails: Socket is connected.")
-        bind.refreshFab.visibility = View.GONE
         Handler(Looper.getMainLooper()).postDelayed({
-            bind.refreshFab.visibility = View.VISIBLE
-        }, 10000)
+            if (isAdded) bind.refreshFab.visibility = View.VISIBLE
+        }, 5000)
 
         wifiManager = requireContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
 
@@ -496,7 +498,7 @@ class FillWifiDetailFragment : Fragment() {
             wifiSSIDList.add(it.SSID)
             listAdapter.notifyDataSetChanged()
         }
-        bind.wifiLv.adapter = listAdapter
+        if (isAdded) bind.wifiLv.adapter = listAdapter
     }
 
     private fun scanFailure(wifiManager: WifiManager) {

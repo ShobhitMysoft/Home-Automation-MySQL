@@ -40,6 +40,7 @@ class StartActivity : AppCompatActivity() {
         const val APPL2 = "appliance2"
         const val APPL3 = "appliance3"
         const val APPL4 = "appliance4"
+        const val APPL6 = "appliance6"
         const val FAN = "fan"
 
         const val ZERO = "0"

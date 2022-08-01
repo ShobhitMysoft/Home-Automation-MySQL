@@ -64,9 +64,6 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         bind = ActivityEditSwitchBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
-        iconsList = resources.obtainTypedArray(R.array.icons_list)
-        iconsNameList = resources.getStringArray(R.array.icons_names)
-
         loadingDialog = LoadingDialog()
         timePickerDialog = TimePickerFragment()
 
@@ -74,6 +71,9 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         roomName = intent.getStringExtra(ROOM_NAME)!!
         switchId = intent.getStringExtra(SWITCH_ID)!!
         switchIdByApp = intent.getStringExtra(SWITCH_ID_BY_APP)!!
+
+        iconsList = if (switchIdByApp == "6") resources.obtainTypedArray(R.array.sl1_icons_list) else resources.obtainTypedArray(R.array.icons_list)
+        iconsNameList = if (switchIdByApp == "6") resources.getStringArray(R.array.sl1_icons_names) else resources.getStringArray(R.array.icons_names)
 
         loadUIData()
 

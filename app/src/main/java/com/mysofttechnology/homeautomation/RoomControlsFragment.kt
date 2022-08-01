@@ -34,6 +34,7 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL1
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL2
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL3
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL4
+import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL6
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FAN
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
@@ -85,6 +86,7 @@ class RoomControlsFragment : Fragment() {
     private var SWITCH2: String? = null
     private var SWITCH3: String? = null
     private var SWITCH4: String? = null
+    private var SWITCH6: String? = null
     private val CHECK_WIFI_DELAY_TIME: Long = 4000
     private val CHECK_BT_DELAY_TIME: Long = 5000
     private lateinit var toggleWifi: Handler
@@ -96,6 +98,7 @@ class RoomControlsFragment : Fragment() {
     private lateinit var waitSnackbar: Snackbar
 
     private var currentDeviceId: String? = null
+    private var curDevSwitchCount: String? = "5"
     private lateinit var cd: Device
     private var currentUserId: String? = null
     private var currentBtDeviceId: String? = null
@@ -201,6 +204,7 @@ class RoomControlsFragment : Fragment() {
                     Log.d(TAG, "checkLocalDatabase: ${allData.value}")
                     cd = allData.value?.get(selectedRoomIndex)!!
                     currentDeviceId = cd.deviceId
+                    curDevSwitchCount = cd.switchCount
                     currentBtDeviceId = cd.bluetoothId
                     binding.currentRoomTv.text = cd.name
                     updateUIWithLocalDB()
@@ -217,24 +221,39 @@ class RoomControlsFragment : Fragment() {
         binding.connectionBtn.visibility = View.INVISIBLE
         binding.statusPb.visibility = View.VISIBLE
 
-        binding.switch1Switch.isChecked = cd.s1State == 1
-        binding.switch2Switch.isChecked = cd.s2State == 1
-        binding.switch3Switch.isChecked = cd.s3State == 1
-        binding.switch4Switch.isChecked = cd.s4State == 1
+        if (curDevSwitchCount == "1") {
+            binding.sl1View.visibility = View.VISIBLE
+            binding.sl5View.visibility = View.GONE
+            binding.powerBtn.visibility = View.GONE
 
-        if (cd.fanSpeed == 0) {
-            binding.fanSpeedSlider.value = 0.0f
-            binding.fanSpeedTv.text = ZERO
-            if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
+            iconsList = resources.obtainTypedArray(R.array.sl1_icons_list)
+
+            binding.switch6Switch.isChecked = cd.s6State == 1
         } else {
-            binding.fanSpeedSlider.value = cd.fanSpeed.toFloat()
-            binding.fanSpeedTv.text = cd.fanSpeed.toString()
-            if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+            binding.sl1View.visibility = View.GONE
+            binding.sl5View.visibility = View.VISIBLE
+            binding.powerBtn.visibility = View.VISIBLE
+
+            binding.switch1Switch.isChecked = cd.s1State == 1
+            binding.switch2Switch.isChecked = cd.s2State == 1
+            binding.switch3Switch.isChecked = cd.s3State == 1
+            binding.switch4Switch.isChecked = cd.s4State == 1
+
+            if (cd.fanSpeed == 0) {
+                binding.fanSpeedSlider.value = 0.0f
+                binding.fanSpeedTv.text = ZERO
+                if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
+            } else {
+                binding.fanSpeedSlider.value = cd.fanSpeed.toFloat()
+                binding.fanSpeedTv.text = cd.fanSpeed.toString()
+                if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+            }
+
+            togglePower(cd.s1State.toString(), cd.s2State.toString(), cd.s3State.toString(),
+                cd.s4State.toString(), cd.fanSpeed.toString())
         }
 
         Log.i(TAG, "updateUIWithLocalDB: Data updated from Local")
-        togglePower(cd.s1State.toString(), cd.s2State.toString(), cd.s3State.toString(),
-            cd.s4State.toString(), cd.fanSpeed.toString())
 
         if (bluetoothAdapter?.isEnabled == true) {
             binding.mainControlsView.visibility = View.VISIBLE
@@ -334,36 +353,51 @@ class RoomControlsFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        val app1Val = mData.get(APPL1).toString()
-                        val app2Val = mData.get(APPL2).toString()
-                        val app3Val = mData.get(APPL3).toString()
-                        val app4Val = mData.get(APPL4).toString()
-                        val fan = mData.get(FAN).toString()
+                        if (curDevSwitchCount == "1") {
+                            val app6Val = mData.get(APPL6).toString()
+                            val wifi = mData.get("wifi").toString()
 
-                        val wifi = mData.get("wifi").toString()
+                            if (checkWifi && wifi == "0") showDeviceOfflineDialog()
+                            else {
+                                updateLive("0", "wifi")
+                                binding.switch6Switch.isChecked = app6Val == ONE
 
-                        if (checkWifi && wifi == "0") showDeviceOfflineDialog()
-                        else {
-                            updateLive("0", "wifi")
-                            liveFanSpeed = fan.toInt()
-
-                            binding.switch1Switch.isChecked = app1Val == ONE
-                            binding.switch2Switch.isChecked = app2Val == ONE
-                            binding.switch3Switch.isChecked = app3Val == ONE
-                            binding.switch4Switch.isChecked = app4Val == ONE
-
-                            if (liveFanSpeed == 0) {
-                                binding.fanSpeedSlider.value = 0.0f
-                                binding.fanSpeedTv.text = ZERO
-                                if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
-                            } else {
-                                binding.fanSpeedSlider.value = liveFanSpeed.toFloat()
-                                binding.fanSpeedTv.text = fan
-                                if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+                                checkWifi = false
                             }
+                        } else {
+                            val app1Val = mData.get(APPL1).toString()
+                            val app2Val = mData.get(APPL2).toString()
+                            val app3Val = mData.get(APPL3).toString()
+                            val app4Val = mData.get(APPL4).toString()
+                            val fan = mData.get(FAN).toString()
 
-                            checkWifi = false
-                            togglePower(app1Val, app2Val, app3Val, app4Val, fan)
+                            val wifi = mData.get("wifi").toString()
+
+                            if (checkWifi && wifi == "0") showDeviceOfflineDialog()
+                            else {
+                                updateLive("0", "wifi")
+                                liveFanSpeed = fan.toInt()
+
+                                binding.switch1Switch.isChecked = app1Val == ONE
+                                binding.switch2Switch.isChecked = app2Val == ONE
+                                binding.switch3Switch.isChecked = app3Val == ONE
+                                binding.switch4Switch.isChecked = app4Val == ONE
+
+                                if (liveFanSpeed == 0) {
+                                    binding.fanSpeedSlider.value = 0.0f
+                                    binding.fanSpeedTv.text = ZERO
+                                    if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                        false
+                                } else {
+                                    binding.fanSpeedSlider.value = liveFanSpeed.toFloat()
+                                    binding.fanSpeedTv.text = fan
+                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                        true
+                                }
+
+                                checkWifi = false
+                                togglePower(app1Val, app2Val, app3Val, app4Val, fan)
+                            }
                         }
 
                         Log.d(TAG, "updateUI: Message - $msg")
@@ -408,11 +442,17 @@ class RoomControlsFragment : Fragment() {
 
                     if (resp == 1) {
                         val switchListData = mData.get("data") as JSONArray
-                        for (i in 0..4) {
-                            val switchData = switchListData.getJSONObject(i)
-                            if (switchData.get("switch_id_by_app").toString() != "5")
-                                loadSwitch(switchData.get("switch_id_by_app").toString(),
-                                    switchData)
+
+                        if (curDevSwitchCount == "1") {
+                            val switchData = switchListData.getJSONObject(0)
+                            loadSwitch(switchData.get("switch_id_by_app").toString(), switchData)
+                        } else {
+                            for (i in 0..4) {
+                                val switchData = switchListData.getJSONObject(i)
+                                if (switchData.get("switch_id_by_app").toString() != "5")
+                                    loadSwitch(switchData.get("switch_id_by_app").toString(),
+                                        switchData)
+                            }
                         }
                         Log.d(TAG, "switchList: Message - $msg")
                     } else {
@@ -469,30 +509,35 @@ class RoomControlsFragment : Fragment() {
             "1" -> SWITCH1 = switch.get("id").toString()
             "2" -> SWITCH2 = switch.get("id").toString()
             "3" -> SWITCH3 = switch.get("id").toString()
+            "6" -> SWITCH6 = switch.get("id").toString()
             else -> SWITCH4 = switch.get("id").toString()
         }
         val switchName = when (switchId) {
             "1" -> binding.switch1Name
             "2" -> binding.switch2Name
             "3" -> binding.switch3Name
+            "6" -> binding.switch6Name
             else -> binding.switch4Name
         }
         val switchIcon = when (switchId) {
             "1" -> binding.switch1Icon
             "2" -> binding.switch2Icon
             "3" -> binding.switch3Icon
+            "6" -> binding.switch6Icon
             else -> binding.switch4Icon
         }
         val switchStartTime = when (switchId) {
             "1" -> binding.switch1StartTimeTv
             "2" -> binding.switch2StartTimeTv
             "3" -> binding.switch3StartTimeTv
+            "6" -> binding.switch6StartTimeTv
             else -> binding.switch4StartTimeTv
         }
         val switchStopTime = when (switchId) {
             "1" -> binding.switch1StopTimeTv
             "2" -> binding.switch2StopTimeTv
             "3" -> binding.switch3StopTimeTv
+            "6" -> binding.switch6StopTimeTv
             else -> binding.switch4StopTimeTv
         }
 
@@ -500,42 +545,49 @@ class RoomControlsFragment : Fragment() {
             "1" -> binding.switch1SunTv
             "2" -> binding.switch2SunTv
             "3" -> binding.switch3SunTv
+            "6" -> binding.switch6SunTv
             else -> binding.switch4SunTv
         }
         val monTv = when (switchId) {
             "1" -> binding.switch1MonTv
             "2" -> binding.switch2MonTv
             "3" -> binding.switch3MonTv
+            "6" -> binding.switch6MonTv
             else -> binding.switch4MonTv
         }
         val tueTv = when (switchId) {
             "1" -> binding.switch1TueTv
             "2" -> binding.switch2TueTv
             "3" -> binding.switch3TueTv
+            "6" -> binding.switch6TueTv
             else -> binding.switch4TueTv
         }
         val wedTv = when (switchId) {
             "1" -> binding.switch1WedTv
             "2" -> binding.switch2WedTv
             "3" -> binding.switch3WedTv
+            "6" -> binding.switch6WedTv
             else -> binding.switch4WedTv
         }
         val thuTv = when (switchId) {
             "1" -> binding.switch1ThuTv
             "2" -> binding.switch2ThuTv
             "3" -> binding.switch3ThuTv
+            "6" -> binding.switch6ThuTv
             else -> binding.switch4ThuTv
         }
         val friTv = when (switchId) {
             "1" -> binding.switch1FriTv
             "2" -> binding.switch2FriTv
             "3" -> binding.switch3FriTv
+            "6" -> binding.switch6FriTv
             else -> binding.switch4FriTv
         }
         val satTv = when (switchId) {
             "1" -> binding.switch1SatTv
             "2" -> binding.switch2SatTv
             "3" -> binding.switch3SatTv
+            "6" -> binding.switch6SatTv
             else -> binding.switch4SatTv
         }
 
@@ -769,6 +821,19 @@ class RoomControlsFragment : Fragment() {
             }
         }
 
+        binding.switch6Switch.setOnCheckedChangeListener { _, isChecked ->
+            disableUI()
+            if (isBTConnected) sendDataToBT(
+                if (isChecked) "A" else "a")                            // TODO: Step 8
+            else {
+                if (!checkWifiIsRunning) {
+                    checkWifiIsRunning = true
+                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                }
+                updateLive(if (isChecked) ONE else ZERO, APPL6)
+            }
+        }
+
         binding.switch1MoreBtn.setOnClickListener {
             SWITCH1?.let { id -> showPopupMenu(it, id, "1") }
         }
@@ -780,6 +845,9 @@ class RoomControlsFragment : Fragment() {
         }
         binding.switch4MoreBtn.setOnClickListener {
             SWITCH4?.let { id -> showPopupMenu(it, id, "4") }
+        }
+        binding.switch6MoreBtn.setOnClickListener {
+            SWITCH6?.let { id -> showPopupMenu(it, id, "6") }
         }
     }
 

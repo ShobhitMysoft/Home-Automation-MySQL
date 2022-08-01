@@ -19,7 +19,6 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
@@ -41,10 +40,18 @@ class DashbordFragment : Fragment() {
     private var s2Name: String = "Switch 2"
     private var s3Name: String = "Switch 3"
     private var s4Name: String = "Switch 4"
+    private var s6Name: String = "Switch"
+    private var s1State: Int = 0
+    private var s2State: Int = 0
+    private var s3State: Int = 0
+    private var s4State: Int = 0
+    private var s6State: Int = 0
+    private var fan: Int = 0
     private var s1Icon: Int = 0
     private var s2Icon: Int = 0
     private var s3Icon: Int = 0
     private var s4Icon: Int = 0
+    private var s6Icon: Int = 0
 
     private lateinit var deviceViewModel: DeviceViewModel
     private lateinit var requestQueue: RequestQueue
@@ -120,18 +127,18 @@ class DashbordFragment : Fragment() {
                             updateUI(true, mData)
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         } else {
-                            
+
                             updateUI(false, mData)
 //                            showToast("No user found. Please register first.")
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         }
                     } catch (e: Exception) {
-                        
+
                         Log.d(TAG, "Exception in checkDeviceAvailability: $e")
                         showToast(e.message)
                     }
                 }, {
-                    
+
                     showToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
@@ -163,7 +170,7 @@ class DashbordFragment : Fragment() {
             createLocalDatabase(deviceListData)
         } else {
             Log.d(TAG, "updateUI: No device available")
-            
+
             binding.addDeviceBtn.visibility = View.VISIBLE
             binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
         }
@@ -180,6 +187,7 @@ class DashbordFragment : Fragment() {
             val deviceData = deviceListData.getJSONObject(i)
             val roomName = deviceData.get("room_name").toString()
             val deviceId = deviceData.get("device_id").toString()
+            val switchCount = deviceData.get("switch_count").toString()
             val bluetoothId = deviceData.get("bluetooth").toString()
 
             val switchListRequest = object : StringRequest(Method.POST, switchListUrl,
@@ -192,47 +200,54 @@ class DashbordFragment : Fragment() {
 
                         if (resp == 1) {
                             val switchListData = mData.get("data") as JSONArray
-                            for (j in 0..4) {
-                                val switchData = switchListData.getJSONObject(j)
-                                val switchId = switchData.get("switch_id_by_app").toString()
-                                if (switchId != "5") {
-                                    when (switchId) {
-                                        "1" -> {
-                                            s1Name = switchData.getString(SWITCH)
-                                            s1Icon = switchData.getString(ICON).toInt()
-                                        }
-                                        "2" -> {
-                                            s2Name = switchData.getString(SWITCH)
-                                            s2Icon = switchData.getString(ICON).toInt()
-                                        }
-                                        "3" -> {
-                                            s3Name = switchData.getString(SWITCH)
-                                            s3Icon = switchData.getString(ICON).toInt()
-                                        }
-                                        else -> {
-                                            s4Name = switchData.getString(SWITCH)
-                                            s4Icon = switchData.getString(ICON).toInt()
+                            if (switchCount == "1") {
+                                val switchData = switchListData.getJSONObject(0)
+//                                val switchId = switchData.get("switch_id_by_app").toString()
+                                s6Name = switchData.getString(SWITCH)
+                                s6Icon = switchData.getString(ICON).toInt()
+                            } else {
+                                for (j in 0..4) {
+                                    val switchData = switchListData.getJSONObject(j)
+                                    val switchId = switchData.get("switch_id_by_app").toString()
+                                    if (switchId != "5") {
+                                        when (switchId) {
+                                            "1" -> {
+                                                s1Name = switchData.getString(SWITCH)
+                                                s1Icon = switchData.getString(ICON).toInt()
+                                            }
+                                            "2" -> {
+                                                s2Name = switchData.getString(SWITCH)
+                                                s2Icon = switchData.getString(ICON).toInt()
+                                            }
+                                            "3" -> {
+                                                s3Name = switchData.getString(SWITCH)
+                                                s3Icon = switchData.getString(ICON).toInt()
+                                            }
+                                            else -> {
+                                                s4Name = switchData.getString(SWITCH)
+                                                s4Icon = switchData.getString(ICON).toInt()
+                                            }
                                         }
                                     }
                                 }
                             }
 
-                            getLiveStates(roomName, deviceId, bluetoothId)
+                            getLiveStates(roomName, deviceId, bluetoothId, switchCount)
 
                             Log.d(TAG, "switchList: Message - $msg")
                         } else {
-                            
+
                             // TODO: Failed to get room data
 //                            showPSnackbar("Failed to get room data")
                             Log.e(TAG, "switch switchList: Message - $msg")
                         }
                     } catch (e: Exception) {
-                        
+
                         Log.e(TAG, "Exception in switch updateUI: $e")
                         showToast(e.message)
                     }
                 }, {
-                    
+
                     showToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
@@ -254,7 +269,8 @@ class DashbordFragment : Fragment() {
     }
 
     private fun getLiveStates(roomName: String, deviceId: String,
-        bluetoothId: String) {                              // TODO: Step 3.2
+        bluetoothId: String,
+        switchCount: String = "5") {                              // TODO: Step 3.2
 
         val getLiveUrl = getString(R.string.base_url) + getString(R.string.url_get_live)
 
@@ -266,18 +282,21 @@ class DashbordFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        val s1State = mData.get(StartActivity.APPL1).toString()
-                        val s2State = mData.get(StartActivity.APPL2).toString()
-                        val s3State = mData.get(StartActivity.APPL3).toString()
-                        val s4State = mData.get(StartActivity.APPL4).toString()
-                        val fan = mData.get(StartActivity.FAN).toString()
+                        if (switchCount == "1") {
+                            s6State = mData.get(StartActivity.APPL6) as Int
+                        } else {
+                            s1State = mData.get(StartActivity.APPL1) as Int
+                            s2State = mData.get(StartActivity.APPL2) as Int
+                            s3State = mData.get(StartActivity.APPL3) as Int
+                            s4State = mData.get(StartActivity.APPL4) as Int
+                            fan = mData.get(StartActivity.FAN) as Int
+                        }
 
                         // Creating local Database
                         val device =
-                            Device(0, roomName, deviceId, bluetoothId, s1Name, s1Icon,
-                                s1State.toInt(), s2Name, s2Icon, s2State.toInt(),
-                                s3Name, s3Icon, s3State.toInt(), s4Name, s4Icon, s4State.toInt(), 0,
-                                fan.toInt())
+                            Device(0, roomName, deviceId, switchCount, bluetoothId, s1Name, s1Icon,
+                                s1State, s2Name, s2Icon, s2State, s3Name, s3Icon, s3State, s4Name,
+                                s4Icon, s4State, s6Name, s6Icon, s6State, 0, fan)
                         deviceViewModel.addDevice(device)
                         Log.d(TAG, "createLocalDB: Created!")
 
@@ -319,12 +338,12 @@ class DashbordFragment : Fragment() {
         allData.observe(viewLifecycleOwner) {
             try {
                 if (it.isNotEmpty()) {
-                    
+
                     binding.addDeviceBtn.visibility = View.GONE
 //                    binding.fragmentContainerView2.findNavController()
 //                        .navigate(R.id.roomControlsFragment)
                 } else {
-                    
+
                     binding.addDeviceBtn.visibility = View.VISIBLE
 //                    binding.fragmentContainerView2.findNavController()
 //                        .navigate(R.id.addDeviceFragment)
@@ -367,7 +386,7 @@ class DashbordFragment : Fragment() {
                             val action =
                                 DashbordFragmentDirections.actionDashbordFragmentToRegistrationFragment()
                             findNavController().navigate(action)
-                            
+
                         }
                         .setNegativeButton("No") { _, _ -> }
                     builder.create()

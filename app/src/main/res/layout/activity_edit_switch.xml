@@ -198,7 +198,7 @@
                                 android:gravity="center"
                                 android:hint="00:00"
                                 android:inputType="none"
-                                android:paddingVertical="12dp"
+                                android:paddingVertical="2dp"
                                 android:textColor="@color/dark_green"
                                 android:textSize="@dimen/_12ssp" />
                         </LinearLayout>
@@ -230,7 +230,7 @@
                                 android:gravity="center"
                                 android:hint="00:00"
                                 android:inputType="none"
-                                android:paddingVertical="12dp"
+                                android:paddingVertical="2dp"
                                 android:textColor="@color/dark_red"
                                 android:textSize="@dimen/_12ssp" />
                         </LinearLayout>
