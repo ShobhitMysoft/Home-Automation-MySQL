@@ -97,6 +97,7 @@ class RegistrationFragment : Fragment() {
                             .setNegativeButton("No") { _, _ -> }
                         builder.create()
                         builder.show()
+                        binding.regRegisterBtn.isEnabled = true
                     } else binding.regPhoneNo.error = "Enter a proper phone number"
                 } else binding.regPhoneNo.error = "Phone number is required"
             } else binding.regEmail.error = "Email address is required"

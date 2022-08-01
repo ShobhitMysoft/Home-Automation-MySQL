@@ -187,7 +187,9 @@ class DashbordFragment : Fragment() {
             val deviceData = deviceListData.getJSONObject(i)
             val roomName = deviceData.get("room_name").toString()
             val deviceId = deviceData.get("device_id").toString()
-            val switchCount = deviceData.get("switch_count").toString()
+            // TODO// Remove this for single switch device
+            val switchCount = "5"
+//            val switchCount = deviceData.get("switch_count").toString()
             val bluetoothId = deviceData.get("bluetooth").toString()
 
             val switchListRequest = object : StringRequest(Method.POST, switchListUrl,
@@ -202,7 +204,6 @@ class DashbordFragment : Fragment() {
                             val switchListData = mData.get("data") as JSONArray
                             if (switchCount == "1") {
                                 val switchData = switchListData.getJSONObject(0)
-//                                val switchId = switchData.get("switch_id_by_app").toString()
                                 s6Name = switchData.getString(SWITCH)
                                 s6Icon = switchData.getString(ICON).toInt()
                             } else {
@@ -283,13 +284,13 @@ class DashbordFragment : Fragment() {
 
                     if (resp == 1) {
                         if (switchCount == "1") {
-                            s6State = mData.get(StartActivity.APPL6) as Int
+                            s6State = (mData.get(StartActivity.APPL1) as String).toInt()
                         } else {
-                            s1State = mData.get(StartActivity.APPL1) as Int
-                            s2State = mData.get(StartActivity.APPL2) as Int
-                            s3State = mData.get(StartActivity.APPL3) as Int
-                            s4State = mData.get(StartActivity.APPL4) as Int
-                            fan = mData.get(StartActivity.FAN) as Int
+                            s1State = (mData.get(StartActivity.APPL1) as String).toInt()
+                            s2State = (mData.get(StartActivity.APPL2) as String).toInt()
+                            s3State = (mData.get(StartActivity.APPL3) as String).toInt()
+                            s4State = (mData.get(StartActivity.APPL4) as String).toInt()
+                            fan = (mData.get(StartActivity.FAN) as String).toInt()
                         }
 
                         // Creating local Database
@@ -340,13 +341,13 @@ class DashbordFragment : Fragment() {
                 if (it.isNotEmpty()) {
 
                     binding.addDeviceBtn.visibility = View.GONE
-//                    binding.fragmentContainerView2.findNavController()
-//                        .navigate(R.id.roomControlsFragment)
+                    binding.fragmentContainerView2.findNavController()
+                        .navigate(R.id.roomControlsFragment)
                 } else {
 
                     binding.addDeviceBtn.visibility = View.VISIBLE
-//                    binding.fragmentContainerView2.findNavController()
-//                        .navigate(R.id.addDeviceFragment)
+                    binding.fragmentContainerView2.findNavController()
+                        .navigate(R.id.addDeviceFragment)
                 }
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG, "checkLocalDatabase: Error", e)

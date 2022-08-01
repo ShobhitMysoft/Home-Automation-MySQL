@@ -34,7 +34,6 @@ import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL1
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL2
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL3
 import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL4
-import com.mysofttechnology.homeautomation.StartActivity.Companion.APPL6
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FAN
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
@@ -119,8 +118,6 @@ class RoomControlsFragment : Fragment() {
         Log.i(TAG, "onCreate: Called")
 
         val exitAppDialog = ExitAppDialog()
-//        loadingDialog = LoadingDialog()
-//        loadingDialog.isCancelable = false
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             exitAppDialog.show(childFragmentManager, "Exit App")
@@ -354,7 +351,7 @@ class RoomControlsFragment : Fragment() {
 
                     if (resp == 1) {
                         if (curDevSwitchCount == "1") {
-                            val app6Val = mData.get(APPL6).toString()
+                            val app6Val = mData.get(APPL1).toString()
                             val wifi = mData.get("wifi").toString()
 
                             if (checkWifi && wifi == "0") showDeviceOfflineDialog()
@@ -830,7 +827,7 @@ class RoomControlsFragment : Fragment() {
                     checkWifiIsRunning = true
                     toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
                 }
-                updateLive(if (isChecked) ONE else ZERO, APPL6)
+                updateLive(if (isChecked) ONE else ZERO, APPL1)
             }
         }
 
