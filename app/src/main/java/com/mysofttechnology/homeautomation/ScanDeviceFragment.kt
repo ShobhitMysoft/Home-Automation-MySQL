@@ -382,8 +382,10 @@ class ScanDeviceFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        for (i in 1..5) {
-                            createSwitch(deviceId, i)
+                        // TODO: Check if single switch device or not
+                        if (deviceId == "has_single_switch") createSwitch(deviceId, 6)
+                         else {
+                            for (i in 1..5) createSwitch(deviceId, i)
                         }
                         Log.d(TAG, "addDevice: Message - $msg")
                     } else {
@@ -456,7 +458,7 @@ class ScanDeviceFragment : Fragment() {
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
                 params["device_id"] = deviceId
-                params["switch"] = if (i == 5) "Fan" else "Switch $i"
+                params["switch"] = if (i == 5) "Fan" else if (i == 6) "Switch" else "Switch $i"
                 params["icon"] = ZERO
                 params[START_TIME] = BLANK
                 params[STOP_TIME] = BLANK
