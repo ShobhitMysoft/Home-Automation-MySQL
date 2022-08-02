@@ -137,7 +137,7 @@ class RegistrationFragment : Fragment() {
                     }
                 } catch (e: Exception) {
                     Log.d(TAG, "Exception in checkUserData: $e")
-                    Toast.makeText(requireActivity(), e.message, Toast.LENGTH_SHORT).show()
+                    if (e.message != null) Toast.makeText(requireActivity(), e.message, Toast.LENGTH_SHORT).show()
                 }
             }, {
                 loadingDialog.dismiss()

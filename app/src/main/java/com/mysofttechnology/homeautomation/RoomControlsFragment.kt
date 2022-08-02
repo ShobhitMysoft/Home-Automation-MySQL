@@ -54,6 +54,7 @@ import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Compani
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.ROOM_NAME
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.SWITCH_ID
 import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.SWITCH_ID_BY_APP
+import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Companion.USER_ID
 import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBinding
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
@@ -221,7 +222,7 @@ class RoomControlsFragment : Fragment() {
         if (curDevSwitchCount == "1") {
             binding.sl1View.visibility = View.VISIBLE
             binding.sl5View.visibility = View.GONE
-            binding.powerBtn.visibility = View.GONE
+            binding.powerBtnView.visibility = View.GONE
 
             iconsList = resources.obtainTypedArray(R.array.sl1_icons_list)
 
@@ -229,7 +230,9 @@ class RoomControlsFragment : Fragment() {
         } else {
             binding.sl1View.visibility = View.GONE
             binding.sl5View.visibility = View.VISIBLE
-            binding.powerBtn.visibility = View.VISIBLE
+            binding.powerBtnView.visibility = View.VISIBLE
+
+            iconsList = resources.obtainTypedArray(R.array.icons_list)
 
             binding.switch1Switch.isChecked = cd.s1State == 1
             binding.switch2Switch.isChecked = cd.s2State == 1
@@ -252,7 +255,7 @@ class RoomControlsFragment : Fragment() {
 
         Log.i(TAG, "updateUIWithLocalDB: Data updated from Local")
 
-        if (bluetoothAdapter?.isEnabled == true) {
+        if (bluetoothAdapter?.isEnabled == true && currentBtDeviceId != null && currentBtDeviceId != "null") {
             binding.mainControlsView.visibility = View.VISIBLE
             GlobalScope.launch(Dispatchers.IO) {
                 connectToBtDevice()
@@ -304,7 +307,7 @@ class RoomControlsFragment : Fragment() {
 
     private fun connectToInternet() {                                                               // TODO: Step 6
         isBTConnected = false
-        if (bluetoothAdapter?.isEnabled == false) binding.mainControlsView.visibility = View.VISIBLE
+        binding.mainControlsView.visibility = View.VISIBLE
         if (isOnline()) {                                                                           // TODO: Step 9.1
             try {
                 binding.connectionBtn.setImageDrawable(
@@ -408,7 +411,7 @@ class RoomControlsFragment : Fragment() {
 
 
                     Log.e(TAG, "Exception in updateUI: $e")
-                    showLToast(e.message)
+                    if (e.message != null) showLToast("${e.message}")
                 }
             }, {
 
@@ -419,6 +422,7 @@ class RoomControlsFragment : Fragment() {
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
                 params["device_id"] = currentDeviceId.toString()
+                params["mobile_no"] = currentUserId.toString()
                 return params
             }
 
@@ -455,14 +459,14 @@ class RoomControlsFragment : Fragment() {
                     } else {
 
 
-                        showPSnackbar("Failed to get room data")
+                        showPSnackbar("Failed to get switch data")
                         Log.e(TAG, "switch switchList: Message - $msg")
                     }
                 } catch (e: Exception) {
 
 
                     Log.e(TAG, "Exception in switch updateUI: $e")
-                    showLToast(e.message)
+                    if (e.message != null) showLToast("${e.message}")
                 }
             }, {
 
@@ -473,6 +477,7 @@ class RoomControlsFragment : Fragment() {
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
                 params["device_id"] = currentDeviceId.toString()
+                params["mobile_no"] = currentUserId.toString()
                 return params
             }
 
@@ -844,6 +849,7 @@ class RoomControlsFragment : Fragment() {
             SWITCH4?.let { id -> showPopupMenu(it, id, "4") }
         }
         binding.switch6MoreBtn.setOnClickListener {
+            Log.d(TAG, "uiHandler: $SWITCH6")
             SWITCH6?.let { id -> showPopupMenu(it, id, "6") }
         }
     }
@@ -918,7 +924,7 @@ class RoomControlsFragment : Fragment() {
 
 
                         Log.e(TAG, "Exception in updateLive: $e")
-                        showLToast(e.message)
+                        if (e.message != null) showLToast(e.message)
                     }
                 }, {
 
@@ -1046,7 +1052,7 @@ class RoomControlsFragment : Fragment() {
 
 
                     Log.e(TAG, "Exception in updateLive: $e")
-                    showLToast(e.message)
+                    if (e.message != null) showLToast(e.message)
                 }
             }, {
 
@@ -1107,6 +1113,7 @@ class RoomControlsFragment : Fragment() {
                 R.id.edit -> {
                     val intent = Intent(context, EditSwitchActivity::class.java)
                     intent.putExtra(ROOM_ID, currentDeviceId)
+                    intent.putExtra(USER_ID, currentUserId)
                     intent.putExtra(ROOM_NAME, roomsList[selectedRoomIndex])
                     intent.putExtra(SWITCH_ID, switchID)
                     intent.putExtra(SWITCH_ID_BY_APP, switchIDByApp)
@@ -1182,11 +1189,11 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun showLToast(message: String? = "Message") {
-        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
+        if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
     private fun showSToast(message: String? = "Message") {
-        Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
+        if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
     }
 
     private fun showPSnackbar(msg: String = "Something went wrong.") {

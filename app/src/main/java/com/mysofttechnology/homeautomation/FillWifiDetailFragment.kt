@@ -75,7 +75,7 @@ class FillWifiDetailFragment : Fragment() {
                 }
             }
             Navigation.findNavController(requireView())
-                .navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+                .navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
 //            val action =
 //                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
 //            findNavController().navigate(action)
@@ -346,7 +346,7 @@ class FillWifiDetailFragment : Fragment() {
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Exception in verifyWifi: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -391,7 +391,7 @@ class FillWifiDetailFragment : Fragment() {
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in addBluetoothId: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()

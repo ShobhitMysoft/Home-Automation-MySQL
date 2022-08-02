@@ -137,7 +137,7 @@ class EditRoomFragment : Fragment() {
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in updateUI: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()

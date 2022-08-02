@@ -107,7 +107,7 @@ class RoomsFragment : Fragment() {
                     } catch (e: Exception) {
                         loadingDialog.dismiss()
                         Log.e(TAG, "Exception in roomsData: $e")
-                        showToast(e.message)
+                        if (e.message != null) showToast(e.message)
                     }
                 }, {
                     loadingDialog.dismiss()

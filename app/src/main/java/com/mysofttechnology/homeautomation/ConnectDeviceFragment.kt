@@ -102,9 +102,10 @@ class ConnectDeviceFragment : Fragment() {
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
             pairedDevices?.forEach { device ->
                 val deviceName = device.name
+                val deviceIdDigits = deviceId?.substring(4, deviceId!!.length)
 //                val deviceHardwareAddress = device.address // MAC address
 
-                if (deviceName?.contains("$deviceId") == true) gotoFillWifiFrag(device.toString())
+                if (deviceName?.contains("$deviceIdDigits") == true) gotoFillWifiFrag(device.toString())
 
                 if (deviceName.take(2) == "SL") {
                     deviceNameList.add(deviceName.toString())

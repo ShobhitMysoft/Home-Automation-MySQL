@@ -112,7 +112,7 @@ class ProfileFragment : Fragment() {
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Exception in loadProfile: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                     loadingDialog.dismiss()
                 }
             }, {
@@ -196,7 +196,7 @@ class ProfileFragment : Fragment() {
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in updateProfile: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()

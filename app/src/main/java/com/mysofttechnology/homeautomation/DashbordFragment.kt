@@ -135,7 +135,7 @@ class DashbordFragment : Fragment() {
                     } catch (e: Exception) {
 
                         Log.d(TAG, "Exception in checkDeviceAvailability: $e")
-                        showToast(e.message)
+                        if (e.message != null) showToast(e.message)
                     }
                 }, {
 
@@ -184,12 +184,13 @@ class DashbordFragment : Fragment() {
         devicesLen = deviceListData.length()
 
         for (i in 0 until devicesLen) {
+            Log.d(TAG, "createLocalDatabase: $deviceListData")
             val deviceData = deviceListData.getJSONObject(i)
             val roomName = deviceData.get("room_name").toString()
             val deviceId = deviceData.get("device_id").toString()
             // TODO// Remove this for single switch device
-            val switchCount = "5"
-//            val switchCount = deviceData.get("switch_count").toString()
+//            val switchCount = "5"
+            val switchCount = deviceData.get("switch_count").toString()
             val bluetoothId = deviceData.get("bluetooth").toString()
 
             val switchListRequest = object : StringRequest(Method.POST, switchListUrl,
@@ -245,7 +246,7 @@ class DashbordFragment : Fragment() {
                     } catch (e: Exception) {
 
                         Log.e(TAG, "Exception in switch updateUI: $e")
-                        showToast(e.message)
+                        if (e.message != null) showToast(e.message)
                     }
                 }, {
 
@@ -255,6 +256,7 @@ class DashbordFragment : Fragment() {
                 override fun getParams(): Map<String, String> {
                     val params = java.util.HashMap<String, String>()
                     params["device_id"] = deviceId
+                    params["mobile_no"] = currentUserId.toString()
                     return params
                 }
 
@@ -311,7 +313,7 @@ class DashbordFragment : Fragment() {
                 } catch (e: Exception) {
 
                     Log.e(TAG, "Exception in getLiveStates: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
 

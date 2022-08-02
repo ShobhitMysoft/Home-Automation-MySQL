@@ -94,7 +94,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Exception in generateOTP: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 showToast("Something went wrong.")
@@ -157,7 +157,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Exception in deleteRoom: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 showToast("Something went wrong.")
