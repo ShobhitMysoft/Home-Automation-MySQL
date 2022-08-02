@@ -209,6 +209,7 @@ class VerifyCodeFragment : Fragment() {
     }
 
     private fun gotoDashboard() {
+        countDownTimer.cancel()
         val spEditor = sharedPref?.edit()
 
         spEditor?.putString(getString(R.string.current_user_name), fullName)
@@ -233,6 +234,7 @@ class VerifyCodeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        countDownTimer.cancel()
         _binding = null
     }
 }

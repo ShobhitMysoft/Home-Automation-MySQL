@@ -185,7 +185,7 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
-        binding.mainControlsView.visibility = View.INVISIBLE
+//        binding.mainControlsView.visibility = View.INVISIBLE
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
@@ -256,7 +256,7 @@ class RoomControlsFragment : Fragment() {
         Log.i(TAG, "updateUIWithLocalDB: Data updated from Local")
 
         if (bluetoothAdapter?.isEnabled == true && currentBtDeviceId != null && currentBtDeviceId != "null") {
-            binding.mainControlsView.visibility = View.VISIBLE
+//            binding.mainControlsView.visibility = View.VISIBLE
             GlobalScope.launch(Dispatchers.IO) {
                 connectToBtDevice()
             }
@@ -295,7 +295,7 @@ class RoomControlsFragment : Fragment() {
                     Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
                     enableUI()
                 }
-                binding.mainControlsView.visibility = View.VISIBLE
+//                binding.mainControlsView.visibility = View.VISIBLE
             }
         } else {
 //            closeSocket()       // Bluetooth is not connected
@@ -307,7 +307,7 @@ class RoomControlsFragment : Fragment() {
 
     private fun connectToInternet() {                                                               // TODO: Step 6
         isBTConnected = false
-        binding.mainControlsView.visibility = View.VISIBLE
+//        binding.mainControlsView.visibility = View.VISIBLE
         if (isOnline()) {                                                                           // TODO: Step 9.1
             try {
                 binding.connectionBtn.setImageDrawable(
