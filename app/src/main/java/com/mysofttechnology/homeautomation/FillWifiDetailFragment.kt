@@ -75,7 +75,7 @@ class FillWifiDetailFragment : Fragment() {
                 }
             }
             Navigation.findNavController(requireView())
-                .navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+                .navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
 //            val action =
 //                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
 //            findNavController().navigate(action)
@@ -138,7 +138,10 @@ class FillWifiDetailFragment : Fragment() {
             }
         }
 
-        bind.refreshFab.setOnClickListener { getWifiDetails() }
+        bind.refreshFab.setOnClickListener {
+            bind.refreshFab.visibility = View.GONE
+            getWifiDetails()
+        }
 
         getWifiDetails()
         checkSettings()
@@ -343,7 +346,7 @@ class FillWifiDetailFragment : Fragment() {
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Exception in verifyWifi: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -388,7 +391,7 @@ class FillWifiDetailFragment : Fragment() {
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in addBluetoothId: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -456,10 +459,9 @@ class FillWifiDetailFragment : Fragment() {
 
     private fun getWifiDetails() {
         Log.d(TAG, "getWifiDetails: Socket is connected.")
-        bind.refreshFab.visibility = View.GONE
         Handler(Looper.getMainLooper()).postDelayed({
-            bind.refreshFab.visibility = View.VISIBLE
-        }, 10000)
+            if (isAdded) bind.refreshFab.visibility = View.VISIBLE
+        }, 5000)
 
         wifiManager = requireContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
 
@@ -496,7 +498,7 @@ class FillWifiDetailFragment : Fragment() {
             wifiSSIDList.add(it.SSID)
             listAdapter.notifyDataSetChanged()
         }
-        bind.wifiLv.adapter = listAdapter
+        if (isAdded) bind.wifiLv.adapter = listAdapter
     }
 
     private fun scanFailure(wifiManager: WifiManager) {

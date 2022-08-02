@@ -48,6 +48,7 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
     private var STOP_TIME_FLAG = false
     private var TIME_PICKER_FLAG = 1
     private lateinit var deviceId: String
+    private lateinit var userId: String
     private lateinit var roomName: String
     private lateinit var switchId: String
     private lateinit var switchIdByApp: String
@@ -64,16 +65,17 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
         bind = ActivityEditSwitchBinding.inflate(layoutInflater)
         setContentView(bind.root)
 
-        iconsList = resources.obtainTypedArray(R.array.icons_list)
-        iconsNameList = resources.getStringArray(R.array.icons_names)
-
         loadingDialog = LoadingDialog()
         timePickerDialog = TimePickerFragment()
 
         deviceId = intent.getStringExtra(ROOM_ID)!!
+        userId = intent.getStringExtra(USER_ID)!!
         roomName = intent.getStringExtra(ROOM_NAME)!!
         switchId = intent.getStringExtra(SWITCH_ID)!!
         switchIdByApp = intent.getStringExtra(SWITCH_ID_BY_APP)!!
+
+        iconsList = if (switchIdByApp == "6") resources.obtainTypedArray(R.array.sl1_icons_list) else resources.obtainTypedArray(R.array.icons_list)
+        iconsNameList = if (switchIdByApp == "6") resources.getStringArray(R.array.sl1_icons_names) else resources.getStringArray(R.array.icons_names)
 
         loadUIData()
 
@@ -168,7 +170,7 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in submitData: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -179,6 +181,7 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
                 val params = HashMap<String, String>()
                 params["device_id"] = deviceId
                 params["switch_id"] = switchId
+                params["mobile_no"] = userId
                 params["switch"] = switchName
                 params["icon"] = switchIconIndex.toString()
                 params[START_TIME] = bind.startTimeTv.text.toString().trim().replace(" ", ":")
@@ -259,7 +262,7 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
                     } catch (e: Exception) {
                         loadingDialog.dismiss()
                         Log.e(TAG, "Exception in switch updateUI: $e")
-                        showToast(e.message)
+                        if (e.message != null) showToast(e.message)
                     }
                 }, {
                     loadingDialog.dismiss()
@@ -268,7 +271,8 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
                 }) {
                 override fun getParams(): Map<String, String> {
                     val params = HashMap<String, String>()
-                    params["device_id"] = deviceId.toString()
+                    params["device_id"] = deviceId
+                    params["mobile_no"] = userId
                     return params
                 }
 
@@ -323,6 +327,7 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
 
     companion object {
         const val ROOM_ID = "device_id"
+        const val USER_ID = "user_id"
         const val ROOM_NAME = "room_name"
         const val SWITCH_ID = "switch_id"
         const val SWITCH_ID_BY_APP = "switch_id_by_app"

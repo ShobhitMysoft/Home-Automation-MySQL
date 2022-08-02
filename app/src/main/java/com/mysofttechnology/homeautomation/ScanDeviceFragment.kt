@@ -175,7 +175,7 @@ class ScanDeviceFragment : Fragment() {
                     loadingDialog.dismiss()
                     binding.sdContinueBtn.isEnabled = true
                     Log.e(TAG, "Exception in checkDeviceAvailability: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -230,7 +230,7 @@ class ScanDeviceFragment : Fragment() {
                     loadingDialog.dismiss()
                     binding.sdContinueBtn.isEnabled = true
                     Log.e(TAG, "Exception in checkChild: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -337,7 +337,7 @@ class ScanDeviceFragment : Fragment() {
                 } catch (e: Exception) {
                     loadingDialog.dismiss()
                     Log.e(TAG, "Exception in verifyOtpCode: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -382,8 +382,7 @@ class ScanDeviceFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        // TODO: Check if single switch device or not
-                        if (deviceId == "has_single_switch") createSwitch(deviceId, 6)
+                        if (deviceId.elementAt(2).toString() == "1") createSwitch(deviceId, 6)
                          else {
                             for (i in 1..5) createSwitch(deviceId, i)
                         }
@@ -398,7 +397,7 @@ class ScanDeviceFragment : Fragment() {
                     loadingDialog.dismiss()
                     binding.sdContinueBtn.isEnabled = true
                     Log.e(TAG, "Exception in addDevice: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -411,6 +410,8 @@ class ScanDeviceFragment : Fragment() {
                 params["device_id"] = deviceId
                 params["user_id"] = currentUserId.toString()
                 params["room_name"] = "Room $deviceId"
+                Log.i(TAG, "getParams: $deviceId | ${deviceId.elementAt(2)}")
+                params["switch_count"] = deviceId.elementAt(2).toString()
                 return params
             }
 
@@ -447,7 +448,7 @@ class ScanDeviceFragment : Fragment() {
                     loadingDialog.dismiss()
                     binding.sdContinueBtn.isEnabled = true
                     Log.e(TAG, "Exception in createSwitch: $e")
-                    showToast(e.message)
+                    if (e.message != null) showToast(e.message)
                 }
             }, {
                 loadingDialog.dismiss()
@@ -458,6 +459,7 @@ class ScanDeviceFragment : Fragment() {
             override fun getParams(): Map<String, String> {
                 val params = HashMap<String, String>()
                 params["device_id"] = deviceId
+                params["mobile_no"] = currentUserId.toString()
                 params["switch"] = if (i == 5) "Fan" else if (i == 6) "Switch" else "Switch $i"
                 params["icon"] = ZERO
                 params[START_TIME] = BLANK

@@ -97,6 +97,7 @@ class RegistrationFragment : Fragment() {
                             .setNegativeButton("No") { _, _ -> }
                         builder.create()
                         builder.show()
+                        binding.regRegisterBtn.isEnabled = true
                     } else binding.regPhoneNo.error = "Enter a proper phone number"
                 } else binding.regPhoneNo.error = "Phone number is required"
             } else binding.regEmail.error = "Email address is required"
@@ -136,7 +137,7 @@ class RegistrationFragment : Fragment() {
                     }
                 } catch (e: Exception) {
                     Log.d(TAG, "Exception in checkUserData: $e")
-                    Toast.makeText(requireActivity(), e.message, Toast.LENGTH_SHORT).show()
+                    if (e.message != null) Toast.makeText(requireActivity(), e.message, Toast.LENGTH_SHORT).show()
                 }
             }, {
                 loadingDialog.dismiss()

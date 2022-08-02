@@ -1,7 +1,6 @@
 package com.mysofttechnology.homeautomation
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -73,13 +72,17 @@ class ConnectDeviceFragment : Fragment() {
                 "Device Name = ${deviceNameList[position]}\nBT Device = ${btDeviceList[position]}"
             )
 
-            val action =
-                ConnectDeviceFragmentDirections.actionConnectDeviceFragmentToFillWifiDetailFragment(
-                    btDeviceList[position].toString(), deviceId.toString()
-                )
-            findNavController().navigate(action)
+            gotoFillWifiFrag(btDeviceList[position].toString())
 
         }
+    }
+
+    private fun gotoFillWifiFrag(deviceBtId: String) {
+        val action =
+            ConnectDeviceFragmentDirections.actionConnectDeviceFragmentToFillWifiDetailFragment(
+                deviceBtId, deviceId.toString()
+            )
+        findNavController().navigate(action)
     }
 
     private fun loadPairedDevices() {
@@ -99,9 +102,12 @@ class ConnectDeviceFragment : Fragment() {
             val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
             pairedDevices?.forEach { device ->
                 val deviceName = device.name
+                val deviceIdDigits = deviceId?.substring(4, deviceId!!.length)
 //                val deviceHardwareAddress = device.address // MAC address
 
-                if (!deviceName.isNullOrBlank() && deviceName.take(4) == "HOME") {
+                if (deviceName?.contains("$deviceIdDigits") == true) gotoFillWifiFrag(device.toString())
+
+                if (deviceName.take(2) == "SL") {
                     deviceNameList.add(deviceName.toString())
                     btDeviceList.add(device)
                     listAdapter.notifyDataSetChanged()
