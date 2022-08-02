@@ -73,6 +73,7 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private var isLoadingUi: Boolean = false
     private var powerBtnClicked: Boolean = false
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var isBTConnected: Boolean = false
@@ -172,6 +173,171 @@ class RoomControlsFragment : Fragment() {
 //        connectToBtDevice()
     }
 
+    private fun uiHandler() {
+        Log.d(TAG, "uiHandler: Called\n")
+        val spEditor = sharedPref?.edit()
+
+        binding.powerBtn.setOnClickListener {
+            powerBtnClicked = true
+            loadingDialog.show(childFragmentManager, "$TAG powerBtn")
+            if (!checkWifiIsRunning) {
+                checkWifiIsRunning = true
+                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+            }
+            togglePower()
+        }
+
+        binding.fanSpeedSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) {}
+
+            override fun onStopTrackingTouch(slider: Slider) {
+                val speed = slider.value
+                disableUI()
+                if (isBTConnected) sendDataToBT(when (speed) {
+                    1.0f -> "F"
+                    2.0f -> "G"
+                    3.0f -> "H"
+                    4.0f -> "I"
+                    else -> "E"
+                })
+                else {
+                    if (!checkWifiIsRunning) {
+                        checkWifiIsRunning = true
+                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                    }
+                    updateLive(speed.toInt().toString(), FAN)
+                }
+                spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
+                spEditor?.apply()
+            }
+        })
+
+        binding.fanSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (!isLoadingUi) {
+                disableUI()
+                if (isBTConnected) {
+                    if (!isChecked) {
+                        sendDataToBT("E")
+                    } else {
+                        val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
+                            liveFanSpeed.toString())
+                        sendDataToBT(when (oldFanSpeed) {
+                            "1" -> "F"
+                            "2" -> "G"
+                            "3" -> "H"
+                            "4" -> "I"
+                            else -> "E"
+                        })
+                    }
+                } else {
+                    if (!checkWifiIsRunning) {
+                        checkWifiIsRunning = true
+                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                    }
+                    if (!isChecked) {
+                        updateLive(ZERO, FAN)
+                    } else {
+                        val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
+                            liveFanSpeed.toString())
+                        updateLive(oldFanSpeed.toString(), FAN)
+                    }
+                }
+            }
+        }
+
+        binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
+            if (!isLoadingUi) {
+                disableUI()
+                if (isBTConnected) sendDataToBT(
+                    if (isChecked) "A" else "a")                            // TODO: Step 8
+                else {
+                    if (!checkWifiIsRunning) {
+                        checkWifiIsRunning = true
+                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                    }
+                    updateLive(if (isChecked) ONE else ZERO, APPL1)
+                }
+            }
+        }
+
+        binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
+            if (!isLoadingUi) {
+                disableUI()
+                if (isBTConnected) sendDataToBT(
+                    if (isChecked) "B" else "b")                            // TODO: Step 8
+                else {
+                    if (!checkWifiIsRunning) {
+                        checkWifiIsRunning = true
+                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                    }
+                    updateLive(if (isChecked) ONE else ZERO, APPL2)
+                }
+            }
+        }
+
+        binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
+            if (!isLoadingUi) {
+                disableUI()
+                if (isBTConnected) sendDataToBT(
+                    if (isChecked) "C" else "c")                            // TODO: Step 8
+                else {
+                    if (!checkWifiIsRunning) {
+                        checkWifiIsRunning = true
+                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                    }
+                    updateLive(if (isChecked) ONE else ZERO, APPL3)
+                }
+            }
+        }
+
+        binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
+            if (!isLoadingUi) {
+                disableUI()
+                if (isBTConnected) sendDataToBT(
+                    if (isChecked) "D" else "d")                            // TODO: Step 8
+                else {
+                    if (!checkWifiIsRunning) {
+                        checkWifiIsRunning = true
+                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                    }
+                    updateLive(if (isChecked) ONE else ZERO, APPL4)
+                }
+            }
+        }
+
+        binding.switch6Switch.setOnCheckedChangeListener { _, isChecked ->
+            if (!isLoadingUi) {
+                disableUI()
+                if (isBTConnected) sendDataToBT(
+                    if (isChecked) "A" else "a")                            // TODO: Step 8
+                else {
+                    if (!checkWifiIsRunning) {
+                        checkWifiIsRunning = true
+                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
+                    }
+                    updateLive(if (isChecked) ONE else ZERO, APPL1)
+                }
+            }
+        }
+
+        binding.switch1MoreBtn.setOnClickListener {
+            SWITCH1?.let { id -> showPopupMenu(it, id, "1") }
+        }
+        binding.switch2MoreBtn.setOnClickListener {
+            SWITCH2?.let { id -> showPopupMenu(it, id, "2") }
+        }
+        binding.switch3MoreBtn.setOnClickListener {
+            SWITCH3?.let { id -> showPopupMenu(it, id, "3") }
+        }
+        binding.switch4MoreBtn.setOnClickListener {
+            SWITCH4?.let { id -> showPopupMenu(it, id, "4") }
+        }
+        binding.switch6MoreBtn.setOnClickListener {
+            Log.d(TAG, "uiHandler: $SWITCH6")
+            SWITCH6?.let { id -> showPopupMenu(it, id, "6") }
+        }
+    }
+
     private fun loadUi() {
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
@@ -186,6 +352,7 @@ class RoomControlsFragment : Fragment() {
 
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
 //        binding.mainControlsView.visibility = View.INVISIBLE
+        isLoadingUi = true
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
@@ -290,9 +457,11 @@ class RoomControlsFragment : Fragment() {
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
                     binding.statusPb.visibility = View.INVISIBLE
                     binding.connectionBtn.visibility = View.VISIBLE
+                    isLoadingUi = false
                     enableUI()
                 } catch (e: Exception) {
                     Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
+                    isLoadingUi = false
                     enableUI()
                 }
 //                binding.mainControlsView.visibility = View.VISIBLE
@@ -315,8 +484,10 @@ class RoomControlsFragment : Fragment() {
                 enableUI()
                 binding.statusPb.visibility = View.INVISIBLE
                 binding.connectionBtn.visibility = View.VISIBLE
+                isLoadingUi = false
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
+                isLoadingUi = false
             }
         } else {                                                                           // TODO: Step 9.1
             try {
@@ -325,8 +496,10 @@ class RoomControlsFragment : Fragment() {
                 enableUI()
                 binding.statusPb.visibility = View.INVISIBLE
                 binding.connectionBtn.visibility = View.VISIBLE
+                isLoadingUi = false
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
+                isLoadingUi = false
             }
         }
     }
@@ -699,159 +872,6 @@ class RoomControlsFragment : Fragment() {
             }
         }
         requestQueue.add(stringRequest)
-    }
-
-    private fun uiHandler() {
-        Log.d(TAG, "uiHandler: Called\n")
-        val spEditor = sharedPref?.edit()
-
-        binding.powerBtn.setOnClickListener {
-            powerBtnClicked = true
-            loadingDialog.show(childFragmentManager, "$TAG powerBtn")
-            if (!checkWifiIsRunning) {
-                checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-            }
-            togglePower()
-        }
-
-        binding.fanSpeedSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(slider: Slider) {}
-
-            override fun onStopTrackingTouch(slider: Slider) {
-                val speed = slider.value
-                disableUI()
-                if (isBTConnected) sendDataToBT(when (speed) {
-                    1.0f -> "F"
-                    2.0f -> "G"
-                    3.0f -> "H"
-                    4.0f -> "I"
-                    else -> "E"
-                })
-                else {
-                    if (!checkWifiIsRunning) {
-                        checkWifiIsRunning = true
-                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                    }
-                    updateLive(speed.toInt().toString(), FAN)
-                }
-                spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
-                spEditor?.apply()
-            }
-        })
-
-        binding.fanSwitch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (isBTConnected) {
-                if (!isChecked) {
-                    sendDataToBT("E")
-                } else {
-                    val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
-                        liveFanSpeed.toString())
-                    sendDataToBT(when (oldFanSpeed) {
-                        "1" -> "F"
-                        "2" -> "G"
-                        "3" -> "H"
-                        "4" -> "I"
-                        else -> "E"
-                    })
-                }
-            } else {
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                }
-                if (!isChecked) {
-                    updateLive(ZERO, FAN)
-                } else {
-                    val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
-                        liveFanSpeed.toString())
-                    updateLive(oldFanSpeed.toString(), FAN)
-                }
-            }
-        }
-
-        binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (isBTConnected) sendDataToBT(
-                if (isChecked) "A" else "a")                            // TODO: Step 8
-            else {
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                }
-                updateLive(if (isChecked) ONE else ZERO, APPL1)
-            }
-        }
-
-        binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (isBTConnected) sendDataToBT(
-                if (isChecked) "B" else "b")                            // TODO: Step 8
-            else {
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                }
-                updateLive(if (isChecked) ONE else ZERO, APPL2)
-            }
-        }
-
-        binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (isBTConnected) sendDataToBT(
-                if (isChecked) "C" else "c")                            // TODO: Step 8
-            else {
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                }
-                updateLive(if (isChecked) ONE else ZERO, APPL3)
-            }
-        }
-
-        binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (isBTConnected) sendDataToBT(
-                if (isChecked) "D" else "d")                            // TODO: Step 8
-            else {
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                }
-                updateLive(if (isChecked) ONE else ZERO, APPL4)
-            }
-        }
-
-        binding.switch6Switch.setOnCheckedChangeListener { _, isChecked ->
-            disableUI()
-            if (isBTConnected) sendDataToBT(
-                if (isChecked) "A" else "a")                            // TODO: Step 8
-            else {
-                if (!checkWifiIsRunning) {
-                    checkWifiIsRunning = true
-                    toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                }
-                updateLive(if (isChecked) ONE else ZERO, APPL1)
-            }
-        }
-
-        binding.switch1MoreBtn.setOnClickListener {
-            SWITCH1?.let { id -> showPopupMenu(it, id, "1") }
-        }
-        binding.switch2MoreBtn.setOnClickListener {
-            SWITCH2?.let { id -> showPopupMenu(it, id, "2") }
-        }
-        binding.switch3MoreBtn.setOnClickListener {
-            SWITCH3?.let { id -> showPopupMenu(it, id, "3") }
-        }
-        binding.switch4MoreBtn.setOnClickListener {
-            SWITCH4?.let { id -> showPopupMenu(it, id, "4") }
-        }
-        binding.switch6MoreBtn.setOnClickListener {
-            Log.d(TAG, "uiHandler: $SWITCH6")
-            SWITCH6?.let { id -> showPopupMenu(it, id, "6") }
-        }
     }
 
     private fun sendDataToBT(signal: String) {
