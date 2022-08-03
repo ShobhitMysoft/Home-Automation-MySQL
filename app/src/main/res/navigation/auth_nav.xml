@@ -133,6 +133,10 @@
             <action
                 android:id="@+id/action_scanDeviceFragment_to_editRoomFragment"
                 app:destination="@id/editRoomFragment" />
+            <action
+                android:id="@+id/action_scanDeviceFragment_to_dashbordFragment"
+                app:destination="@id/dashbordFragment"
+                app:popUpTo="@id/dashbordFragment" />
         </fragment>
         <fragment
             android:id="@+id/connectDeviceFragment"

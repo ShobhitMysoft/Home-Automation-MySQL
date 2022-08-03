@@ -215,6 +215,7 @@ class RoomControlsFragment : Fragment() {
         })
 
         binding.fanSwitch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: fanSwitch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) {
@@ -248,6 +249,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch1Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -263,6 +265,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch2Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -278,6 +281,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch3Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -293,6 +297,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch4Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -308,6 +313,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch6Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch6Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -365,13 +371,15 @@ class RoomControlsFragment : Fragment() {
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
 //        binding.mainControlsView.visibility = View.INVISIBLE
         isLoadingUi = true
+        var i = 0
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
+            Log.i(TAG, "checkLocalDatabase: ${deviceList.size}")
             roomsList.clear()
             deviceIDList.clear()
             deviceList.forEach {
-                Log.d(TAG, "checkLocalDatabase: ${it.name} | ${it.bluetoothId}")
+                Log.d(TAG, "checkLocalDatabase ${++i}: ${it.name} | ${it.bluetoothId}")
                 roomsList.add(it.name)
                 deviceIDList.add(it.deviceId)
             }
@@ -388,7 +396,7 @@ class RoomControlsFragment : Fragment() {
                     binding.currentRoomTv.text = cd.name
                     updateUIWithLocalDB()
                 } catch (e: Exception) {
-                    Log.i(TAG, "checkLocalDatabase: $roomsList\n$deviceIDList")
+                    Log.e(TAG, "checkLocalDatabase: $roomsList\n$deviceIDList")
                     Log.e(TAG, "checkLocalDatabase: Error", e)
                 }
             }
@@ -397,6 +405,7 @@ class RoomControlsFragment : Fragment() {
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun updateUIWithLocalDB() {                                                             // TODO: Step 5
+        Log.d(TAG, "checkLocalDatabase: Called")
         binding.connectionBtn.visibility = View.INVISIBLE
         binding.statusPb.visibility = View.VISIBLE
 
