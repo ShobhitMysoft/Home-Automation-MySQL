@@ -141,7 +141,8 @@
             tools:layout="@layout/fragment_connect_device" >
             <action
                 android:id="@+id/action_connectDeviceFragment_to_fillWifiDetailFragment"
-                app:destination="@id/fillWifiDetailFragment" />
+                app:destination="@id/fillWifiDetailFragment"
+                app:popUpTo="@id/connectDeviceFragment" />
             <action
                 android:id="@+id/action_connectDeviceFragment_to_roomsFragment"
                 app:destination="@id/roomsFragment"
@@ -185,7 +186,8 @@
                 app:popUpToInclusive="true" />
             <action
                 android:id="@+id/action_editRoomFragment_to_connectDeviceFragment"
-                app:destination="@id/connectDeviceFragment" />
+                app:destination="@id/connectDeviceFragment"
+                app:popUpTo="@id/editRoomFragment" />
             <action
                 android:id="@+id/action_editRoomFragment_to_dashbordFragment"
                 app:destination="@id/dashbordFragment" />

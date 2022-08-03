@@ -82,7 +82,15 @@ class ConnectDeviceFragment : Fragment() {
             ConnectDeviceFragmentDirections.actionConnectDeviceFragmentToFillWifiDetailFragment(
                 deviceBtId, deviceId.toString()
             )
-        findNavController().navigate(action)
+        if (findNavController().currentDestination?.id == R.id.connectDeviceFragment)
+            findNavController().navigate(action)
+        else gotoRoomsFragment()
+    }
+
+    private fun gotoRoomsFragment() {
+        if (findNavController().currentDestination?.id == R.id.fillWifiDetailFragment)
+            Navigation.findNavController(requireView()).navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
+        else Navigation.findNavController(requireView()).navigate(R.id.action_connectDeviceFragment_to_roomsFragment)
     }
 
     private fun loadPairedDevices() {
