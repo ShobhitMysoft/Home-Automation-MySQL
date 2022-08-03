@@ -79,7 +79,8 @@ class RoomControlsFragment : Fragment() {
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var isBTConnected: Boolean = false
     private lateinit var deviceViewModel: DeviceViewModel
-//    private lateinit var allData: List<Device>
+
+    //    private lateinit var allData: List<Device>
     private var btSocket: BluetoothSocket? = null
     private val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
@@ -90,7 +91,7 @@ class RoomControlsFragment : Fragment() {
     private var SWITCH4: String? = null
     private var SWITCH6: String? = null
     private val CHECK_WIFI_DELAY_TIME: Long = 4000
-//    private val CHECK_BT_DELAY_TIME: Long = 5000
+    private val CHECK_BT_DELAY_TIME: Long = 5000
     private lateinit var toggleWifi: Handler
     private lateinit var btHandler: Handler
     private var checkWifiIsRunning: Boolean = false
@@ -171,7 +172,6 @@ class RoomControlsFragment : Fragment() {
         }
 
         loadUi()
-        uiHandler()
 //        connectToBtDevice()
     }
 
@@ -435,7 +435,7 @@ class RoomControlsFragment : Fragment() {
             binding.switch2Name.text = cd.s2Name
             binding.switch3Name.text = cd.s3Name
             binding.switch4Name.text = cd.s4Name
-            
+
             binding.switch1Icon.setImageResource(iconsList.getResourceId(cd.s1Icon, 0))
             binding.switch2Icon.setImageResource(iconsList.getResourceId(cd.s2Icon, 0))
             binding.switch3Icon.setImageResource(iconsList.getResourceId(cd.s3Icon, 0))
@@ -473,7 +473,7 @@ class RoomControlsFragment : Fragment() {
 
         try {
             Log.i(TAG, "connectToBtDevice: Try ${Calendar.getInstance().time}")
-//            btHandler.postDelayed(btRunnable, CHECK_BT_DELAY_TIME)
+            btHandler.postDelayed(btRunnable, CHECK_BT_DELAY_TIME)
             btSocket!!.connect()
             Log.i(TAG, "connectToBtDevice: Try complete ${Calendar.getInstance().time}")
         } catch (e: Exception) {
@@ -498,11 +498,13 @@ class RoomControlsFragment : Fragment() {
                     else {
                         isLoadingUi = false
                         enableUI()
+                        uiHandler()
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
                     isLoadingUi = false
                     enableUI()
+                    uiHandler()
                 }
 //                binding.mainControlsView.visibility = View.VISIBLE
             }
@@ -526,9 +528,11 @@ class RoomControlsFragment : Fragment() {
                 binding.statusPb.visibility = View.INVISIBLE
                 binding.connectionBtn.visibility = View.VISIBLE
                 isLoadingUi = false
+                uiHandler()
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
                 isLoadingUi = false
+                uiHandler()
             }
         } else {                                                                           // TODO: Step 9.1
             try {
@@ -538,9 +542,11 @@ class RoomControlsFragment : Fragment() {
                 binding.statusPb.visibility = View.INVISIBLE
                 binding.connectionBtn.visibility = View.VISIBLE
                 isLoadingUi = false
+                uiHandler()
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
                 isLoadingUi = false
+                uiHandler()
             }
         }
     }
@@ -972,7 +978,7 @@ class RoomControlsFragment : Fragment() {
                         val msg = mData.get("msg")
 
                         if (resp == 1) {
-                            if (appl != "wifi") updateUI()
+                            if (appl != "wifi" && isLoadingUi) updateUI()
                             Log.d(TAG, "updateLive: Message - $msg")
                         } else {
 
@@ -1017,11 +1023,11 @@ class RoomControlsFragment : Fragment() {
         checkWifi = true
     }
 
-//    val btRunnable = Runnable {
-//        Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
-////        closeSocket()
-////        connectToInternet()
-//    }
+    val btRunnable = Runnable {
+        Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
+//        closeSocket()
+//        connectToInternet()
+    }
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
         fan: String) {
@@ -1159,7 +1165,8 @@ class RoomControlsFragment : Fragment() {
 //                closeSocket()
                 binding.currentRoomTv.text = selectedRoom
                 currentDeviceId = selectedDevice
-                sharedPref?.edit()?.putInt(getString(R.string.selected_room_index), selectedRoomIndex)?.apply()
+                sharedPref?.edit()
+                    ?.putInt(getString(R.string.selected_room_index), selectedRoomIndex)?.apply()
                 checkLocalDatabase()                                // ChooseRoomDialog
             }
             .setNeutralButton("Cancel") { _, _ -> }

@@ -66,6 +66,10 @@ class ConnectDeviceFragment : Fragment() {
                 .navigate(R.id.action_connectDeviceFragment_to_roomsFragment)
         }
 
+        bind.btSettingsBtn.setOnClickListener {
+            startActivity(Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS))
+        }
+
         bind.devicesLv.setOnItemClickListener { _, _, position, _ ->
             Log.d(
                 TAG,
