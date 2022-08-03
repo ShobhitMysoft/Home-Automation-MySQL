@@ -90,7 +90,7 @@ class RoomControlsFragment : Fragment() {
     private var SWITCH4: String? = null
     private var SWITCH6: String? = null
     private val CHECK_WIFI_DELAY_TIME: Long = 4000
-    private val CHECK_BT_DELAY_TIME: Long = 5000
+//    private val CHECK_BT_DELAY_TIME: Long = 5000
     private lateinit var toggleWifi: Handler
     private lateinit var btHandler: Handler
     private var checkWifiIsRunning: Boolean = false
@@ -147,6 +147,7 @@ class RoomControlsFragment : Fragment() {
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
 
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
+        selectedRoomIndex = sharedPref!!.getInt(getString(R.string.selected_room_index), 0)
 
         Log.d(TAG, "onViewCreated: $currentUserId")
 
@@ -378,6 +379,8 @@ class RoomControlsFragment : Fragment() {
             if (deviceIDList.size > 0) {
                 try {
                     Log.d(TAG, "checkLocalDatabase: ${allData.value}")
+                    if (selectedRoomIndex >= deviceIDList.size) selectedRoomIndex = 0
+
                     cd = allData.value?.get(selectedRoomIndex)!!
                     currentDeviceId = cd.deviceId
                     curDevSwitchCount = cd.switchCount
@@ -461,7 +464,7 @@ class RoomControlsFragment : Fragment() {
 
         try {
             Log.i(TAG, "connectToBtDevice: Try ${Calendar.getInstance().time}")
-            btHandler.postDelayed(btRunnable, CHECK_BT_DELAY_TIME)
+//            btHandler.postDelayed(btRunnable, CHECK_BT_DELAY_TIME)
             btSocket!!.connect()
             Log.i(TAG, "connectToBtDevice: Try complete ${Calendar.getInstance().time}")
         } catch (e: Exception) {
@@ -1005,11 +1008,11 @@ class RoomControlsFragment : Fragment() {
         checkWifi = true
     }
 
-    val btRunnable = Runnable {
-        Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
-//        closeSocket()
-//        connectToInternet()
-    }
+//    val btRunnable = Runnable {
+//        Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
+////        closeSocket()
+////        connectToInternet()
+//    }
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
         fan: String) {
@@ -1147,6 +1150,7 @@ class RoomControlsFragment : Fragment() {
 //                closeSocket()
                 binding.currentRoomTv.text = selectedRoom
                 currentDeviceId = selectedDevice
+                sharedPref?.edit()?.putInt(getString(R.string.selected_room_index), selectedRoomIndex)?.apply()
                 checkLocalDatabase()                                // ChooseRoomDialog
             }
             .setNeutralButton("Cancel") { _, _ -> }
