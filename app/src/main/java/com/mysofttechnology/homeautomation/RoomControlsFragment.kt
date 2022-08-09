@@ -171,6 +171,7 @@ class RoomControlsFragment : Fragment() {
             true
         }
 
+        uiHandler()
         loadUi()
 //        connectToBtDevice()
     }
@@ -394,7 +395,7 @@ class RoomControlsFragment : Fragment() {
                     curDevSwitchCount = cd.switchCount
                     currentBtDeviceId = cd.bluetoothId
                     binding.currentRoomTv.text = cd.name
-                    updateUIWithLocalDB()
+                    if (isOnline()) connectToInternet() else updateUIWithLocalDB()
                 } catch (e: Exception) {
                     Log.e(TAG, "checkLocalDatabase: $roomsList\n$deviceIDList")
                     Log.e(TAG, "checkLocalDatabase: Error", e)
@@ -457,18 +458,23 @@ class RoomControlsFragment : Fragment() {
 
         Log.i(TAG, "updateUIWithLocalDB: Data updated from Local")
 
+        checkBluetooth()
+    }
+
+    private fun checkBluetooth() {
         if (bluetoothAdapter?.isEnabled == true && currentBtDeviceId != null && currentBtDeviceId != "null") {
 //            binding.mainControlsView.visibility = View.VISIBLE
             GlobalScope.launch(Dispatchers.IO) {
                 connectToBtDevice()
             }
-        } else connectToInternet()
+        }
     }
 
     private suspend fun connectToBtDevice() {                                                               // TODO: Step 6
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
-
+        
+        closeSocket()
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
 
         try {
@@ -494,45 +500,26 @@ class RoomControlsFragment : Fragment() {
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
                     binding.statusPb.visibility = View.INVISIBLE
                     binding.connectionBtn.visibility = View.VISIBLE
-                    if (isOnline()) updateUI()
-                    else {
-                        isLoadingUi = false
-                        enableUI()
-                        uiHandler()
-                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
-                    isLoadingUi = false
-                    enableUI()
-                    uiHandler()
                 }
 //                binding.mainControlsView.visibility = View.VISIBLE
             }
-        } else {
-//            closeSocket()       // Bluetooth is not connected
-            requireActivity().runOnUiThread {
-                connectToInternet()
-            }
-        }
+        } else isBTConnected = false
     }
 
     private fun connectToInternet() {                                                               // TODO: Step 6
-        isBTConnected = false
+        checkBluetooth()
 //        binding.mainControlsView.visibility = View.VISIBLE
         if (isOnline()) {                                                                           // TODO: Step 9.1
             try {
                 binding.connectionBtn.setImageDrawable(
                     context?.let { ContextCompat.getDrawable(it, R.drawable.ic_network) })
                 updateUI()
-                enableUI()
                 binding.statusPb.visibility = View.INVISIBLE
                 binding.connectionBtn.visibility = View.VISIBLE
-                isLoadingUi = false
-                uiHandler()
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
-                isLoadingUi = false
-                uiHandler()
             }
         } else {                                                                           // TODO: Step 9.1
             try {
@@ -541,12 +528,8 @@ class RoomControlsFragment : Fragment() {
                 enableUI()
                 binding.statusPb.visibility = View.INVISIBLE
                 binding.connectionBtn.visibility = View.VISIBLE
-                isLoadingUi = false
-                uiHandler()
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
-                isLoadingUi = false
-                uiHandler()
             }
         }
     }
@@ -554,6 +537,7 @@ class RoomControlsFragment : Fragment() {
     private fun closeSocket() {
         try {
             btSocket?.close()
+            btSocket = null
         } catch (e: IOException) {
             Log.e(TAG, "connectToBtDevice: Socket Close Error : ", e)
         }
@@ -1037,7 +1021,6 @@ class RoomControlsFragment : Fragment() {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
                     enableUI()
-
 
                 } else {
                     binding.powerBtn.setImageDrawable(
