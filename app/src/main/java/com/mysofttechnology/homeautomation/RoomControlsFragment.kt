@@ -79,7 +79,8 @@ class RoomControlsFragment : Fragment() {
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var isBTConnected: Boolean = false
     private lateinit var deviceViewModel: DeviceViewModel
-//    private lateinit var allData: List<Device>
+
+    //    private lateinit var allData: List<Device>
     private var btSocket: BluetoothSocket? = null
     private val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
@@ -90,7 +91,7 @@ class RoomControlsFragment : Fragment() {
     private var SWITCH4: String? = null
     private var SWITCH6: String? = null
     private val CHECK_WIFI_DELAY_TIME: Long = 4000
-//    private val CHECK_BT_DELAY_TIME: Long = 5000
+    private val CHECK_BT_DELAY_TIME: Long = 5000
     private lateinit var toggleWifi: Handler
     private lateinit var btHandler: Handler
     private var checkWifiIsRunning: Boolean = false
@@ -170,8 +171,8 @@ class RoomControlsFragment : Fragment() {
             true
         }
 
-        loadUi()
         uiHandler()
+        loadUi()
 //        connectToBtDevice()
     }
 
@@ -207,6 +208,7 @@ class RoomControlsFragment : Fragment() {
                         checkWifiIsRunning = true
                         toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
                     }
+                    isLoadingUi = true
                     updateLive(speed.toInt().toString(), FAN)
                 }
                 spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
@@ -215,6 +217,7 @@ class RoomControlsFragment : Fragment() {
         })
 
         binding.fanSwitch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: fanSwitch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) {
@@ -248,6 +251,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch1Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -263,6 +267,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch2Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -278,6 +283,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch3Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -293,6 +299,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch4Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -308,6 +315,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         binding.switch6Switch.setOnCheckedChangeListener { _, isChecked ->
+            Log.d(TAG, "uiHandler: switch6Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
                 if (isBTConnected) sendDataToBT(
@@ -365,13 +373,15 @@ class RoomControlsFragment : Fragment() {
     private fun checkLocalDatabase() {                                                              // TODO: Step 4
 //        binding.mainControlsView.visibility = View.INVISIBLE
         isLoadingUi = true
+        var i = 0
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
+            Log.i(TAG, "checkLocalDatabase: ${deviceList.size}")
             roomsList.clear()
             deviceIDList.clear()
             deviceList.forEach {
-                Log.d(TAG, "checkLocalDatabase: ${it.name} | ${it.bluetoothId}")
+                Log.d(TAG, "checkLocalDatabase ${++i}: ${it.name} | ${it.bluetoothId}")
                 roomsList.add(it.name)
                 deviceIDList.add(it.deviceId)
             }
@@ -386,9 +396,9 @@ class RoomControlsFragment : Fragment() {
                     curDevSwitchCount = cd.switchCount
                     currentBtDeviceId = cd.bluetoothId
                     binding.currentRoomTv.text = cd.name
-                    updateUIWithLocalDB()
+                    if (isOnline()) connectToInternet() else updateUIWithLocalDB()
                 } catch (e: Exception) {
-                    Log.i(TAG, "checkLocalDatabase: $roomsList\n$deviceIDList")
+                    Log.e(TAG, "checkLocalDatabase: $roomsList\n$deviceIDList")
                     Log.e(TAG, "checkLocalDatabase: Error", e)
                 }
             }
@@ -397,6 +407,7 @@ class RoomControlsFragment : Fragment() {
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun updateUIWithLocalDB() {                                                             // TODO: Step 5
+        Log.d(TAG, "checkLocalDatabase: Called")
         binding.connectionBtn.visibility = View.INVISIBLE
         binding.statusPb.visibility = View.VISIBLE
 
@@ -426,7 +437,7 @@ class RoomControlsFragment : Fragment() {
             binding.switch2Name.text = cd.s2Name
             binding.switch3Name.text = cd.s3Name
             binding.switch4Name.text = cd.s4Name
-            
+
             binding.switch1Icon.setImageResource(iconsList.getResourceId(cd.s1Icon, 0))
             binding.switch2Icon.setImageResource(iconsList.getResourceId(cd.s2Icon, 0))
             binding.switch3Icon.setImageResource(iconsList.getResourceId(cd.s3Icon, 0))
@@ -447,24 +458,30 @@ class RoomControlsFragment : Fragment() {
         }
 
         Log.i(TAG, "updateUIWithLocalDB: Data updated from Local")
+        isLoadingUi = false
 
+        checkBluetooth()
+    }
+
+    private fun checkBluetooth() {
         if (bluetoothAdapter?.isEnabled == true && currentBtDeviceId != null && currentBtDeviceId != "null") {
 //            binding.mainControlsView.visibility = View.VISIBLE
             GlobalScope.launch(Dispatchers.IO) {
                 connectToBtDevice()
             }
-        } else connectToInternet()
+        }
     }
 
     private suspend fun connectToBtDevice() {                                                               // TODO: Step 6
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
-
+        
+        closeSocket()
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
 
         try {
             Log.i(TAG, "connectToBtDevice: Try ${Calendar.getInstance().time}")
-//            btHandler.postDelayed(btRunnable, CHECK_BT_DELAY_TIME)
+            btHandler.postDelayed(btRunnable, CHECK_BT_DELAY_TIME)
             btSocket!!.connect()
             Log.i(TAG, "connectToBtDevice: Try complete ${Calendar.getInstance().time}")
         } catch (e: Exception) {
@@ -485,41 +502,26 @@ class RoomControlsFragment : Fragment() {
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
                     binding.statusPb.visibility = View.INVISIBLE
                     binding.connectionBtn.visibility = View.VISIBLE
-                    if (isOnline()) updateUI()
-                    else {
-                        isLoadingUi = false
-                        enableUI()
-                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
-                    isLoadingUi = false
-                    enableUI()
                 }
 //                binding.mainControlsView.visibility = View.VISIBLE
             }
-        } else {
-//            closeSocket()       // Bluetooth is not connected
-            requireActivity().runOnUiThread {
-                connectToInternet()
-            }
-        }
+        } else isBTConnected = false
     }
 
     private fun connectToInternet() {                                                               // TODO: Step 6
-        isBTConnected = false
+        checkBluetooth()
 //        binding.mainControlsView.visibility = View.VISIBLE
         if (isOnline()) {                                                                           // TODO: Step 9.1
             try {
                 binding.connectionBtn.setImageDrawable(
                     context?.let { ContextCompat.getDrawable(it, R.drawable.ic_network) })
                 updateUI()
-                enableUI()
                 binding.statusPb.visibility = View.INVISIBLE
                 binding.connectionBtn.visibility = View.VISIBLE
-                isLoadingUi = false
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
-                isLoadingUi = false
             }
         } else {                                                                           // TODO: Step 9.1
             try {
@@ -528,10 +530,8 @@ class RoomControlsFragment : Fragment() {
                 enableUI()
                 binding.statusPb.visibility = View.INVISIBLE
                 binding.connectionBtn.visibility = View.VISIBLE
-                isLoadingUi = false
             } catch (e: Exception) {
                 Log.e(TAG, "connectToInternet: Error", e)
-                isLoadingUi = false
             }
         }
     }
@@ -539,6 +539,7 @@ class RoomControlsFragment : Fragment() {
     private fun closeSocket() {
         try {
             btSocket?.close()
+            btSocket = null
         } catch (e: IOException) {
             Log.e(TAG, "connectToBtDevice: Socket Close Error : ", e)
         }
@@ -559,6 +560,13 @@ class RoomControlsFragment : Fragment() {
 
                     if (resp == 1) {
                         if (curDevSwitchCount == "1") {
+                            binding.sl1View.visibility = View.VISIBLE
+                            binding.sl5View.visibility = View.GONE
+                            binding.powerBtnView.visibility = View.GONE
+
+                            iconsList = resources.obtainTypedArray(R.array.sl1_icons_list)
+
+
                             val app6Val = mData.get(APPL1).toString()
                             val wifi = mData.get("wifi").toString()
 
@@ -569,7 +577,15 @@ class RoomControlsFragment : Fragment() {
 
                                 checkWifi = false
                             }
+                            isLoadingUi = false
                         } else {
+                            binding.sl1View.visibility = View.GONE
+                            binding.sl5View.visibility = View.VISIBLE
+                            binding.powerBtnView.visibility = View.VISIBLE
+
+                            iconsList = resources.obtainTypedArray(R.array.icons_list)
+
+
                             val app1Val = mData.get(APPL1).toString()
                             val app2Val = mData.get(APPL2).toString()
                             val app3Val = mData.get(APPL3).toString()
@@ -963,7 +979,7 @@ class RoomControlsFragment : Fragment() {
                         val msg = mData.get("msg")
 
                         if (resp == 1) {
-                            if (appl != "wifi") updateUI()
+                            if (appl != "wifi" && isLoadingUi) updateUI()
                             Log.d(TAG, "updateLive: Message - $msg")
                         } else {
 
@@ -1008,11 +1024,11 @@ class RoomControlsFragment : Fragment() {
         checkWifi = true
     }
 
-//    val btRunnable = Runnable {
-//        Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
-////        closeSocket()
-////        connectToInternet()
-//    }
+    val btRunnable = Runnable {
+        Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
+//        closeSocket()
+//        connectToInternet()
+    }
 
     private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
         fan: String) {
@@ -1022,12 +1038,13 @@ class RoomControlsFragment : Fragment() {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
                     enableUI()
-
+                    isLoadingUi = false
 
                 } else {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
                     enableUI()
+                    isLoadingUi = false
 
                     Log.d(TAG, " ${Thread.currentThread().stackTrace[2].lineNumber - 1}")
                 }
@@ -1150,7 +1167,8 @@ class RoomControlsFragment : Fragment() {
 //                closeSocket()
                 binding.currentRoomTv.text = selectedRoom
                 currentDeviceId = selectedDevice
-                sharedPref?.edit()?.putInt(getString(R.string.selected_room_index), selectedRoomIndex)?.apply()
+                sharedPref?.edit()
+                    ?.putInt(getString(R.string.selected_room_index), selectedRoomIndex)?.apply()
                 checkLocalDatabase()                                // ChooseRoomDialog
             }
             .setNeutralButton("Cancel") { _, _ -> }

@@ -18,6 +18,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.android.volley.toolbox.StringRequest
 import com.budiyev.android.codescanner.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mysofttechnology.homeautomation.StartActivity.Companion.BLANK
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.MON
@@ -485,10 +486,24 @@ class ScanDeviceFragment : Fragment() {
     }
 
     private fun gotoConnectDevice() {
-            val action =
-                ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
-            findNavController().navigate(action)
-        loadingDialog.dismiss()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Is device online?")
+            .setMessage("You can Skip if  the device is online but if this is your first time setting up the device you must add wifi detail. Do you want to add wifi details?")
+            .setCancelable(false)
+            .setNegativeButton("Skip") { _, _ ->
+                val action =
+                    ScanDeviceFragmentDirections.actionScanDeviceFragmentToDashbordFragment()
+                findNavController().navigate(action)
+                loadingDialog.dismiss()
+            }
+            .setPositiveButton("Ok") { _, _ ->
+                val action =
+                    ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+                findNavController().navigate(action)
+                loadingDialog.dismiss()
+            }
+            .show()
+
     }
 
     private val activityResultLauncher = registerForActivityResult(
