@@ -208,6 +208,7 @@ class RoomControlsFragment : Fragment() {
                         checkWifiIsRunning = true
                         toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
                     }
+                    isLoadingUi = true
                     updateLive(speed.toInt().toString(), FAN)
                 }
                 spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
@@ -457,6 +458,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         Log.i(TAG, "updateUIWithLocalDB: Data updated from Local")
+        isLoadingUi = false
 
         checkBluetooth()
     }
@@ -558,6 +560,13 @@ class RoomControlsFragment : Fragment() {
 
                     if (resp == 1) {
                         if (curDevSwitchCount == "1") {
+                            binding.sl1View.visibility = View.VISIBLE
+                            binding.sl5View.visibility = View.GONE
+                            binding.powerBtnView.visibility = View.GONE
+
+                            iconsList = resources.obtainTypedArray(R.array.sl1_icons_list)
+
+
                             val app6Val = mData.get(APPL1).toString()
                             val wifi = mData.get("wifi").toString()
 
@@ -568,7 +577,15 @@ class RoomControlsFragment : Fragment() {
 
                                 checkWifi = false
                             }
+                            isLoadingUi = false
                         } else {
+                            binding.sl1View.visibility = View.GONE
+                            binding.sl5View.visibility = View.VISIBLE
+                            binding.powerBtnView.visibility = View.VISIBLE
+
+                            iconsList = resources.obtainTypedArray(R.array.icons_list)
+
+
                             val app1Val = mData.get(APPL1).toString()
                             val app2Val = mData.get(APPL2).toString()
                             val app3Val = mData.get(APPL3).toString()
@@ -1021,11 +1038,13 @@ class RoomControlsFragment : Fragment() {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
                     enableUI()
+                    isLoadingUi = false
 
                 } else {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
                     enableUI()
+                    isLoadingUi = false
 
                     Log.d(TAG, " ${Thread.currentThread().stackTrace[2].lineNumber - 1}")
                 }
