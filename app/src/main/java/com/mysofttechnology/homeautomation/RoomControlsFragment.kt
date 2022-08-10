@@ -598,6 +598,7 @@ class RoomControlsFragment : Fragment() {
                             else {
                                 updateLive("0", "wifi")
                                 liveFanSpeed = fan.toInt()
+                                sharedPref?.edit()?.putString("old_fan_speed_$currentDeviceId)", liveFanSpeed.toString())?.apply()
 
                                 binding.switch1Switch.isChecked = app1Val == ONE
                                 binding.switch2Switch.isChecked = app2Val == ONE
@@ -1280,12 +1281,6 @@ class RoomControlsFragment : Fragment() {
             checkLocalDatabase()                                // Snack bar Retry
         }
     }
-
-//    override fun onResume() {
-//        super.onResume()
-//        Log.i(TAG, "onResume: Called $currentDeviceId")
-////        if (!isOnline()) showSToast("No Internet Connection")
-//    }
 
     override fun onDestroyView() {
         super.onDestroyView()
