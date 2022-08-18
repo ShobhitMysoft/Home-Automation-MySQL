@@ -14,7 +14,7 @@
     <string name="verifiy_code">Verifiy Code</string>
     <string name="verify">Verify</string>
     <!-- DATABASE -->
-    <string name="base_url">https://mysofttechnology.com/homeautomation/admin/api/</string>
+    <string name="base_url">https://smartlit.co.in/app/admin/api/</string>
     <string name="url_register">register</string>
     <string name="url_profile">profile</string>
     <string name="url_room_list">room_list</string>
