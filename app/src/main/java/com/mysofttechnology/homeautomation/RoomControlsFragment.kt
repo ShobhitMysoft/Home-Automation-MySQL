@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -58,11 +59,13 @@ import com.mysofttechnology.homeautomation.activities.EditSwitchActivity.Compani
 import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBinding
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
-import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import com.mysofttechnology.homeautomation.mqtt.MQTTClient
+import com.mysofttechnology.homeautomation.utils.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -116,6 +119,8 @@ class RoomControlsFragment : Fragment() {
 
     private lateinit var iconsList: TypedArray
     private var selectedRoomIndex = 0
+
+    private lateinit var mqttClient: MQTTClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -171,9 +176,61 @@ class RoomControlsFragment : Fragment() {
             true
         }
 
+        connectToMQTT()
         uiHandler()
         loadUi()
 //        connectToBtDevice()
+    }
+
+    private fun connectToMQTT() {
+        Log.i(TAG, "connectToMQTT: Called")
+
+        val serverURI = getString(R.string.mqtt_server_url)
+        val clientID = MQTT_CLIENT_ID_KEY
+        val username = MQTT_USERNAME_KEY
+        val password = MQTT_PWD_KEY
+
+        if (serverURI != null && clientID != null) {
+            mqttClient = MQTTClient(context, serverURI, clientID)
+
+            mqttClient.connect(username, password,
+                object : IMqttActionListener {
+                    override fun onSuccess(asyncActionToken: IMqttToken?) {
+                        Log.d(this.javaClass.name, "Connection success")
+
+                        Toast.makeText(context, "MQTT Connection success", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+
+                    override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                        Log.d(this.javaClass.name, "Connection failure: ${exception.toString()}")
+
+                        Toast.makeText(context, "MQTT Connection failed: ${exception.toString()}",
+                            Toast.LENGTH_SHORT).show()
+
+                        // Come back to Connect Fragment
+                        /*if (findNavController().currentDestination?.id == R.id.clientFragment)
+                            findNavController().navigate(
+                                R.id.action_clientFragment_to_connectFragment)*/
+                    }
+                },
+                object : MqttCallback {
+                    override fun messageArrived(topic: String?, message: MqttMessage?) {
+                        val msg = "Receive message: ${message.toString()} from topic: $topic"
+                        Log.d(this.javaClass.name, msg)
+
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun connectionLost(cause: Throwable?) {
+                        Log.d(this.javaClass.name, "Connection lost ${cause.toString()}")
+                    }
+
+                    override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                        Log.d(this.javaClass.name, "Delivery complete")
+                    }
+                })
+        }
     }
 
     private fun uiHandler() {
@@ -264,6 +321,53 @@ class RoomControlsFragment : Fragment() {
                     updateLive(if (isChecked) ONE else ZERO, APPL1)
                 }
             }
+
+            if (isChecked) {
+                if (mqttClient.isConnected()) {
+                    mqttClient.publish(MQTT_TEST_TOPIC,
+                        "A",
+                        1,
+                        false,
+                        object : IMqttActionListener {
+                            override fun onSuccess(asyncActionToken: IMqttToken?) {
+                                val msg = "Publish message: 'A' to topic: $MQTT_TEST_TOPIC"
+                                Log.d(this.javaClass.name, msg)
+
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
+
+                            override fun onFailure(asyncActionToken: IMqttToken?,
+                                exception: Throwable?) {
+                                Log.d(this.javaClass.name, "Failed to publish message to topic")
+                            }
+                        })
+                } else {
+                    Log.d(this.javaClass.name, "Impossible to publish, no server connected")
+                }
+            } else {
+                if (mqttClient.isConnected()) {
+                    mqttClient.publish(MQTT_TEST_TOPIC,
+                        "a",
+                        1,
+                        false,
+                        object : IMqttActionListener {
+                            override fun onSuccess(asyncActionToken: IMqttToken?) {
+                                val msg = "Publish message: 'a' to topic: $MQTT_TEST_TOPIC"
+                                Log.d(this.javaClass.name, msg)
+
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
+
+                            override fun onFailure(asyncActionToken: IMqttToken?,
+                                exception: Throwable?) {
+                                Log.d(this.javaClass.name, "Failed to publish message to topic")
+                            }
+                        })
+                } else {
+                    Log.d(this.javaClass.name, "Impossible to publish, no server connected")
+                }
+            }
+
         }
 
         binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
@@ -475,7 +579,7 @@ class RoomControlsFragment : Fragment() {
     private suspend fun connectToBtDevice() {                                                               // TODO: Step 6
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
-        
+
         closeSocket()
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
 
