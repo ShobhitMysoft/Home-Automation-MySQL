@@ -63,6 +63,6 @@ class StartActivity : AppCompatActivity() {
 }
 
 /**
- * VERSION: 3
- * This version is before start of version 3.
+ * VERSION: 4
+ * This version is before start of MQTT Implementation.
  * */
