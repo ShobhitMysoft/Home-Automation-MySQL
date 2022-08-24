@@ -200,6 +200,22 @@ class RoomControlsFragment : Fragment() {
                                 Toast.makeText(context, "MQTT Connection success",
                                     Toast.LENGTH_SHORT)
                                     .show()
+
+                                mqttClient.subscribe(MQTT_TEST_TOPIC,
+                                    1,
+                                    object : IMqttActionListener {
+                                        override fun onSuccess(asyncActionToken: IMqttToken?) {
+                                            val msg = "Subscribed to: $MQTT_TEST_TOPIC"
+                                            Log.d(this.javaClass.name, msg)
+
+                                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                        }
+
+                                        override fun onFailure(asyncActionToken: IMqttToken?,
+                                            exception: Throwable?) {
+                                            Log.d(this.javaClass.name, "Failed to subscribe: $MQTT_TEST_TOPIC")
+                                        }
+                                    })
                             }
 
                             override fun onFailure(asyncActionToken: IMqttToken?,
@@ -219,14 +235,6 @@ class RoomControlsFragment : Fragment() {
                                 } catch (e: Exception) {
                                     Log.e(TAG, "connectToInternet: Error", e)
                                 }
-
-//                        Toast.makeText(context, "MQTT Connection failed: ${exception.toString()}",
-//                            Toast.LENGTH_SHORT).show()
-
-                                // Come back to Connect Fragment
-                                /*if (findNavController().currentDestination?.id == R.id.clientFragment)
-                            findNavController().navigate(
-                                R.id.action_clientFragment_to_connectFragment)*/
                             }
                         },
                         object : MqttCallback {
@@ -235,11 +243,13 @@ class RoomControlsFragment : Fragment() {
                                     "Receive message: ${message.toString()} from topic: $topic"
                                 Log.d(this.javaClass.name, msg)
 
-                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+//                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                updateSwitchState(message.toString())
                             }
 
                             override fun connectionLost(cause: Throwable?) {
                                 Log.d(this.javaClass.name, "Connection lost ${cause.toString()}")
+                                connectToMQTT()
                             }
 
                             override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -1090,57 +1100,7 @@ class RoomControlsFragment : Fragment() {
 
 //                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 
-                            when (signal) {
-                                "a" -> {
-                                    if (binding.switch1Switch.isChecked) binding.switch1Switch.isChecked = false
-                                }
-                                "b" -> {
-                                    if (binding.switch2Switch.isChecked) binding.switch2Switch.isChecked = false
-                                }
-                                "c" -> {
-                                    if (binding.switch3Switch.isChecked) binding.switch3Switch.isChecked = false
-                                }
-                                "d" -> {
-                                    if (binding.switch4Switch.isChecked) binding.switch4Switch.isChecked = false
-                                }
-                                "A" -> {
-                                    if (!binding.switch1Switch.isChecked) binding.switch1Switch.isChecked = true
-                                }
-                                "B" -> {
-                                    if (!binding.switch2Switch.isChecked) binding.switch2Switch.isChecked = true
-                                }
-                                "C" -> {
-                                    if (!binding.switch3Switch.isChecked) binding.switch3Switch.isChecked = true
-                                }
-                                "D" -> {
-                                    if (!binding.switch4Switch.isChecked) binding.switch4Switch.isChecked = true
-                                }
-                                "F" -> {
-                                    binding.fanSpeedSlider.value = 1.0f
-                                    binding.fanSpeedTv.text = "1"
-                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                                }
-                                "G" -> {
-                                    binding.fanSpeedSlider.value = 2.0f
-                                    binding.fanSpeedTv.text = "2"
-                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                                }
-                                "H" -> {
-                                    binding.fanSpeedSlider.value = 3.0f
-                                    binding.fanSpeedTv.text = "3"
-                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                                }
-                                "I" -> {
-                                    binding.fanSpeedSlider.value = 4.0f
-                                    binding.fanSpeedTv.text = "4"
-                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                                }
-                                "E" -> {
-                                    binding.fanSpeedSlider.value = 0.0f
-                                    binding.fanSpeedTv.text = "0"
-                                    if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
-                                }
-                            }
+                            updateSwitchState(signal)
 
                             togglePower(
                                 if (binding.switch1Switch.isChecked) ONE else ZERO,
@@ -1167,6 +1127,60 @@ class RoomControlsFragment : Fragment() {
 //            sendDataToMQTT(signal)
         }
 
+    }
+
+    private fun updateSwitchState(signal: String) {
+        when (signal) {
+            "a" -> {
+                if (binding.switch1Switch.isChecked) binding.switch1Switch.isChecked = false
+            }
+            "b" -> {
+                if (binding.switch2Switch.isChecked) binding.switch2Switch.isChecked = false
+            }
+            "c" -> {
+                if (binding.switch3Switch.isChecked) binding.switch3Switch.isChecked = false
+            }
+            "d" -> {
+                if (binding.switch4Switch.isChecked) binding.switch4Switch.isChecked = false
+            }
+            "A" -> {
+                if (!binding.switch1Switch.isChecked) binding.switch1Switch.isChecked = true
+            }
+            "B" -> {
+                if (!binding.switch2Switch.isChecked) binding.switch2Switch.isChecked = true
+            }
+            "C" -> {
+                if (!binding.switch3Switch.isChecked) binding.switch3Switch.isChecked = true
+            }
+            "D" -> {
+                if (!binding.switch4Switch.isChecked) binding.switch4Switch.isChecked = true
+            }
+            "F" -> {
+                binding.fanSpeedSlider.value = 1.0f
+                binding.fanSpeedTv.text = "1"
+                if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+            }
+            "G" -> {
+                binding.fanSpeedSlider.value = 2.0f
+                binding.fanSpeedTv.text = "2"
+                if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+            }
+            "H" -> {
+                binding.fanSpeedSlider.value = 3.0f
+                binding.fanSpeedTv.text = "3"
+                if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+            }
+            "I" -> {
+                binding.fanSpeedSlider.value = 4.0f
+                binding.fanSpeedTv.text = "4"
+                if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
+            }
+            "E" -> {
+                binding.fanSpeedSlider.value = 0.0f
+                binding.fanSpeedTv.text = "0"
+                if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
+            }
+        }
     }
 
     private fun updateLive(value: String, appl: String) {
