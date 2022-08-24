@@ -188,58 +188,67 @@ class RoomControlsFragment : Fragment() {
         val username = MQTT_USERNAME_KEY
         val password = MQTT_PWD_KEY
 
-        if (serverURI != null && clientID != null) {
-            mqttClient = MQTTClient(context, serverURI, clientID)
+            if (serverURI != null && clientID != null) {
+                mqttClient = MQTTClient(context, serverURI, clientID)
 
-            mqttClient.connect(username, password,
-                object : IMqttActionListener {
-                    override fun onSuccess(asyncActionToken: IMqttToken?) {
-                        Log.d(this.javaClass.name, "Connection success")
+                if (!mqttClient.isConnected()) {
+                    mqttClient.connect(username, password,
+                        object : IMqttActionListener {
+                            override fun onSuccess(asyncActionToken: IMqttToken?) {
+                                Log.d(this.javaClass.name, "Connection success")
 
-                        Toast.makeText(context, "MQTT Connection success", Toast.LENGTH_SHORT)
-                            .show()
-                    }
+                                Toast.makeText(context, "MQTT Connection success",
+                                    Toast.LENGTH_SHORT)
+                                    .show()
+                            }
 
-                    override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                        Log.d(this.javaClass.name, "Connection failure: ${exception.toString()}")
+                            override fun onFailure(asyncActionToken: IMqttToken?,
+                                exception: Throwable?) {
+                                Log.d(this.javaClass.name,
+                                    "Connection failure: ${exception.toString()}")
 
-                        try {
-                            checkBluetooth()
-                            binding.connectionBtn.setImageDrawable(
-                                context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
-                            enableUI()
-                            binding.statusPb.visibility = View.INVISIBLE
-                            binding.connectionBtn.visibility = View.VISIBLE
-                        } catch (e: Exception) {
-                            Log.e(TAG, "connectToInternet: Error", e)
-                        }
+                                try {
+                                    checkBluetooth()
+                                    binding.connectionBtn.setImageDrawable(
+                                        context?.let {
+                                            ContextCompat.getDrawable(it, R.drawable.ic_no_network)
+                                        })
+                                    enableUI()
+                                    binding.statusPb.visibility = View.INVISIBLE
+                                    binding.connectionBtn.visibility = View.VISIBLE
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "connectToInternet: Error", e)
+                                }
 
 //                        Toast.makeText(context, "MQTT Connection failed: ${exception.toString()}",
 //                            Toast.LENGTH_SHORT).show()
 
-                        // Come back to Connect Fragment
-                        /*if (findNavController().currentDestination?.id == R.id.clientFragment)
+                                // Come back to Connect Fragment
+                                /*if (findNavController().currentDestination?.id == R.id.clientFragment)
                             findNavController().navigate(
                                 R.id.action_clientFragment_to_connectFragment)*/
-                    }
-                },
-                object : MqttCallback {
-                    override fun messageArrived(topic: String?, message: MqttMessage?) {
-                        val msg = "Receive message: ${message.toString()} from topic: $topic"
-                        Log.d(this.javaClass.name, msg)
+                            }
+                        },
+                        object : MqttCallback {
+                            override fun messageArrived(topic: String?, message: MqttMessage?) {
+                                val msg =
+                                    "Receive message: ${message.toString()} from topic: $topic"
+                                Log.d(this.javaClass.name, msg)
 
-                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                    }
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
 
-                    override fun connectionLost(cause: Throwable?) {
-                        Log.d(this.javaClass.name, "Connection lost ${cause.toString()}")
-                    }
+                            override fun connectionLost(cause: Throwable?) {
+                                Log.d(this.javaClass.name, "Connection lost ${cause.toString()}")
+                            }
 
-                    override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                        Log.d(this.javaClass.name, "Delivery complete")
-                    }
-                })
-        }
+                            override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                                Log.d(this.javaClass.name, "Delivery complete")
+                            }
+                        })
+                }
+            }
+
     }
 
     private fun uiHandler() {
@@ -289,7 +298,8 @@ class RoomControlsFragment : Fragment() {
             }
         })
 
-        binding.fanSwitch.setOnCheckedChangeListener { _, isChecked ->
+        binding.fanSwitch.setOnClickListener {
+            val isChecked = binding.fanSwitch.isChecked
             Log.d(TAG, "uiHandler: fanSwitch isChecked Called")
             if (!isLoadingUi) {
                 Log.d(TAG, "uiHandler: isLoadingUi = $isLoadingUi")
@@ -304,8 +314,7 @@ class RoomControlsFragment : Fragment() {
                             "1" -> "F"
                             "2" -> "G"
                             "3" -> "H"
-                            "4" -> "I"
-                            else -> "E"
+                            else -> "I"
                         })
                     }
                 } else {
@@ -325,15 +334,15 @@ class RoomControlsFragment : Fragment() {
                             "1" -> "F"
                             "2" -> "G"
                             "3" -> "H"
-                            "4" -> "I"
-                            else -> "E"
+                            else -> "I"
                         })
                     }
                 }
             } else Log.d(TAG, "uiHandler: isLoadingUi = $isLoadingUi")
         }
 
-        binding.switch1Switch.setOnCheckedChangeListener { _, isChecked ->
+        binding.switch1Switch.setOnClickListener {
+            val isChecked = binding.switch1Switch.isChecked
             Log.d(TAG, "uiHandler: switch1Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
@@ -350,7 +359,8 @@ class RoomControlsFragment : Fragment() {
             }
         }
 
-        binding.switch2Switch.setOnCheckedChangeListener { _, isChecked ->
+        binding.switch2Switch.setOnClickListener {
+            val isChecked = binding.switch2Switch.isChecked
             Log.d(TAG, "uiHandler: switch2Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
@@ -367,7 +377,8 @@ class RoomControlsFragment : Fragment() {
             }
         }
 
-        binding.switch3Switch.setOnCheckedChangeListener { _, isChecked ->
+        binding.switch3Switch.setOnClickListener {
+            val isChecked = binding.switch3Switch.isChecked
             Log.d(TAG, "uiHandler: switch3Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
@@ -384,7 +395,8 @@ class RoomControlsFragment : Fragment() {
             }
         }
 
-        binding.switch4Switch.setOnCheckedChangeListener { _, isChecked ->
+        binding.switch4Switch.setOnClickListener {
+            val isChecked = binding.switch4Switch.isChecked
             Log.d(TAG, "uiHandler: switch4Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
@@ -401,7 +413,8 @@ class RoomControlsFragment : Fragment() {
             }
         }
 
-        binding.switch6Switch.setOnCheckedChangeListener { _, isChecked ->
+        binding.switch6Switch.setOnClickListener {
+            val isChecked = binding.switch6Switch.isChecked
             Log.d(TAG, "uiHandler: switch6Switch isChecked Called")
             if (!isLoadingUi) {
                 disableUI()
@@ -1150,8 +1163,8 @@ class RoomControlsFragment : Fragment() {
             }
         } else {
             showSToast("MQTT not connected.")
-            connectToMQTT()
-            sendDataToMQTT(signal)
+//            connectToMQTT()
+//            sendDataToMQTT(signal)
         }
 
     }
@@ -1265,8 +1278,7 @@ class RoomControlsFragment : Fragment() {
                             "1" -> "F"
                             "2" -> "G"
                             "3" -> "H"
-                            "4" -> "I"
-                            else -> "E"
+                            else -> "I"
                         }
                         fanSpeed
                     } else "E"
@@ -1289,8 +1301,7 @@ class RoomControlsFragment : Fragment() {
                             "1" -> "F"
                             "2" -> "G"
                             "3" -> "H"
-                            "4" -> "I"
-                            else -> "E"
+                            else -> "I"
                         }
                         fanSpeed
                     } else "E"
@@ -1495,10 +1506,12 @@ class RoomControlsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         closeSocket()
+        mqttClient.disconnect()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         closeSocket()
+        mqttClient.disconnect()
     }
 }

@@ -203,12 +203,12 @@
 
                                 </LinearLayout>
 
-                                <com.suke.widget.SwitchButton
+                                <Switch
                                     android:id="@+id/fan_switch"
-                                    android:layout_width="65dp"
-                                    android:layout_height="30dp"
-                                    android:layout_gravity="end"
-                                    Card_View:sb_checked_color="@color/colorAccent" />
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:theme="@style/SwitchStyle"
+                                    android:layout_gravity="end" />
                             </FrameLayout>
 
                             <com.google.android.material.slider.Slider
@@ -273,12 +273,12 @@
                                         android:src="@drawable/ic_light" />
 
 
-                                    <com.suke.widget.SwitchButton
+                                    <Switch
                                         android:id="@+id/switch1_switch"
-                                        android:layout_width="65dp"
-                                        android:layout_height="30dp"
-                                        android:layout_gravity="end|center"
-                                        Card_View:sb_checked_color="@color/colorAccent" />
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:theme="@style/SwitchStyle"
+                                        android:layout_gravity="end|center" />
 
                                 </FrameLayout>
 
@@ -471,12 +471,12 @@
                                         android:layout_height="40dp"
                                         android:src="@drawable/ic_light" />
 
-                                    <com.suke.widget.SwitchButton
+                                    <Switch
                                         android:id="@+id/switch2_switch"
-                                        android:layout_width="65dp"
-                                        android:layout_height="30dp"
-                                        android:layout_gravity="end|center"
-                                        Card_View:sb_checked_color="@color/colorAccent" />
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:theme="@style/SwitchStyle"
+                                        android:layout_gravity="end|center" />
                                 </FrameLayout>
 
                                 <TextView
@@ -679,12 +679,12 @@
                                         android:layout_height="40dp"
                                         android:src="@drawable/ic_light" />
 
-                                    <com.suke.widget.SwitchButton
+                                    <Switch
                                         android:id="@+id/switch3_switch"
-                                        android:layout_width="65dp"
-                                        android:layout_height="30dp"
-                                        android:layout_gravity="end|center"
-                                        Card_View:sb_checked_color="@color/colorAccent" />
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:theme="@style/SwitchStyle"
+                                        android:layout_gravity="end|center" />
                                 </FrameLayout>
 
                                 <TextView
@@ -880,12 +880,12 @@
                                         android:layout_height="40dp"
                                         android:src="@drawable/ic_light" />
 
-                                    <com.suke.widget.SwitchButton
+                                    <Switch
                                         android:id="@+id/switch4_switch"
-                                        android:layout_width="65dp"
-                                        android:layout_height="30dp"
-                                        android:layout_gravity="end|center"
-                                        Card_View:sb_checked_color="@color/colorAccent" />
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:theme="@style/SwitchStyle"
+                                        android:layout_gravity="end|center" />
                                 </FrameLayout>
 
                                 <TextView
@@ -1085,12 +1085,12 @@
                                 android:src="@drawable/ic_air_conditioner" />
 
 
-                            <com.suke.widget.SwitchButton
+                            <Switch
                                 android:id="@+id/switch6_switch"
-                                android:layout_width="65dp"
-                                android:layout_height="30dp"
-                                android:layout_gravity="end|center"
-                                Card_View:sb_checked_color="@color/colorAccent" />
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:theme="@style/SwitchStyle"
+                                android:layout_gravity="end|center" />
 
                         </FrameLayout>
 
