@@ -11,4 +11,5 @@ const val MQTT_USERNAME         = ""
 const val MQTT_PWD              = ""
 
 const val MQTT_TEST_TOPIC       = "mqtt123"
+const val MQTT_TEST_TOPIC_SUB       = "mqtt123_pub"
 const val MQTT_TEST_MSG         = "Hello!"
