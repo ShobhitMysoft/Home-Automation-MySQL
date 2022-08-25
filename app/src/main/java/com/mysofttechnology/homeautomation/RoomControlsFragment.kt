@@ -302,7 +302,7 @@ class RoomControlsFragment : Fragment() {
         loadingDialog.isCancelable = false
 
         if (!currentDeviceId.isNullOrBlank() || !currentDeviceId.equals("null")) {
-            checkLocalDatabase()                                // Load UI
+            if (view != null) checkLocalDatabase()                                // Load UI
         } else {
             Log.i(TAG, "onViewCreated: ~~~~ $currentDeviceId is not present")
         }
@@ -426,8 +426,6 @@ class RoomControlsFragment : Fragment() {
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_bluetooth_on) })
                     binding.statusPb.visibility = View.INVISIBLE
                     binding.connectionBtn.visibility = View.VISIBLE
-                    requireActivity().registerReceiver(bluetoothReceiver,
-                        IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
                 } catch (e: Exception) {
                     Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
                     noNetwork()
@@ -437,6 +435,8 @@ class RoomControlsFragment : Fragment() {
             isBTConnected = false
             noNetwork()
         }
+        requireActivity().registerReceiver(bluetoothReceiver,
+            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
     }
 
     private val bluetoothReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -457,11 +457,13 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun noNetwork() {
-        binding.connectionBtn.setImageDrawable(
-            context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
-        enableUI()
-        binding.statusPb.visibility = View.INVISIBLE
-        binding.connectionBtn.visibility = View.VISIBLE
+        requireActivity().runOnUiThread {
+            binding.connectionBtn.setImageDrawable(
+                context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
+            enableUI()
+            binding.statusPb.visibility = View.INVISIBLE
+            binding.connectionBtn.visibility = View.VISIBLE
+        }
     }
 
     /* INTERNET */

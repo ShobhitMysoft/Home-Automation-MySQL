@@ -129,17 +129,16 @@ class DashbordFragment : Fragment() {
                         } else {
 
                             updateUI(false, mData)
-//                            showToast("No user found. Please register first.")
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         }
                     } catch (e: Exception) {
 
                         Log.d(TAG, "Exception in checkDeviceAvailability: $e")
-                        if (e.message != null) showToast(e.message)
+                        if (isAdded && e.message != null) showToast(e.message)
                     }
                 }, {
 
-                    showToast("Something went wrong.")
+                    if (isAdded) showToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
                 override fun getParams(): Map<String, String> {
@@ -246,11 +245,11 @@ class DashbordFragment : Fragment() {
                     } catch (e: Exception) {
 
                         Log.e(TAG, "Exception in switch updateUI: $e")
-                        if (e.message != null) showToast(e.message)
+                        if (isAdded && e.message != null) showToast(e.message)
                     }
                 }, {
 
-                    showToast("Something went wrong.")
+                    if (isAdded) showToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
                 override fun getParams(): Map<String, String> {
@@ -305,19 +304,16 @@ class DashbordFragment : Fragment() {
 
                         Log.d(TAG, "getLiveStates: Message - $msg")
                     } else {
-
-                        // TODO:
-//                        showPSnackbar("Failed to get room data")
                         Log.e(TAG, "getLiveStates: Message - $msg")
                     }
                 } catch (e: Exception) {
 
                     Log.e(TAG, "Exception in getLiveStates: $e")
-                    if (e.message != null) showToast(e.message)
+                    if (isAdded && e.message != null) showToast(e.message)
                 }
             }, {
 
-                showToast("Something went wrong.")
+                if (isAdded) showToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -358,7 +354,7 @@ class DashbordFragment : Fragment() {
     }
 
     private fun showToast(message: String?) {
-        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
+        if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
     private fun showPopupMenu(view: View?) {
