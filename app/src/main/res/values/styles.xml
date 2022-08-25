@@ -17,4 +17,16 @@
         <item name="android:fontFamily">@font/raleway</item>
         <item name="android:textColor">@color/black</item>
     </style>
+
+    <style name="SwitchStyle" parent="Theme.AppCompat.Light">
+        <item name="colorControlActivated">@color/colorAccent</item>
+
+        <!-- inactive thumb color -->
+        <item name="colorSwitchThumbNormal">#f1f1f1</item>
+
+        <!-- inactive track color (30% transparency) -->
+<!--        <item name="android:colorForeground">@color/secondary_text</item>-->
+
+        <item name="android:switchMinWidth">@dimen/_50sdp</item>
+    </style>
 </resources>

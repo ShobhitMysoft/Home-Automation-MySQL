@@ -79,4 +79,9 @@ dependencies {
     implementation 'com.github.zcweng:switch-button:0.0.3'
 //    implementation 'me.itangqi.waveloadingview:library:0.3.5'
 //    implementation 'jp.hamcheesedev:outlinedtextview:0.1.0'
+
+
+    implementation('org.eclipse.paho:org.eclipse.paho.android.service:1.0.2') {
+        exclude module: 'support-v4'
+    }
 }
