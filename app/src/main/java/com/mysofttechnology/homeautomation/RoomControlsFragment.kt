@@ -82,7 +82,6 @@ class RoomControlsFragment : Fragment() {
     private var SWITCH1: String? = null
     private var SWITCH2: String? = null
     private var SWITCH3: String? = null
-
     private var SWITCH4: String? = null
     private var SWITCH6: String? = null
 
@@ -162,6 +161,9 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun attachNetworkListener() {
+        requireActivity().registerReceiver(bluetoothReceiver,
+            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+
         val networkRequest = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -464,8 +466,6 @@ class RoomControlsFragment : Fragment() {
             isBTConnected = false
 //            noNetwork()
         }
-        requireActivity().registerReceiver(bluetoothReceiver,
-            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
     }
 
     private val bluetoothReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -664,7 +664,7 @@ class RoomControlsFragment : Fragment() {
                     if (e.message != null) showLToast("${e.message}")
                 }
             }, {
-                showLToast("Something went wrong.")
+//                showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -712,7 +712,7 @@ class RoomControlsFragment : Fragment() {
                     if (e.message != null) showLToast("${e.message}")
                 }
             }, {
-                showLToast("Something went wrong.")
+//                showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -1172,6 +1172,7 @@ class RoomControlsFragment : Fragment() {
     private fun showEditSwitchMenu(view: View?, switchID: String, switchIDByApp: String) {
         val popup = PopupMenu(requireActivity(), view)
         popup.menuInflater.inflate(R.menu.switch_menu, popup.menu)
+
         popup.setOnMenuItemClickListener {
             when (it!!.itemId) {
                 R.id.edit -> {
@@ -1181,7 +1182,8 @@ class RoomControlsFragment : Fragment() {
                     intent.putExtra(ROOM_NAME, roomsList[selectedRoomIndex])
                     intent.putExtra(SWITCH_ID, switchID)
                     intent.putExtra(SWITCH_ID_BY_APP, switchIDByApp)
-                    startActivity(intent)
+                    if (isOnline()) startActivity(intent)
+                    else showSToast("No internet")
                 }
             }
             true

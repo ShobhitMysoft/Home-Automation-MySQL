@@ -292,9 +292,9 @@ class FillWifiDetailFragment : Fragment() {
                         val msg = mData.get("msg")
 
                         if (resp == 1) {
-                            showToast("0 sent!")
+//                            showToast("0 sent!")
                             Handler(Looper.getMainLooper()).postDelayed({
-                                showToast("Handler called")
+//                                showToast("Handler called")
                                 verifyWifi()
                             }, 15000)
                             Log.d(TAG, "updateLive: Message - $msg")
@@ -336,7 +336,7 @@ class FillWifiDetailFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        showToast("Received 1")
+//                        showToast("Received 1")
                         if (mData.get("wifi") == "1") startActivity(Intent(requireContext(), WorkDoneActivity::class.java))
                         else btSocket = null
 
@@ -558,6 +558,7 @@ class FillWifiDetailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        closeSocket()
     }
 
     /*private fun retryDialog() {
