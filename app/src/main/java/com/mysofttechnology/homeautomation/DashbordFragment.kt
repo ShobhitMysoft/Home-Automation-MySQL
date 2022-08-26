@@ -374,7 +374,8 @@ class DashbordFragment : Fragment() {
                 }
                 R.id.rooms -> {
                     val action = DashbordFragmentDirections.actionDashbordFragmentToRoomsFragment()
-                    findNavController().navigate(action)
+                    if (isOnline()) findNavController().navigate(action)
+                    else showToast("No Internet")
                 }
                 R.id.logout -> {
                     builder.setTitle("Logout").setMessage("Are you sure you want to logout?")

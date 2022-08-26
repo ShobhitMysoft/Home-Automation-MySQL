@@ -129,7 +129,7 @@ class RoomsFragment : Fragment() {
             requestQueue.add(stringRequest)
         } else {
             loadingDialog.dismiss()
-            showLSnackbar("No internet connection")
+//            showLSnackbar("No internet")
         }
         return roomsData
     }
@@ -138,7 +138,7 @@ class RoomsFragment : Fragment() {
         if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
-    private fun showLSnackbar(msg: String = "Something went wrong.") {
+    /*private fun showLSnackbar(msg: String = "Something went wrong.") {
         if (context != null) {
             Snackbar.make(bind.roomsRootView, msg, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") {
@@ -150,7 +150,7 @@ class RoomsFragment : Fragment() {
             Log.e(TAG, "showLSnackbar: Contect Error - $context")
             roomsData()
         }
-    }
+    }*/
 
     private fun isOnline(): Boolean {
         val connectivityManager =

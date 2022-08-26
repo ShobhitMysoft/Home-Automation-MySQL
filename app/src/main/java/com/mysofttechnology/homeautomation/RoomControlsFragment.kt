@@ -7,7 +7,9 @@ import android.content.*
 import android.content.res.TypedArray
 import android.graphics.Typeface
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -154,8 +156,35 @@ class RoomControlsFragment : Fragment() {
         binding.connectionBtn.setOnClickListener { loadUi() }
         binding.statusPb.setOnClickListener { loadUi() }
 
+        attachNetworkListener()
         uiHandler()
-        loadUi()
+//        loadUi()
+    }
+
+    private fun attachNetworkListener() {
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build()
+
+        val connectivityManager = requireActivity().getSystemService(
+            ConnectivityManager::class.java) as ConnectivityManager
+        connectivityManager.requestNetwork(networkRequest, networkCallback)
+    }
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        // network is available for use
+        override fun onAvailable(network: Network) {
+            super.onAvailable(network)
+            requireActivity().runOnUiThread { loadUi() }
+        }
+
+        // lost network connection
+        override fun onLost(network: Network) {
+            super.onLost(network)
+            requireActivity().runOnUiThread { loadUi() }
+        }
     }
 
     private fun uiHandler() {
@@ -273,27 +302,27 @@ class RoomControlsFragment : Fragment() {
         binding.switch1MoreBtn.setOnClickListener {
             if (SWITCH1 != null) showEditSwitchMenu(it, SWITCH1!!, "1")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
         binding.switch2MoreBtn.setOnClickListener {
             if (SWITCH2 != null) showEditSwitchMenu(it, SWITCH2!!, "2")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
         binding.switch3MoreBtn.setOnClickListener {
             if (SWITCH3 != null) showEditSwitchMenu(it, SWITCH3!!, "3")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
         binding.switch4MoreBtn.setOnClickListener {
             if (SWITCH4 != null) showEditSwitchMenu(it, SWITCH4!!, "4")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
         binding.switch6MoreBtn.setOnClickListener {
             if (SWITCH6 != null) showEditSwitchMenu(it, SWITCH6!!, "6")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
     }
 
@@ -410,7 +439,7 @@ class RoomControlsFragment : Fragment() {
             btSocket!!.connect()
         } catch (e: Exception) {
             checkBtIsConnected()
-            closeSocket()   // failed to connectToBtDevice
+//            closeSocket()   // failed to connectToBtDevice
         }
 
         checkBtIsConnected()
@@ -433,7 +462,7 @@ class RoomControlsFragment : Fragment() {
             }
         } else {
             isBTConnected = false
-            noNetwork()
+//            noNetwork()
         }
         requireActivity().registerReceiver(bluetoothReceiver,
             IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
@@ -457,13 +486,13 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun noNetwork() {
-        requireActivity().runOnUiThread {
-            binding.connectionBtn.setImageDrawable(
-                context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
-            enableUI()
-            binding.statusPb.visibility = View.INVISIBLE
-            binding.connectionBtn.visibility = View.VISIBLE
-        }
+//        requireActivity().runOnUiThread {
+        binding.connectionBtn.setImageDrawable(
+            context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
+        enableUI()
+        binding.statusPb.visibility = View.INVISIBLE
+        binding.connectionBtn.visibility = View.VISIBLE
+//        }
     }
 
     /* INTERNET */
@@ -551,7 +580,7 @@ class RoomControlsFragment : Fragment() {
 
                         override fun connectionLost(cause: Throwable?) {
                             Log.i(this.javaClass.name, "Connection lost ${cause.toString()}")
-                            showSToast("Connection Lost")
+//                            showSToast("Connection Lost")
                             if (isAdded && isOnline()) connectToMQTT()
                             else loadUi()
                         }
@@ -898,33 +927,7 @@ class RoomControlsFragment : Fragment() {
             try {
                 ssidOutputStream?.write(signal.toByteArray())
 
-                when (signal) {
-                    "F" -> {
-                        binding.fanSpeedSlider.value = 1.0f
-                        binding.fanSpeedTv.text = "1"
-                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                    }
-                    "G" -> {
-                        binding.fanSpeedSlider.value = 2.0f
-                        binding.fanSpeedTv.text = "2"
-                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                    }
-                    "H" -> {
-                        binding.fanSpeedSlider.value = 3.0f
-                        binding.fanSpeedTv.text = "3"
-                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                    }
-                    "I" -> {
-                        binding.fanSpeedSlider.value = 4.0f
-                        binding.fanSpeedTv.text = "4"
-                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                    }
-                    "E" -> {
-                        binding.fanSpeedSlider.value = 0.0f
-                        binding.fanSpeedTv.text = "0"
-                        if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
-                    }
-                }
+                updateSwitchState(signal)
 
                 enableUI()
 
