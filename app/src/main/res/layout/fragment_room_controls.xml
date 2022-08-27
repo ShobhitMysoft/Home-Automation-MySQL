@@ -71,6 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="-10dp"
+                style="@style/NeumorphismCardView"
                 android:background="@color/secondary_text"
                 android:clickable="true"
                 android:focusable="true"
@@ -96,6 +97,7 @@
                 android:id="@+id/power_btn_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                style="@style/NeumorphismCardView"
                 android:backgroundTint="@color/primary"
                 android:clickable="true"
                 android:focusable="true"
@@ -128,7 +130,7 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <androidx.cardview.widget.CardView xmlns:Card_View="http://schemas.android.com/apk/res-auto"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="15dp"
@@ -172,7 +174,7 @@
                                             android:layout_gravity="top"
                                             android:fontFamily="@font/raleway"
                                             android:text="Fan"
-                                            android:textColor="#000000"
+                                            android:textColor="@color/black"
                                             android:textSize="17dp" />
 
                                         <LinearLayout
@@ -207,8 +209,8 @@
                                     android:id="@+id/fan_switch"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:theme="@style/SwitchStyle"
-                                    android:layout_gravity="end" />
+                                    android:layout_gravity="end"
+                                    android:theme="@style/SwitchStyle" />
                             </FrameLayout>
 
                             <com.google.android.material.slider.Slider
@@ -289,7 +291,7 @@
                                     android:layout_marginTop="15dp"
                                     android:fontFamily="@font/raleway"
                                     android:text="Switch 1"
-                                    android:textColor="#000000"
+                                    android:textColor="@color/black"
                                     android:textSize="17dp" />
 
                                 <View
@@ -486,7 +488,7 @@
                                     android:layout_marginTop="15dp"
                                     android:fontFamily="@font/raleway"
                                     android:text="Switch 2"
-                                    android:textColor="#000000"
+                                    android:textColor="@color/black"
                                     android:textSize="17dp" />
 
                                 <View
@@ -694,7 +696,7 @@
                                     android:layout_marginTop="15dp"
                                     android:fontFamily="@font/raleway"
                                     android:text="Switch 3"
-                                    android:textColor="#000000"
+                                    android:textColor="@color/black"
                                     android:textSize="17dp" />
 
                                 <View
@@ -895,7 +897,7 @@
                                     android:layout_marginTop="15dp"
                                     android:fontFamily="@font/raleway"
                                     android:text="Switch 4"
-                                    android:textColor="#000000"
+                                    android:textColor="@color/black"
                                     android:textSize="17dp" />
 
                                 <View
@@ -1101,7 +1103,7 @@
                             android:layout_marginTop="15dp"
                             android:fontFamily="@font/raleway"
                             android:text="Switch"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="17dp" />
 
                         <View

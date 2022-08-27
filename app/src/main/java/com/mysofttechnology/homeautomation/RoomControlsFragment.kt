@@ -157,7 +157,7 @@ class RoomControlsFragment : Fragment() {
 
         attachNetworkListener()
         uiHandler()
-//        loadUi()
+        loadUi()
     }
 
     private fun attachNetworkListener() {
@@ -704,7 +704,7 @@ class RoomControlsFragment : Fragment() {
                         }
                         Log.d(TAG, "switchList: Message - $msg")
                     } else {
-                        showPSnackbar("Failed to get switch data")
+//                        showPSnackbar("Failed to get switch data")
                         Log.e(TAG, "switch switchList: Message - $msg")
                     }
                 } catch (e: Exception) {
@@ -1265,7 +1265,7 @@ class RoomControlsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         closeSocket()
-        mqttClient?.disconnect()
+//        mqttClient?.disconnect()
     }
 
     override fun onDestroy() {

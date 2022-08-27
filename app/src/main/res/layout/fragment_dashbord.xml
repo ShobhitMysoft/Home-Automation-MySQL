@@ -152,7 +152,7 @@
                     android:layout_gravity="center_vertical"
                     android:fontFamily="@font/raleway"
                     android:text="Smart Home"
-                    android:textColor="@color/white"
+                    android:textColor="#FFFFFF"
                     android:textSize="30dp"
                     android:textStyle="bold" />
 
@@ -163,7 +163,7 @@
                     android:layout_marginTop="8dp"
                     android:fontFamily="@font/raleway"
                     android:text="A smart home with advanced features that you can control."
-                    android:textColor="@color/white"
+                    android:textColor="#FFFFFF"
                     android:textSize="14dp"
                     android:textStyle="bold" />
 

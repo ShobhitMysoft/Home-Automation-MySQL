@@ -138,20 +138,6 @@ class RoomsFragment : Fragment() {
         if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
-    /*private fun showLSnackbar(msg: String = "Something went wrong.") {
-        if (context != null) {
-            Snackbar.make(bind.roomsRootView, msg, Snackbar.LENGTH_INDEFINITE)
-                .setAction("Retry") {
-                    if (isOnline()) roomsData()
-                    else showLSnackbar("No internet")
-                }
-                .show()
-        } else {
-            Log.e(TAG, "showLSnackbar: Contect Error - $context")
-            roomsData()
-        }
-    }*/
-
     private fun isOnline(): Boolean {
         val connectivityManager =
             context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

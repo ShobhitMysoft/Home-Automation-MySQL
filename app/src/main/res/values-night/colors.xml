@@ -5,8 +5,8 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FFFFFFFF</color>
+    <color name="white">#2B2B2B</color>
     <color name="light_blue_600">#FF039BE5</color>
     <color name="light_blue_900">#FF01579B</color>
     <color name="light_blue_A100">#B3E5FC</color>
@@ -16,24 +16,24 @@
 
     <!--Custom colors-->
     <color name="primary">#0c83e5</color>
-<!--    <color name="primary">#123DC9</color>-->
+    <!--    <color name="primary">#123DC9</color>-->
     <color name="colorAccent">#0c83e5</color>
-<!--    <color name="primary">#2D7Df6</color>-->
-    <color name="background">#EFEEEE</color>
+    <!--    <color name="primary">#2D7Df6</color>-->
+    <color name="background">#121212</color>
     <!-- Snapchat background color -->
-    <color name="grey_50">#FAFAFA</color>
+    <color name="grey_50">#161616</color>
     <!--Snapchat Icons(Right side >, x, ...) color-->
     <color name="blue_grey_100">#CFD8DC</color>
-    <color name="primary_text">#353636</color>
-    <color name="secondary_text">#7D818A</color>
-    <color name="dark_shadow">#CDD5EA</color>
-    <color name="light_shadow">#F8F9FE</color>
-    <color name="dark_icon">#212121</color>
+    <color name="primary_text">#FFFFFFFF</color>
+    <color name="secondary_text">#CCCCCC</color>
+    <color name="dark_shadow">#070809</color>
+    <color name="light_shadow">#3C3F42</color>
+    <color name="dark_icon">#FFFFFF</color>
 
-    <color name="card_view_bg">#F1F1F1</color>
-    <color name="dark_green">#005A04</color>
-    <color name="dark_red">#9E0000</color>
+    <color name="card_view_bg">#121212</color>
+    <color name="dark_green">#00FF0B</color>
+    <color name="dark_red">#FF0000</color>
 
     <color name="dark_grey">#121212</color>
-    <color name="dark_grey_secondary">#212121</color>
+    <color name="dark_grey_secondary">#FFFFFF</color>
 </resources>

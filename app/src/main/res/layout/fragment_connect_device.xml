@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:id="@+id/cd_root_view"
     tools:context=".ConnectDeviceFragment">
 
@@ -84,6 +85,7 @@
         android:fontFamily="@font/raleway"
         android:gravity="center"
         android:padding="@dimen/_20sdp"
+        android:textColor="@color/black"
         android:text="Make sure the device is already paired.\nGo to Settings > Bluetooth > Select the device to pair"
         android:textSize="@dimen/_12ssp"
         app:layout_constraintBottom_toTopOf="@+id/bt_settings_btn"
