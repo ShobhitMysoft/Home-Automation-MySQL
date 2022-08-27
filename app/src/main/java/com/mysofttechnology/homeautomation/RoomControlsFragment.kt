@@ -359,12 +359,19 @@ class RoomControlsFragment : Fragment() {
                     curDevSwitchCount = cd.switchCount
                     currentBtDeviceId = cd.bluetoothId
                     binding.currentRoomTv.text = cd.name
-                    if (isOnline()) connectToInternet() else updateUIWithLocalDB()
+                    if (isOnline() && isLessThanAndroidS()) connectToInternet() else updateUIWithLocalDB()
                 } catch (e: Exception) {
                     Log.e(TAG, "checkLocalDatabase: Error", e)
                 }
             }
         }
+    }
+
+    private fun isLessThanAndroidS(): Boolean {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+            return true
+        } else showOkPSnackbar("Sorry! Android devices above version 11 can't be connected over wifi currently.")
+        return false
     }
 
     private fun updateUIWithLocalDB() {
@@ -948,7 +955,8 @@ class RoomControlsFragment : Fragment() {
     private fun sendDataToMQTT(signal: String) {
         if (mqttClient?.isConnected() == true) {
             try {
-                mqttClient!!.publish(MQTT_TEST_TOPIC, signal, 1, false,
+                showSToast("currentDeviceId = $currentDeviceId")
+                mqttClient!!.publish(currentDeviceId!!, signal, 1, false,
                     object : IMqttActionListener {
                         override fun onSuccess(asyncActionToken: IMqttToken?) {
                             val msg = "Publish message: $signal to topic: $MQTT_TEST_TOPIC"
@@ -1258,6 +1266,14 @@ class RoomControlsFragment : Fragment() {
         } else {
             Log.e(TAG, "showPSnackbar: Contect Error - $context")
             checkLocalDatabase()                                // Snack bar Retry
+        }
+    }
+
+    private fun showOkPSnackbar(msg: String = "Something went wrong.") {
+        if (context != null) {
+            Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_INDEFINITE)
+                .setAction("Ok") {}
+                .show()
         }
     }
 
