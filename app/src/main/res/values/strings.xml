@@ -15,7 +15,7 @@
     <string name="verify">Verify</string>
     <!-- DATABASE -->
     <string name="base_url">https://smartlit.co.in/app/admin/api/</string>
-    <string name="mqtt_server_url">tcp://mqtt.eclipseprojects.io:1883</string>
+    <string name="mqtt_server_url">tcp://smartlit.co.in:1883</string>
     <string name="url_register">register</string>
     <string name="url_profile">profile</string>
     <string name="url_room_list">room_list</string>

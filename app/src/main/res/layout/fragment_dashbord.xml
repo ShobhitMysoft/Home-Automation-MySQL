@@ -101,6 +101,7 @@
         android:fontFamily="@font/raleway"
         android:gravity="center"
         android:padding="@dimen/_30sdp"
+        android:textColor="@color/black"
         android:text="Loading..."
         android:textSize="@dimen/_12ssp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -128,7 +129,7 @@
             <!-- Banner -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
+                android:layout_height="150dp"
                 android:background="@drawable/banner1_min"
                 android:orientation="vertical"
                 android:paddingHorizontal="@dimen/_16sdp"

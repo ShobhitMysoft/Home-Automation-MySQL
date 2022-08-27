@@ -38,6 +38,9 @@ android {
 }
 
 dependencies {
+    // MQTT
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.4'
+    implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
@@ -79,9 +82,4 @@ dependencies {
     implementation 'com.github.zcweng:switch-button:0.0.3'
 //    implementation 'me.itangqi.waveloadingview:library:0.3.5'
 //    implementation 'jp.hamcheesedev:outlinedtextview:0.1.0'
-
-
-    implementation('org.eclipse.paho:org.eclipse.paho.android.service:1.0.2') {
-        exclude module: 'support-v4'
-    }
 }

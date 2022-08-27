@@ -11,17 +11,6 @@
         <item name="colorOnSecondary">@color/black</item>
     </style>
 
-    <!--    <style name="Theme.App.Starting" parent="Theme.SplashScreen">-->
-    <!--        <item name="windowSplashScreenBackground">@color/background</item>-->
-    <!--        <item name="windowSplashScreenAnimatedIcon">@drawable/mysoft_symbol</item>-->
-    <!--        <item name="postSplashScreenTheme">@style/Theme.HomeAutomation</item>-->
-    <!--    </style>-->
-
-    <!--    <style name="ThemeOverlay.HomeAutomation.FullscreenContainer" parent="">-->
-    <!--        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>-->
-    <!--        <item name="fullscreenTextColor">@color/light_blue_A200</item>-->
-    <!--    </style>-->
-
     <!--    Custom Style-->
     <style name="FullScreen" parent="Theme.HomeAutomation">
         <item name="android:windowNoTitle">true</item>

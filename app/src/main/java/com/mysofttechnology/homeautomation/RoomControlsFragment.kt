@@ -202,7 +202,7 @@ class RoomControlsFragment : Fragment() {
 
             override fun onStopTrackingTouch(slider: Slider) {
                 val speed = slider.value
-                disableUI()
+//                disableUI()
                 spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
                 spEditor?.apply()
                 if (isBTConnected) sendDataToBT(when (speed) {
@@ -226,7 +226,7 @@ class RoomControlsFragment : Fragment() {
 
         binding.fanSwitch.setOnClickListener {
             val isChecked = binding.fanSwitch.isChecked
-            disableUI()
+//            disableUI()
             if (isBTConnected) {
                 if (!isChecked) {
                     sendDataToBT("E")
@@ -258,7 +258,7 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch1Switch.setOnClickListener {
             val isChecked = binding.switch1Switch.isChecked
-            disableUI()
+//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "A" else "a")
             else {
                 sendDataToMQTT(if (isChecked) "A" else "a")
@@ -267,7 +267,7 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch2Switch.setOnClickListener {
             val isChecked = binding.switch2Switch.isChecked
-            disableUI()
+//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "B" else "b")
             else {
                 sendDataToMQTT(if (isChecked) "B" else "b")
@@ -276,7 +276,7 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch3Switch.setOnClickListener {
             val isChecked = binding.switch3Switch.isChecked
-            disableUI()
+//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "C" else "c")
             else {
                 sendDataToMQTT(if (isChecked) "C" else "c")
@@ -285,7 +285,7 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch4Switch.setOnClickListener {
             val isChecked = binding.switch4Switch.isChecked
-            disableUI()
+//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "D" else "d")
             else {
                 sendDataToMQTT(if (isChecked) "D" else "d")
@@ -294,7 +294,7 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch6Switch.setOnClickListener {
             val isChecked = binding.switch6Switch.isChecked
-            disableUI()
+//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "A" else "a")
             else {
                 sendDataToMQTT(if (isChecked) "A" else "a")
@@ -489,7 +489,7 @@ class RoomControlsFragment : Fragment() {
 //        requireActivity().runOnUiThread {
         binding.connectionBtn.setImageDrawable(
             context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
-        enableUI()
+//        enableUI()
         binding.statusPb.visibility = View.INVISIBLE
         binding.connectionBtn.visibility = View.VISIBLE
 //        }
@@ -521,9 +521,9 @@ class RoomControlsFragment : Fragment() {
     private fun connectToMQTT() {
 
         val serverURI = getString(R.string.mqtt_server_url)
-        val clientID = MQTT_CLIENT_ID_KEY
-        val username = MQTT_USERNAME_KEY
-        val password = MQTT_PWD_KEY
+        val clientID = "9c198616-3f15-4287-94d9-f2e6ec1f6144"
+        val username = "mysoft"
+        val password = "Mysoft@#$123"
 
         if (serverURI != null && clientID != null) {
             mqttClient = MQTTClient(context, serverURI, clientID)
@@ -560,7 +560,7 @@ class RoomControlsFragment : Fragment() {
                                     context?.let {
                                         ContextCompat.getDrawable(it, R.drawable.ic_no_network)
                                     })
-                                enableUI()
+//                                enableUI()
                                 binding.statusPb.visibility = View.INVISIBLE
                                 binding.connectionBtn.visibility = View.VISIBLE
                                 checkBluetooth()
@@ -929,7 +929,7 @@ class RoomControlsFragment : Fragment() {
 
                 updateSwitchState(signal)
 
-                enableUI()
+//                enableUI()
 
                 togglePowerButton(
                     if (binding.switch1Switch.isChecked) ONE else ZERO,
@@ -1002,7 +1002,7 @@ class RoomControlsFragment : Fragment() {
                         }
                     })
 
-                enableUI()
+//                enableUI()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -1082,12 +1082,12 @@ class RoomControlsFragment : Fragment() {
                 if (app1Val == ZERO && app2Val == ZERO && app3Val == ZERO && app4Val == ZERO && fan == ZERO) {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
-                    enableUI()
+//                    enableUI()
 
                 } else {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
-                    enableUI()
+//                    enableUI()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "togglePower: Error", e)
@@ -1191,7 +1191,7 @@ class RoomControlsFragment : Fragment() {
         popup.show()
     }
 
-    private fun disableUI() {
+    /*private fun disableUI() {
         if (isAdded) {
             binding.powerBtn.isClickable = false
             binding.powerBtn.isEnabled = false
@@ -1202,9 +1202,9 @@ class RoomControlsFragment : Fragment() {
             binding.switch3Switch.isClickable = false
             binding.switch4Switch.isClickable = false
         }
-    }
+    }*/
 
-    private fun enableUI() {
+    /*private fun enableUI() {
         if (isAdded) {
             binding.powerBtn.isClickable = true
             binding.powerBtn.isEnabled = true
@@ -1215,7 +1215,7 @@ class RoomControlsFragment : Fragment() {
             binding.switch3Switch.isClickable = true
             binding.switch4Switch.isClickable = true
         }
-    }
+    }*/
 
     private fun isOnline(): Boolean {
         if (context != null) {
