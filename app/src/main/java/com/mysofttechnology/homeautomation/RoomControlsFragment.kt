@@ -258,7 +258,6 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch1Switch.setOnClickListener {
             val isChecked = binding.switch1Switch.isChecked
-//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "A" else "a")
             else {
                 sendDataToMQTT(if (isChecked) "A" else "a")
@@ -267,7 +266,6 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch2Switch.setOnClickListener {
             val isChecked = binding.switch2Switch.isChecked
-//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "B" else "b")
             else {
                 sendDataToMQTT(if (isChecked) "B" else "b")
@@ -276,7 +274,6 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch3Switch.setOnClickListener {
             val isChecked = binding.switch3Switch.isChecked
-//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "C" else "c")
             else {
                 sendDataToMQTT(if (isChecked) "C" else "c")
@@ -285,7 +282,6 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch4Switch.setOnClickListener {
             val isChecked = binding.switch4Switch.isChecked
-//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "D" else "d")
             else {
                 sendDataToMQTT(if (isChecked) "D" else "d")
@@ -294,7 +290,6 @@ class RoomControlsFragment : Fragment() {
 
         binding.switch6Switch.setOnClickListener {
             val isChecked = binding.switch6Switch.isChecked
-//            disableUI()
             if (isBTConnected) sendDataToBT(if (isChecked) "A" else "a")
             else {
                 sendDataToMQTT(if (isChecked) "A" else "a")
@@ -359,7 +354,7 @@ class RoomControlsFragment : Fragment() {
                     curDevSwitchCount = cd.switchCount
                     currentBtDeviceId = cd.bluetoothId
                     binding.currentRoomTv.text = cd.name
-                    if (isOnline() && isLessThanAndroidS()) connectToInternet() else updateUIWithLocalDB()
+                    if (isOnline()) connectToInternet() else updateUIWithLocalDB()
                 } catch (e: Exception) {
                     Log.e(TAG, "checkLocalDatabase: Error", e)
                 }
@@ -367,12 +362,12 @@ class RoomControlsFragment : Fragment() {
         }
     }
 
-    private fun isLessThanAndroidS(): Boolean {
+    /*private fun isLessThanAndroidS(): Boolean {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
             return true
         } else showOkPSnackbar("Sorry! Android devices above version 11 can't be connected over wifi currently.")
         return false
-    }
+    }*/
 
     private fun updateUIWithLocalDB() {
         binding.connectionBtn.visibility = View.INVISIBLE
