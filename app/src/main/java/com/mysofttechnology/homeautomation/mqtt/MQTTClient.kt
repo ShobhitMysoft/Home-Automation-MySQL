@@ -2,7 +2,8 @@ package com.mysofttechnology.homeautomation.mqtt
 
 import android.content.Context
 import android.util.Log
-import info.mqtt.android.service.MqttAndroidClient
+import org.eclipse.paho.android.service.MqttAndroidClient
+//import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
 private const val TAG = "MQTTClient"
