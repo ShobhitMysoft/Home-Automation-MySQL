@@ -536,7 +536,7 @@ class RoomControlsFragment : Fragment() {
                         override fun onSuccess(asyncActionToken: IMqttToken?) {
                             Log.d(this.javaClass.name, "Connection success")
 
-                            mqttClient!!.subscribe(MQTT_TEST_TOPIC_SUB,
+                            mqttClient!!.subscribe("${currentDeviceId}_sub",
                                 1,
                                 object : IMqttActionListener {
                                     override fun onSuccess(asyncActionToken: IMqttToken?) {
@@ -954,7 +954,7 @@ class RoomControlsFragment : Fragment() {
                 mqttClient!!.publish(currentDeviceId!!, signal, 1, false,
                     object : IMqttActionListener {
                         override fun onSuccess(asyncActionToken: IMqttToken?) {
-                            val msg = "Publish message: $signal to topic: $MQTT_TEST_TOPIC"
+                            val msg = "Publish message: $signal to topic: $currentDeviceId"
                             Log.d(this.javaClass.name, msg)
 
                             when (signal) {
