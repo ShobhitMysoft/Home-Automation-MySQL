@@ -26,6 +26,7 @@
                 android:id="@+id/vc_back_btn"
                 android:layout_width="@dimen/_48sdp"
                 android:layout_height="@dimen/_48sdp"
+                style="@style/NeumorphismCardView"
                 android:clickable="true"
                 android:focusable="true"
                 app:neumorph_shadowElevation="@dimen/_3sdp">
@@ -52,6 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_4sdp"
+            style="@style/NeumorphismCardView"
             app:neumorph_shapeType="pressed">
 
             <EditText
@@ -86,6 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/_8sdp"
             android:backgroundTint="@color/primary"
+            style="@style/NeumorphismCardView"
             android:clickable="true"
             android:focusable="true">
 

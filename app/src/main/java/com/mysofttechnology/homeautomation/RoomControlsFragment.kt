@@ -1,19 +1,16 @@
 package com.mysofttechnology.homeautomation
 
-import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.content.res.TypedArray
 import android.graphics.Typeface
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,7 +21,6 @@ import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.Navigation
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -60,7 +56,6 @@ import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBindi
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.mqtt.MQTTClient
 import com.mysofttechnology.homeautomation.utils.*
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -76,13 +71,10 @@ private const val TAG = "RoomControlsFragment"
 class RoomControlsFragment : Fragment() {
 
     private var ssidOutputStream: OutputStream? = null
-//    private var isLoadingUi: Boolean = false
-    private var powerBtnClicked: Boolean = false
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var isBTConnected: Boolean = false
     private lateinit var deviceViewModel: DeviceViewModel
 
-    //    private lateinit var allData: List<Device>
     private var btSocket: BluetoothSocket? = null
     private val mUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
@@ -92,12 +84,7 @@ class RoomControlsFragment : Fragment() {
     private var SWITCH3: String? = null
     private var SWITCH4: String? = null
     private var SWITCH6: String? = null
-    private val CHECK_WIFI_DELAY_TIME: Long = 4000
-    private val CHECK_BT_DELAY_TIME: Long = 5000
-    private lateinit var toggleWifi: Handler
-    private lateinit var btHandler: Handler
-    private var checkWifiIsRunning: Boolean = false
-    private var checkWifi: Boolean = false
+
     private var sharedPref: SharedPreferences? = null
     private lateinit var requestQueue: RequestQueue
     private lateinit var waitSnackbar: Snackbar
@@ -123,7 +110,6 @@ class RoomControlsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.i(TAG, "onCreate: Called")
 
         val exitAppDialog = ExitAppDialog()
 
@@ -154,10 +140,6 @@ class RoomControlsFragment : Fragment() {
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
         selectedRoomIndex = sharedPref!!.getInt(getString(R.string.selected_room_index), 0)
 
-        Log.d(TAG, "onViewCreated: $currentUserId")
-
-        toggleWifi = Handler(Looper.getMainLooper())
-        btHandler = Handler(Looper.getMainLooper())
         waitSnackbar =
             Snackbar.make(requireActivity().findViewById(android.R.id.content), "Please wait...",
                 Snackbar.LENGTH_INDEFINITE)
@@ -170,109 +152,49 @@ class RoomControlsFragment : Fragment() {
             showChooseRoomDialog()
         }
 
-        binding.switch1Card.setOnLongClickListener {
-            Toast.makeText(requireContext(), "Long press detected", Toast.LENGTH_SHORT).show()
-            true
-        }
+        binding.connectionBtn.setOnClickListener { loadUi() }
+        binding.statusPb.setOnClickListener { loadUi() }
 
+        attachNetworkListener()
         uiHandler()
         loadUi()
-//        connectToBtDevice()
     }
 
-    private fun connectToMQTT() {
-        Log.i(TAG, "connectToMQTT: Called")
+    private fun attachNetworkListener() {
+        requireActivity().registerReceiver(bluetoothReceiver,
+            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
 
-        val serverURI = getString(R.string.mqtt_server_url)
-        val clientID = MQTT_CLIENT_ID_KEY
-        val username = MQTT_USERNAME_KEY
-        val password = MQTT_PWD_KEY
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build()
 
-            if (serverURI != null && clientID != null) {
-                mqttClient = MQTTClient(context, serverURI, clientID)
+        val connectivityManager = requireActivity().getSystemService(
+            ConnectivityManager::class.java) as ConnectivityManager
+        connectivityManager.requestNetwork(networkRequest, networkCallback)
+    }
 
-                if (!mqttClient!!.isConnected()) {
-                    mqttClient!!.connect(username, password,
-                        object : IMqttActionListener {
-                            override fun onSuccess(asyncActionToken: IMqttToken?) {
-                                Log.d(this.javaClass.name, "Connection success")
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        // network is available for use
+        override fun onAvailable(network: Network) {
+            super.onAvailable(network)
+            requireActivity().runOnUiThread { loadUi() }
+        }
 
-                                Toast.makeText(context, "MQTT Connection success",
-                                    Toast.LENGTH_SHORT)
-                                    .show()
-
-                                mqttClient!!.subscribe(MQTT_TEST_TOPIC_SUB,
-                                    1,
-                                    object : IMqttActionListener {
-                                        override fun onSuccess(asyncActionToken: IMqttToken?) {
-                                            val msg = "Subscribed to: $MQTT_TEST_TOPIC_SUB"
-                                            Log.d(this.javaClass.name, msg)
-
-//                                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                                        }
-
-                                        override fun onFailure(asyncActionToken: IMqttToken?,
-                                            exception: Throwable?) {
-                                            Log.d(this.javaClass.name, "Failed to subscribe: $MQTT_TEST_TOPIC_SUB")
-                                        }
-                                    })
-                            }
-
-                            override fun onFailure(asyncActionToken: IMqttToken?,
-                                exception: Throwable?) {
-                                Log.d(this.javaClass.name,
-                                    "Connection failure: ${exception.toString()}")
-
-                                try {
-                                    binding.connectionBtn.setImageDrawable(
-                                        context?.let {
-                                            ContextCompat.getDrawable(it, R.drawable.ic_no_network)
-                                        })
-                                    enableUI()
-                                    binding.statusPb.visibility = View.INVISIBLE
-                                    binding.connectionBtn.visibility = View.VISIBLE
-                                    checkBluetooth()
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "connectToInternet: Error", e)
-                                }
-                            }
-                        },
-                        object : MqttCallback {
-                            override fun messageArrived(topic: String?, message: MqttMessage?) {
-                                val msg =
-                                    "Receive message: ${message.toString()} from topic: $topic"
-                                Log.d(this.javaClass.name, msg)
-
-//                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                                updateSwitchState(message.toString())
-                            }
-
-                            override fun connectionLost(cause: Throwable?) {
-                                Log.d(this.javaClass.name, "Connection lost ${cause.toString()}")
-                                if (isAdded) connectToMQTT()
-                            }
-
-                            override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                                Log.d(this.javaClass.name, "Delivery complete")
-                            }
-                        })
-                }
-            }
-
+        // lost network connection
+        override fun onLost(network: Network) {
+            super.onLost(network)
+            requireActivity().runOnUiThread { loadUi() }
+        }
     }
 
     private fun uiHandler() {
-        Log.d(TAG, "uiHandler: Called\n")
         val spEditor = sharedPref?.edit()
 
         binding.powerBtn.setOnClickListener {
-            powerBtnClicked = true
             loadingDialog.show(childFragmentManager, "$TAG powerBtn")
-            if (!checkWifiIsRunning) {
-                checkWifiIsRunning = true
-                toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-            }
-            togglePower()
+            togglePowerState()
         }
 
         binding.fanSpeedSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
@@ -280,7 +202,7 @@ class RoomControlsFragment : Fragment() {
 
             override fun onStopTrackingTouch(slider: Slider) {
                 val speed = slider.value
-                disableUI()
+//                disableUI()
                 spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
                 spEditor?.apply()
                 if (isBTConnected) sendDataToBT(when (speed) {
@@ -291,12 +213,6 @@ class RoomControlsFragment : Fragment() {
                     else -> "E"
                 })
                 else {
-                    if (!checkWifiIsRunning) {
-                        checkWifiIsRunning = true
-                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                    }
-//                    isLoadingUi = true
-//                    updateLive(speed.toInt().toString(), FAN)
                     sendDataToMQTT(when (speed) {
                         1.0f -> "F"
                         2.0f -> "G"
@@ -310,196 +226,127 @@ class RoomControlsFragment : Fragment() {
 
         binding.fanSwitch.setOnClickListener {
             val isChecked = binding.fanSwitch.isChecked
-            Log.d(TAG, "uiHandler: fanSwitch isChecked Called")
-//            if (!isLoadingUi) {
-//                Log.d(TAG, "uiHandler: isLoadingUi = $isLoadingUi")
-                disableUI()
-                if (isBTConnected) {
-                    if (!isChecked) {
-                        sendDataToBT("E")
-                    } else {
-                        val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
-                            liveFanSpeed.toString())
-                        sendDataToBT(when (oldFanSpeed) {
-                            "1" -> "F"
-                            "2" -> "G"
-                            "3" -> "H"
-                            else -> "I"
-                        })
-                    }
+//            disableUI()
+            if (isBTConnected) {
+                if (!isChecked) {
+                    sendDataToBT("E")
                 } else {
-                    Log.d(TAG, "uiHandler: isBTConnected = $isBTConnected")
-                    if (!checkWifiIsRunning) {
-                        checkWifiIsRunning = true
-                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                    }
-                    if (!isChecked) {
-//                        updateLive(ZERO, FAN)
-                        sendDataToMQTT("E")
-                    } else {
-                        val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
-                            liveFanSpeed.toString())
-//                        updateLive(oldFanSpeed.toString(), FAN)
-                        sendDataToMQTT(when (oldFanSpeed) {
-                            "1" -> "F"
-                            "2" -> "G"
-                            "3" -> "H"
-                            else -> "I"
-                        })
-                    }
+                    val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
+                        liveFanSpeed.toString())
+                    sendDataToBT(when (oldFanSpeed) {
+                        "1" -> "F"
+                        "2" -> "G"
+                        "3" -> "H"
+                        else -> "I"
+                    })
                 }
-//            } else Log.d(TAG, "uiHandler: isLoadingUi = $isLoadingUi")
+            } else {
+                if (!isChecked) {
+                    sendDataToMQTT("E")
+                } else {
+                    val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
+                        liveFanSpeed.toString())
+                    sendDataToMQTT(when (oldFanSpeed) {
+                        "1" -> "F"
+                        "2" -> "G"
+                        "3" -> "H"
+                        else -> "I"
+                    })
+                }
+            }
         }
 
         binding.switch1Switch.setOnClickListener {
             val isChecked = binding.switch1Switch.isChecked
-            Log.d(TAG, "uiHandler: switch1Switch isChecked Called")
-//            if (!isLoadingUi) {
-                disableUI()
-                if (isBTConnected) sendDataToBT(
-                    if (isChecked) "A" else "a")                            // TODO: Step 8
-                else {
-                    if (!checkWifiIsRunning) {
-                        checkWifiIsRunning = true
-                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                    }
-//                    updateLive(if (isChecked) ONE else ZERO, APPL1)
-                    sendDataToMQTT(if (isChecked) "A" else "a")
-                }
-//            }
+            if (isBTConnected) sendDataToBT(if (isChecked) "A" else "a")
+            else {
+                sendDataToMQTT(if (isChecked) "A" else "a")
+            }
         }
 
         binding.switch2Switch.setOnClickListener {
             val isChecked = binding.switch2Switch.isChecked
-            Log.d(TAG, "uiHandler: switch2Switch isChecked Called")
-//            if (!isLoadingUi) {
-                disableUI()
-                if (isBTConnected) sendDataToBT(
-                    if (isChecked) "B" else "b")                            // TODO: Step 8
-                else {
-                    if (!checkWifiIsRunning) {
-                        checkWifiIsRunning = true
-                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                    }
-//                    updateLive(if (isChecked) ONE else ZERO, APPL2)
-                    sendDataToMQTT(if (isChecked) "B" else "b")
-                }
-//            }
+            if (isBTConnected) sendDataToBT(if (isChecked) "B" else "b")
+            else {
+                sendDataToMQTT(if (isChecked) "B" else "b")
+            }
         }
 
         binding.switch3Switch.setOnClickListener {
             val isChecked = binding.switch3Switch.isChecked
-            Log.d(TAG, "uiHandler: switch3Switch isChecked Called")
-//            if (!isLoadingUi) {
-                disableUI()
-                if (isBTConnected) sendDataToBT(
-                    if (isChecked) "C" else "c")                            // TODO: Step 8
-                else {
-                    if (!checkWifiIsRunning) {
-                        checkWifiIsRunning = true
-                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                    }
-//                    updateLive(if (isChecked) ONE else ZERO, APPL3)
-                    sendDataToMQTT(if (isChecked) "C" else "c")
-                }
-//            }
+            if (isBTConnected) sendDataToBT(if (isChecked) "C" else "c")
+            else {
+                sendDataToMQTT(if (isChecked) "C" else "c")
+            }
         }
 
         binding.switch4Switch.setOnClickListener {
             val isChecked = binding.switch4Switch.isChecked
-            Log.d(TAG, "uiHandler: switch4Switch isChecked Called")
-//            if (!isLoadingUi) {
-                disableUI()
-                if (isBTConnected) sendDataToBT(
-                    if (isChecked) "D" else "d")                            // TODO: Step 8
-                else {
-                    if (!checkWifiIsRunning) {
-                        checkWifiIsRunning = true
-                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                    }
-//                    updateLive(if (isChecked) ONE else ZERO, APPL4)
-                    sendDataToMQTT(if (isChecked) "D" else "d")
-                }
-//            }
+            if (isBTConnected) sendDataToBT(if (isChecked) "D" else "d")
+            else {
+                sendDataToMQTT(if (isChecked) "D" else "d")
+            }
         }
 
         binding.switch6Switch.setOnClickListener {
             val isChecked = binding.switch6Switch.isChecked
-            Log.d(TAG, "uiHandler: switch6Switch isChecked Called")
-//            if (!isLoadingUi) {
-                disableUI()
-                if (isBTConnected) sendDataToBT(
-                    if (isChecked) "A" else "a")                            // TODO: Step 8
-                else {
-                    if (!checkWifiIsRunning) {
-                        checkWifiIsRunning = true
-                        toggleWifi.postDelayed(wifiRunnable, CHECK_WIFI_DELAY_TIME)
-                    }
-//                    updateLive(if (isChecked) ONE else ZERO, APPL1)
-                    sendDataToMQTT(if (isChecked) "A" else "a")
-                }
-//            }
+            if (isBTConnected) sendDataToBT(if (isChecked) "A" else "a")
+            else {
+                sendDataToMQTT(if (isChecked) "A" else "a")
+            }
         }
 
         binding.switch1MoreBtn.setOnClickListener {
-            if (SWITCH1 != null) showPopupMenu(it, SWITCH1!!, "1")
+            if (SWITCH1 != null) showEditSwitchMenu(it, SWITCH1!!, "1")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
         binding.switch2MoreBtn.setOnClickListener {
-            if (SWITCH2 != null) showPopupMenu(it, SWITCH2!!, "2")
+            if (SWITCH2 != null) showEditSwitchMenu(it, SWITCH2!!, "2")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
         binding.switch3MoreBtn.setOnClickListener {
-            if (SWITCH3 != null) showPopupMenu(it, SWITCH3!!, "3")
+            if (SWITCH3 != null) showEditSwitchMenu(it, SWITCH3!!, "3")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
         binding.switch4MoreBtn.setOnClickListener {
-            if (SWITCH4 != null) showPopupMenu(it, SWITCH4!!, "4")
+            if (SWITCH4 != null) showEditSwitchMenu(it, SWITCH4!!, "4")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
         binding.switch6MoreBtn.setOnClickListener {
-            if (SWITCH6 != null) showPopupMenu(it, SWITCH6!!, "6")
+            if (SWITCH6 != null) showEditSwitchMenu(it, SWITCH6!!, "6")
             else if (isOnline()) updateUI()
-            else showSToast("You are offline")
+            else showSToast("No internet")
         }
     }
 
     private fun loadUi() {
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
-//        isLoadingUi = true
 
         if (!currentDeviceId.isNullOrBlank() || !currentDeviceId.equals("null")) {
-//            checkDatabase()
-            checkLocalDatabase()                                // Load UI
+            if (view != null) checkLocalDatabase()                                // Load UI
         } else {
             Log.i(TAG, "onViewCreated: ~~~~ $currentDeviceId is not present")
         }
     }
 
-    private fun checkLocalDatabase() {                                                              // TODO: Step 4
-//        binding.mainControlsView.visibility = View.INVISIBLE
-//        isLoadingUi = true
-        var i = 0
+    private fun checkLocalDatabase() {
         val allData = deviceViewModel.readAllData
 
         allData.observe(viewLifecycleOwner) { deviceList ->
-            Log.i(TAG, "checkLocalDatabase: ${deviceList.size}")
             roomsList.clear()
             deviceIDList.clear()
             deviceList.forEach {
-                Log.d(TAG, "checkLocalDatabase ${++i}: ${it.name} | ${it.bluetoothId}")
                 roomsList.add(it.name)
                 deviceIDList.add(it.deviceId)
             }
 
             if (deviceIDList.size > 0) {
                 try {
-                    Log.d(TAG, "checkLocalDatabase: ${allData.value}")
                     if (selectedRoomIndex >= deviceIDList.size) selectedRoomIndex = 0
 
                     cd = allData.value?.get(selectedRoomIndex)!!
@@ -509,16 +356,20 @@ class RoomControlsFragment : Fragment() {
                     binding.currentRoomTv.text = cd.name
                     if (isOnline()) connectToInternet() else updateUIWithLocalDB()
                 } catch (e: Exception) {
-                    Log.e(TAG, "checkLocalDatabase: $roomsList\n$deviceIDList")
                     Log.e(TAG, "checkLocalDatabase: Error", e)
                 }
             }
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun updateUIWithLocalDB() {                                                             // TODO: Step 5
-        Log.d(TAG, "checkLocalDatabase: Called")
+    /*private fun isLessThanAndroidS(): Boolean {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+            return true
+        } else showOkPSnackbar("Sorry! Android devices above version 11 can't be connected over wifi currently.")
+        return false
+    }*/
+
+    private fun updateUIWithLocalDB() {
         binding.connectionBtn.visibility = View.INVISIBLE
         binding.statusPb.visibility = View.VISIBLE
 
@@ -564,26 +415,24 @@ class RoomControlsFragment : Fragment() {
                 if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
             }
 
-            togglePower(cd.s1State.toString(), cd.s2State.toString(), cd.s3State.toString(),
+            togglePowerButton(cd.s1State.toString(), cd.s2State.toString(), cd.s3State.toString(),
                 cd.s4State.toString(), cd.fanSpeed.toString())
         }
 
         Log.i(TAG, "updateUIWithLocalDB: Data updated from Local")
-//        isLoadingUi = false
 
         checkBluetooth()
     }
 
     private fun checkBluetooth() {
         if (bluetoothAdapter?.isEnabled == true && currentBtDeviceId != null && currentBtDeviceId != "null") {
-//            binding.mainControlsView.visibility = View.VISIBLE
             GlobalScope.launch(Dispatchers.IO) {
                 connectToBtDevice()
             }
-        }
+        } else noNetwork()
     }
 
-    private suspend fun connectToBtDevice() {                                                               // TODO: Step 6
+    private suspend fun connectToBtDevice() {
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
 
@@ -591,20 +440,17 @@ class RoomControlsFragment : Fragment() {
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
 
         try {
-            Log.i(TAG, "connectToBtDevice: Try ${Calendar.getInstance().time}")
-            btHandler.postDelayed(btRunnable, CHECK_BT_DELAY_TIME)
             btSocket!!.connect()
-            Log.i(TAG, "connectToBtDevice: Try complete ${Calendar.getInstance().time}")
         } catch (e: Exception) {
             checkBtIsConnected()
-            closeSocket()   // failed to connectToBtDevice
+//            closeSocket()   // failed to connectToBtDevice
         }
 
         checkBtIsConnected()
     }
 
     private fun checkBtIsConnected() {
-        if (btSocket?.isConnected == true) {                                                        // TODO: Step 7
+        if (btSocket?.isConnected == true) {
             isBTConnected = true
             ssidOutputStream = btSocket!!.outputStream
             requireActivity().runOnUiThread {
@@ -615,35 +461,19 @@ class RoomControlsFragment : Fragment() {
                     binding.connectionBtn.visibility = View.VISIBLE
                 } catch (e: Exception) {
                     Log.e(TAG, "connectToBtDevice isBTConnected = $isBTConnected: Error", e)
+                    noNetwork()
                 }
-//                binding.mainControlsView.visibility = View.VISIBLE
             }
-        } else isBTConnected = false
+        } else {
+            isBTConnected = false
+//            noNetwork()
+        }
     }
 
-    private fun connectToInternet() {                                                               // TODO: Step 6
-//        binding.mainControlsView.visibility = View.VISIBLE
-        if (isOnline()) {                                                                           // TODO: Step 9.1
-            try {
-                binding.connectionBtn.setImageDrawable(
-                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_network) })
-                updateUI()
-                binding.statusPb.visibility = View.INVISIBLE
-                binding.connectionBtn.visibility = View.VISIBLE
-                connectToMQTT()
-            } catch (e: Exception) {
-                Log.e(TAG, "connectToInternet: Error", e)
-            }
-        } else {                                                                           // TODO: Step 9.1
-            try {
-                checkBluetooth()
-                binding.connectionBtn.setImageDrawable(
-                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
-                enableUI()
-                binding.statusPb.visibility = View.INVISIBLE
-                binding.connectionBtn.visibility = View.VISIBLE
-            } catch (e: Exception) {
-                Log.e(TAG, "connectToInternet: Error", e)
+    private val bluetoothReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            if (bluetoothAdapter?.state == BluetoothAdapter.STATE_OFF || bluetoothAdapter?.state == BluetoothAdapter.STATE_ON) {
+                loadUi()
             }
         }
     }
@@ -657,14 +487,121 @@ class RoomControlsFragment : Fragment() {
         }
     }
 
+    private fun noNetwork() {
+//        requireActivity().runOnUiThread {
+        binding.connectionBtn.setImageDrawable(
+            context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
+//        enableUI()
+        binding.statusPb.visibility = View.INVISIBLE
+        binding.connectionBtn.visibility = View.VISIBLE
+//        }
+    }
+
+    /* INTERNET */
+    private fun connectToInternet() {
+        if (isOnline()) {
+            try {
+                binding.connectionBtn.setImageDrawable(
+                    context?.let { ContextCompat.getDrawable(it, R.drawable.ic_network) })
+                updateUI()
+                binding.statusPb.visibility = View.INVISIBLE
+                binding.connectionBtn.visibility = View.VISIBLE
+                connectToMQTT()
+            } catch (e: Exception) {
+                Log.e(TAG, "connectToInternet: Error", e)
+            }
+        } else {
+            try {
+                checkBluetooth()
+                noNetwork()
+            } catch (e: Exception) {
+                Log.e(TAG, "connectToInternet: Error", e)
+            }
+        }
+    }
+
+    private fun connectToMQTT() {
+
+        val serverURI = getString(R.string.mqtt_server_url)
+        val clientID = "9c198616-3f15-4287-94d9-f2e6ec1f6144"
+        val username = "mysoft"
+        val password = "Mysoft@#$123"
+
+        if (serverURI != null && clientID != null) {
+            mqttClient = MQTTClient(context, serverURI, clientID)
+
+            if (!mqttClient!!.isConnected()) {
+                mqttClient!!.connect(username, password,
+                    object : IMqttActionListener {
+                        override fun onSuccess(asyncActionToken: IMqttToken?) {
+                            Log.d(this.javaClass.name, "Connection success")
+
+                            mqttClient!!.subscribe(MQTT_TEST_TOPIC_SUB,
+                                1,
+                                object : IMqttActionListener {
+                                    override fun onSuccess(asyncActionToken: IMqttToken?) {
+                                        val msg = "Subscribed to: $MQTT_TEST_TOPIC_SUB"
+                                        Log.d(this.javaClass.name, msg)
+                                    }
+
+                                    override fun onFailure(asyncActionToken: IMqttToken?,
+                                        exception: Throwable?) {
+                                        Log.e(this.javaClass.name,
+                                            "Failed to subscribe: $MQTT_TEST_TOPIC_SUB")
+                                    }
+                                })
+                        }
+
+                        override fun onFailure(asyncActionToken: IMqttToken?,
+                            exception: Throwable?) {
+                            Log.e(this.javaClass.name,
+                                "Connection failure: ${exception.toString()}")
+
+                            try {
+                                binding.connectionBtn.setImageDrawable(
+                                    context?.let {
+                                        ContextCompat.getDrawable(it, R.drawable.ic_no_network)
+                                    })
+//                                enableUI()
+                                binding.statusPb.visibility = View.INVISIBLE
+                                binding.connectionBtn.visibility = View.VISIBLE
+                                checkBluetooth()
+                            } catch (e: Exception) {
+                                Log.e(TAG, "connectToInternet: Error", e)
+                            }
+                        }
+                    },
+                    object : MqttCallback {
+                        override fun messageArrived(topic: String?, message: MqttMessage?) {
+                            val msg =
+                                "Receive message: ${message.toString()} from topic: $topic"
+                            Log.d(this.javaClass.name, msg)
+
+                            updateSwitchState(message.toString())
+                        }
+
+                        override fun connectionLost(cause: Throwable?) {
+                            Log.i(this.javaClass.name, "Connection lost ${cause.toString()}")
+//                            showSToast("Connection Lost")
+                            if (isAdded && isOnline()) connectToMQTT()
+                            else loadUi()
+                        }
+
+                        override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                            Log.d(this.javaClass.name, "Delivery complete")
+                        }
+                    })
+            }
+        }
+
+    }
+
     private fun updateUI() {
-        Log.i(TAG, "updateUI: Called $currentDeviceId")
         val getLiveUrl = getString(R.string.base_url) + getString(R.string.url_get_live)
         val switchListUrl = getString(R.string.base_url) + getString(R.string.url_switch_list)
 
         val liveDataRequest = object : StringRequest(Method.POST, getLiveUrl,
             { response ->
-                Log.i(TAG, "updateUI: $response")
                 try {
                     val mData = JSONObject(response.toString())
                     val resp = mData.get("response") as Int
@@ -680,16 +617,8 @@ class RoomControlsFragment : Fragment() {
 
 
                             val app6Val = mData.get(APPL1).toString()
-                            val wifi = mData.get("wifi").toString()
 
-                            if (checkWifi && wifi == "0") showDeviceOfflineDialog()
-                            else {
-                                updateLive("0", "wifi")
-                                binding.switch6Switch.isChecked = app6Val == ONE
-
-                                checkWifi = false
-                            }
-//                            isLoadingUi = false
+                            binding.switch6Switch.isChecked = app6Val == ONE
                         } else {
                             binding.sl1View.visibility = View.GONE
                             binding.sl5View.visibility = View.VISIBLE
@@ -704,54 +633,40 @@ class RoomControlsFragment : Fragment() {
                             val app4Val = mData.get(APPL4).toString()
                             val fan = mData.get(FAN).toString()
 
-                            val wifi = mData.get("wifi").toString()
+                            liveFanSpeed = fan.toInt()
+                            sharedPref?.edit()?.putString("old_fan_speed_$currentDeviceId)",
+                                liveFanSpeed.toString())?.apply()
 
-                            if (checkWifi && wifi == "0") showDeviceOfflineDialog()
-                            else {
-                                updateLive("0", "wifi")
-                                liveFanSpeed = fan.toInt()
-                                sharedPref?.edit()?.putString("old_fan_speed_$currentDeviceId)",
-                                    liveFanSpeed.toString())?.apply()
+                            binding.switch1Switch.isChecked = app1Val == ONE
+                            binding.switch2Switch.isChecked = app2Val == ONE
+                            binding.switch3Switch.isChecked = app3Val == ONE
+                            binding.switch4Switch.isChecked = app4Val == ONE
 
-                                binding.switch1Switch.isChecked = app1Val == ONE
-                                binding.switch2Switch.isChecked = app2Val == ONE
-                                binding.switch3Switch.isChecked = app3Val == ONE
-                                binding.switch4Switch.isChecked = app4Val == ONE
-
-                                if (liveFanSpeed == 0) {
-                                    binding.fanSpeedSlider.value = 0.0f
-                                    binding.fanSpeedTv.text = ZERO
-                                    if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
-                                        false
-                                } else {
-                                    binding.fanSpeedSlider.value = liveFanSpeed.toFloat()
-                                    binding.fanSpeedTv.text = fan
-                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
-                                        true
-                                }
-
-                                checkWifi = false
-                                togglePower(app1Val, app2Val, app3Val, app4Val, fan)
+                            if (liveFanSpeed == 0) {
+                                binding.fanSpeedSlider.value = 0.0f
+                                binding.fanSpeedTv.text = ZERO
+                                if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                    false
+                            } else {
+                                binding.fanSpeedSlider.value = liveFanSpeed.toFloat()
+                                binding.fanSpeedTv.text = fan
+                                if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                    true
                             }
+
+                            togglePowerButton(app1Val, app2Val, app3Val, app4Val, fan)
+
                         }
-
-                        Log.d(TAG, "updateUI: Message - $msg")
                     } else {
-
-
                         showPSnackbar("Failed to get room data")
                         Log.e(TAG, "updateUI: Message - $msg")
                     }
                 } catch (e: Exception) {
-
-
                     Log.e(TAG, "Exception in updateUI: $e")
                     if (e.message != null) showLToast("${e.message}")
                 }
             }, {
-
-
-                showLToast("Something went wrong.")
+//                showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -770,7 +685,6 @@ class RoomControlsFragment : Fragment() {
 
         val switchListRequest = object : StringRequest(Method.POST, switchListUrl,
             { response ->
-                Log.i(TAG, "switchList: $response")
                 try {
                     val mData = JSONObject(response.toString())
                     val resp = mData.get("response") as Int
@@ -792,21 +706,15 @@ class RoomControlsFragment : Fragment() {
                         }
                         Log.d(TAG, "switchList: Message - $msg")
                     } else {
-
-
-                        showPSnackbar("Failed to get switch data")
+//                        showPSnackbar("Failed to get switch data")
                         Log.e(TAG, "switch switchList: Message - $msg")
                     }
                 } catch (e: Exception) {
-
-
                     Log.e(TAG, "Exception in switch updateUI: $e")
                     if (e.message != null) showLToast("${e.message}")
                 }
             }, {
-
-
-                showLToast("Something went wrong.")
+//                showLToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -825,20 +733,6 @@ class RoomControlsFragment : Fragment() {
 
         requestQueue.add(liveDataRequest)
         requestQueue.add(switchListRequest)
-    }
-
-    private fun showDeviceOfflineDialog() {
-        checkWifi = false
-
-
-        val builder = AlertDialog.Builder(requireActivity())
-        builder.setTitle("Device Offline")
-            .setMessage(
-                "${roomsList[selectedRoomIndex]} is currently offline. Please make sure the device is connected to wifi.")
-            .setPositiveButton("Ok"
-            ) { _, _ -> enableUI() }
-        builder.create()
-        builder.show()
     }
 
     private fun loadSwitch(switchId: String, switch: JSONObject) {
@@ -1004,23 +898,17 @@ class RoomControlsFragment : Fragment() {
                     if (resp == 1) {
                         Log.d(TAG, "updateSwitch: Message - $msg")
                     } else {
-
-
                         showLToast("unable to create room")
                         Log.e(TAG, "updateSwitch: Message - $msg")
                     }
                 } catch (e: Exception) {
-
-
                     Log.e(TAG, "Exception in updateSwitch: $e")
                 }
             }, {
-
-
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
-                val params = java.util.HashMap<String, String>()
+                val params = HashMap<String, String>()
                 params["switch_id"] = switchId
                 params["notification"] = "0"
 
@@ -1028,7 +916,7 @@ class RoomControlsFragment : Fragment() {
             }
 
             override fun getHeaders(): MutableMap<String, String> {
-                val params = java.util.HashMap<String, String>()
+                val params = HashMap<String, String>()
                 params["Content-Type"] = "application/x-www-form-urlencoded"
                 return params
             }
@@ -1037,50 +925,21 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun sendDataToBT(signal: String) {
-        Log.d(TAG, "sendDataToBT: Called $signal")
         if (btSocket?.isConnected == true) {
             try {
                 ssidOutputStream?.write(signal.toByteArray())
 
-                when (signal) {
-                    "F" -> {
-                        binding.fanSpeedSlider.value = 1.0f
-                        binding.fanSpeedTv.text = "1"
-                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                    }
-                    "G" -> {
-                        binding.fanSpeedSlider.value = 2.0f
-                        binding.fanSpeedTv.text = "2"
-                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                    }
-                    "H" -> {
-                        binding.fanSpeedSlider.value = 3.0f
-                        binding.fanSpeedTv.text = "3"
-                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                    }
-                    "I" -> {
-                        binding.fanSpeedSlider.value = 4.0f
-                        binding.fanSpeedTv.text = "4"
-                        if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = true
-                    }
-                    "E" -> {
-                        binding.fanSpeedSlider.value = 0.0f
-                        binding.fanSpeedTv.text = "0"
-                        if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked = false
-                    }
-                }
+                updateSwitchState(signal)
 
-                enableUI()
+//                enableUI()
 
-                togglePower(
+                togglePowerButton(
                     if (binding.switch1Switch.isChecked) ONE else ZERO,
                     if (binding.switch2Switch.isChecked) ONE else ZERO,
                     if (binding.switch3Switch.isChecked) ONE else ZERO,
                     if (binding.switch4Switch.isChecked) ONE else ZERO,
                     if (binding.fanSpeedSlider.value > 0.0f) ONE else ZERO
                 )
-
-//            closeSocket()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -1089,20 +948,49 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun sendDataToMQTT(signal: String) {
-        Log.d(TAG, "sendDataToMQTT: Called $signal")
         if (mqttClient?.isConnected() == true) {
             try {
-                mqttClient!!.publish(MQTT_TEST_TOPIC, signal, 1, false,
+                showSToast("currentDeviceId = $currentDeviceId")
+                mqttClient!!.publish(currentDeviceId!!, signal, 1, false,
                     object : IMqttActionListener {
                         override fun onSuccess(asyncActionToken: IMqttToken?) {
                             val msg = "Publish message: $signal to topic: $MQTT_TEST_TOPIC"
                             Log.d(this.javaClass.name, msg)
 
-//                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            when (signal) {
+                                "F" -> {
+                                    binding.fanSpeedSlider.value = 1.0f
+                                    binding.fanSpeedTv.text = "1"
+                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                        true
+                                }
+                                "G" -> {
+                                    binding.fanSpeedSlider.value = 2.0f
+                                    binding.fanSpeedTv.text = "2"
+                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                        true
+                                }
+                                "H" -> {
+                                    binding.fanSpeedSlider.value = 3.0f
+                                    binding.fanSpeedTv.text = "3"
+                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                        true
+                                }
+                                "I" -> {
+                                    binding.fanSpeedSlider.value = 4.0f
+                                    binding.fanSpeedTv.text = "4"
+                                    if (!binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                        true
+                                }
+                                "E" -> {
+                                    binding.fanSpeedSlider.value = 0.0f
+                                    binding.fanSpeedTv.text = "0"
+                                    if (binding.fanSwitch.isChecked) binding.fanSwitch.isChecked =
+                                        false
+                                }
+                            }
 
-//                            updateSwitchState(signal)
-
-                            togglePower(
+                            togglePowerButton(
                                 if (binding.switch1Switch.isChecked) ONE else ZERO,
                                 if (binding.switch2Switch.isChecked) ONE else ZERO,
                                 if (binding.switch3Switch.isChecked) ONE else ZERO,
@@ -1113,18 +1001,16 @@ class RoomControlsFragment : Fragment() {
 
                         override fun onFailure(asyncActionToken: IMqttToken?,
                             exception: Throwable?) {
-                            Log.d(this.javaClass.name, "Failed to publish message to topic")
+                            Log.e(this.javaClass.name, "Failed to publish message to topic")
                         }
                     })
 
-                enableUI()
+//                enableUI()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
         } else {
             showSToast("MQTT not connected.")
-//            connectToMQTT()
-//            sendDataToMQTT(signal)
         }
 
     }
@@ -1182,7 +1068,7 @@ class RoomControlsFragment : Fragment() {
             }
         }
 
-        togglePower(
+        togglePowerButton(
             if (binding.switch1Switch.isChecked) ONE else ZERO,
             if (binding.switch2Switch.isChecked) ONE else ZERO,
             if (binding.switch3Switch.isChecked) ONE else ZERO,
@@ -1191,97 +1077,28 @@ class RoomControlsFragment : Fragment() {
         )
     }
 
-    private fun updateLive(value: String, appl: String) {
-        if (isOnline()) {
-            val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
-
-            val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
-                { response ->
-                    Log.i(TAG, "updateUI: $response")
-                    try {
-                        val mData = JSONObject(response.toString())
-                        val resp = mData.get("response") as Int
-                        val msg = mData.get("msg")
-
-                        if (resp == 1) {
-                            if (appl != "wifi") updateUI()
-                            Log.d(TAG, "updateLive: Message - $msg")
-                        } else {
-
-
-                            showPSnackbar("Failed to update room")
-                            Log.e(TAG, "updateLive: Message - $msg")
-                        }
-                    } catch (e: Exception) {
-
-
-                        Log.e(TAG, "Exception in updateLive: $e")
-                        if (e.message != null) showLToast(e.message)
-                    }
-                }, {
-
-
-                    showLToast("Something went wrong.")
-                    Log.e(TAG, "VollyError: ${it.message}")
-                }) {
-                override fun getParams(): Map<String, String> {
-                    val params = HashMap<String, String>()
-                    params["device_id"] = currentDeviceId.toString()
-                    params["appliance"] = appl
-                    params["data"] = value
-                    return params
-                }
-
-                override fun getHeaders(): MutableMap<String, String> {
-                    val params = HashMap<String, String>()
-                    params["Content-Type"] = "application/x-www-form-urlencoded"
-                    return params
-                }
-            }
-
-            requestQueue.add(liveUpdateRequest)
-        } else enableUI()
-    }
-
-    val wifiRunnable = Runnable {
-        Log.i(TAG, "Runnable: Called")
-        checkWifiIsRunning = false
-        checkWifi = true
-    }
-
-    val btRunnable = Runnable {
-        Log.i(TAG, "BT Runnable: Called ${Calendar.getInstance().time}")
-//        closeSocket()
-//        connectToInternet()
-    }
-
-    private fun togglePower(app1Val: String, app2Val: String, app3Val: String, app4Val: String,
+    private fun togglePowerButton(app1Val: String, app2Val: String, app3Val: String,
+        app4Val: String,
         fan: String) {
         if (isAdded) {
             try {
                 if (app1Val == ZERO && app2Val == ZERO && app3Val == ZERO && app4Val == ZERO && fan == ZERO) {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
-                    enableUI()
-//                    isLoadingUi = false
+//                    enableUI()
 
                 } else {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
-                    enableUI()
-//                    isLoadingUi = false
-
-                    Log.d(TAG, " ${Thread.currentThread().stackTrace[2].lineNumber - 1}")
+//                    enableUI()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "togglePower: Error", e)
             }
         }
-//        else togglePower()
     }
 
-    private fun togglePower() {
-//        val appliances = arrayOf(APPL1, APPL2, APPL3, APPL4, FAN)
+    private fun togglePowerState() {
         val toggleFlag = !binding.fanSwitch.isChecked && !binding.switch1Switch.isChecked
                 && !binding.switch2Switch.isChecked && !binding.switch3Switch.isChecked
                 && !binding.switch4Switch.isChecked
@@ -1307,9 +1124,6 @@ class RoomControlsFragment : Fragment() {
                 })
             }
         } else if (isOnline()) {
-            /*for (appl in appliances) {
-                updatePowerLive(if (toggleFlag) ONE else ZERO, appl)
-            }*/
             for (i in 0..4) {
                 sendDataToMQTT(when (i) {
                     0 -> if (toggleFlag) "A" else "a"
@@ -1332,66 +1146,7 @@ class RoomControlsFragment : Fragment() {
         } else {
             showLToast("You are not connected.")
         }
-        if (powerBtnClicked) {
-            powerBtnClicked = false
-            loadingDialog.dismiss()
-        }
-    }
-
-    private fun updatePowerLive(value: String, appl: String) {
-
-        val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
-
-        val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
-            { response ->
-                Log.i(TAG, "updateUI: $response")
-                try {
-                    val mData = JSONObject(response.toString())
-                    val resp = mData.get("response") as Int
-                    val msg = mData.get("msg")
-
-                    if (resp == 1) {
-                        if (appl == FAN) updateUI()
-                        Log.d(TAG, "updateLive: Message - $msg")
-                    } else {
-
-
-                        showPSnackbar("Failed to update room")
-                        Log.e(TAG, "updateLive: Message - $msg")
-                    }
-                } catch (e: Exception) {
-
-
-                    Log.e(TAG, "Exception in updateLive: $e")
-                    if (e.message != null) showLToast(e.message)
-                }
-            }, {
-
-
-                showLToast("Something went wrong.")
-                Log.e(TAG, "VollyError: ${it.message}")
-            }) {
-            override fun getParams(): Map<String, String> {
-                val params = HashMap<String, String>()
-                params["device_id"] = currentDeviceId.toString()
-                params["appliance"] = appl
-                params["data"] = value
-                return params
-            }
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val params = HashMap<String, String>()
-                params["Content-Type"] = "application/x-www-form-urlencoded"
-                return params
-            }
-        }
-
-        requestQueue.add(liveUpdateRequest)
-    }
-
-    private fun gotoAddDevice() {
-        Navigation.findNavController(requireView())
-            .navigate(R.id.action_roomControlsFragment_to_addDeviceFragment)
+        loadingDialog.dismiss()
     }
 
     private fun showChooseRoomDialog() {
@@ -1407,7 +1162,6 @@ class RoomControlsFragment : Fragment() {
                 selectedDevice = deviceIDList[which]
             }
             .setPositiveButton("OK") { _, _ ->
-//                closeSocket()
                 binding.currentRoomTv.text = selectedRoom
                 currentDeviceId = selectedDevice
                 sharedPref?.edit()
@@ -1418,9 +1172,10 @@ class RoomControlsFragment : Fragment() {
             .show()
     }
 
-    private fun showPopupMenu(view: View?, switchID: String, switchIDByApp: String) {
+    private fun showEditSwitchMenu(view: View?, switchID: String, switchIDByApp: String) {
         val popup = PopupMenu(requireActivity(), view)
         popup.menuInflater.inflate(R.menu.switch_menu, popup.menu)
+
         popup.setOnMenuItemClickListener {
             when (it!!.itemId) {
                 R.id.edit -> {
@@ -1430,7 +1185,8 @@ class RoomControlsFragment : Fragment() {
                     intent.putExtra(ROOM_NAME, roomsList[selectedRoomIndex])
                     intent.putExtra(SWITCH_ID, switchID)
                     intent.putExtra(SWITCH_ID_BY_APP, switchIDByApp)
-                    startActivity(intent)
+                    if (isOnline()) startActivity(intent)
+                    else showSToast("No internet")
                 }
             }
             true
@@ -1438,46 +1194,31 @@ class RoomControlsFragment : Fragment() {
         popup.show()
     }
 
-//    override fun onSaveInstanceState(outState: Bundle) {}
-
-    private fun disableUI() {
-//        waitSnackbar.show()
+    /*private fun disableUI() {
         if (isAdded) {
             binding.powerBtn.isClickable = false
             binding.powerBtn.isEnabled = false
             binding.fanSwitch.isClickable = false
             binding.fanSpeedSlider.isClickable = false
-//            binding.fanSpeedSlider.isEnabled = false
             binding.switch1Switch.isClickable = false
-//            binding.switch1Switch.isEnabled = false
             binding.switch2Switch.isClickable = false
-//            binding.switch2Switch.isEnabled = false
             binding.switch3Switch.isClickable = false
-//            binding.switch3Switch.isEnabled = false
             binding.switch4Switch.isClickable = false
-//            binding.switch4Switch.isEnabled = false
         }
-    }
+    }*/
 
-    private fun enableUI() {
-//        waitSnackbar.dismiss()
+    /*private fun enableUI() {
         if (isAdded) {
             binding.powerBtn.isClickable = true
             binding.powerBtn.isEnabled = true
             binding.fanSwitch.isClickable = true
-//            binding.fanSwitch.isEnabled = true
             binding.fanSpeedSlider.isClickable = true
-//            binding.fanSpeedSlider.isEnabled = true
             binding.switch1Switch.isClickable = true
-//            binding.switch1Switch.isEnabled = true
             binding.switch2Switch.isClickable = true
-//            binding.switch2Switch.isEnabled = true
             binding.switch3Switch.isClickable = true
-//            binding.switch3Switch.isEnabled = true
             binding.switch4Switch.isClickable = true
-//            binding.switch4Switch.isEnabled = true
         }
-    }
+    }*/
 
     private fun isOnline(): Boolean {
         if (context != null) {
@@ -1519,8 +1260,15 @@ class RoomControlsFragment : Fragment() {
                 .show()
         } else {
             Log.e(TAG, "showPSnackbar: Contect Error - $context")
-//            checkDatabase()
             checkLocalDatabase()                                // Snack bar Retry
+        }
+    }
+
+    private fun showOkPSnackbar(msg: String = "Something went wrong.") {
+        if (context != null) {
+            Snackbar.make(binding.rcRootView, msg, Snackbar.LENGTH_INDEFINITE)
+                .setAction("Ok") {}
+                .show()
         }
     }
 
@@ -1528,7 +1276,7 @@ class RoomControlsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         closeSocket()
-        mqttClient?.disconnect()
+//        mqttClient?.disconnect()
     }
 
     override fun onDestroy() {

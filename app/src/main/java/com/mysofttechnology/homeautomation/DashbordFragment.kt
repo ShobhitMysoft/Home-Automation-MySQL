@@ -65,14 +65,6 @@ class DashbordFragment : Fragment() {
     private var cuPhoneNo: String? = null
     private var currentUserId: String? = null
 
-//    private lateinit var loadingDialog: LoadingDialog
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        loadingDialog = LoadingDialog()
-//        loadingDialog.isCancelable = false
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -95,9 +87,6 @@ class DashbordFragment : Fragment() {
         requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref?.getString(getString(R.string.current_user_id), "")
-//        binding.actionbarTv.text = currentUserId
-
-//        loadingDialog.show(childFragmentManager, TAG)
 
         checkDeviceAvailability()
 
@@ -111,8 +100,8 @@ class DashbordFragment : Fragment() {
         }
     }
 
-    private fun checkDeviceAvailability() {                                                         // TODO: Step 1
-        if (isOnline()) {                                                                           // TODO: Step 2
+    private fun checkDeviceAvailability() {
+        if (isOnline()) {
             val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
             val url = getString(R.string.base_url) + getString(R.string.url_room_list)
 
@@ -129,17 +118,16 @@ class DashbordFragment : Fragment() {
                         } else {
 
                             updateUI(false, mData)
-//                            showToast("No user found. Please register first.")
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         }
                     } catch (e: Exception) {
 
                         Log.d(TAG, "Exception in checkDeviceAvailability: $e")
-                        if (e.message != null) showToast(e.message)
+                        if (isAdded && e.message != null) showToast(e.message)
                     }
                 }, {
 
-                    showToast("Something went wrong.")
+                    if (isAdded) showToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
                 override fun getParams(): Map<String, String> {
@@ -161,11 +149,9 @@ class DashbordFragment : Fragment() {
     }
 
     private fun updateUI(flag: Boolean,
-        mData: JSONObject) {                                                                        // TODO: Step 3
-        // TODO: Clear table
+        mData: JSONObject) {
         deviceViewModel.clearDatabase()
         if (flag) {
-            // TODO: Set local database from online database
             val deviceListData = mData.get("data") as JSONArray
             createLocalDatabase(deviceListData)
         } else {
@@ -177,7 +163,7 @@ class DashbordFragment : Fragment() {
     }
 
     private fun createLocalDatabase(
-        deviceListData: JSONArray) {                                                                // TODO: Step 3.1
+        deviceListData: JSONArray) {
         requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val switchListUrl = getString(R.string.base_url) + getString(R.string.url_switch_list)
 
@@ -188,8 +174,6 @@ class DashbordFragment : Fragment() {
             val deviceData = deviceListData.getJSONObject(i)
             val roomName = deviceData.get("room_name").toString()
             val deviceId = deviceData.get("device_id").toString()
-            // TODO// Remove this for single switch device
-//            val switchCount = "5"
             val switchCount = deviceData.get("switch_count").toString()
             val bluetoothId = deviceData.get("bluetooth").toString()
 
@@ -238,19 +222,16 @@ class DashbordFragment : Fragment() {
 
                             Log.d(TAG, "switchList: Message - $msg")
                         } else {
-
-                            // TODO: Failed to get room data
-//                            showPSnackbar("Failed to get room data")
                             Log.e(TAG, "switch switchList: Message - $msg")
                         }
                     } catch (e: Exception) {
 
                         Log.e(TAG, "Exception in switch updateUI: $e")
-                        if (e.message != null) showToast(e.message)
+                        if (isAdded && e.message != null) showToast(e.message)
                     }
                 }, {
 
-                    showToast("Something went wrong.")
+                    if (isAdded) showToast("Something went wrong.")
                     Log.e(TAG, "VollyError: ${it.message}")
                 }) {
                 override fun getParams(): Map<String, String> {
@@ -271,9 +252,8 @@ class DashbordFragment : Fragment() {
         }
     }
 
-    private fun getLiveStates(roomName: String, deviceId: String,
-        bluetoothId: String,
-        switchCount: String = "5") {                              // TODO: Step 3.2
+    private fun getLiveStates(roomName: String, deviceId: String, bluetoothId: String,
+        switchCount: String = "5") {
 
         val getLiveUrl = getString(R.string.base_url) + getString(R.string.url_get_live)
 
@@ -305,19 +285,16 @@ class DashbordFragment : Fragment() {
 
                         Log.d(TAG, "getLiveStates: Message - $msg")
                     } else {
-
-                        // TODO:
-//                        showPSnackbar("Failed to get room data")
                         Log.e(TAG, "getLiveStates: Message - $msg")
                     }
                 } catch (e: Exception) {
 
                     Log.e(TAG, "Exception in getLiveStates: $e")
-                    if (e.message != null) showToast(e.message)
+                    if (isAdded && e.message != null) showToast(e.message)
                 }
             }, {
 
-                showToast("Something went wrong.")
+                if (isAdded) showToast("Something went wrong.")
                 Log.e(TAG, "VollyError: ${it.message}")
             }) {
             override fun getParams(): Map<String, String> {
@@ -336,7 +313,7 @@ class DashbordFragment : Fragment() {
         requestQueue.add(liveDataRequest)
     }
 
-    private fun checkLocalDatabase() {                                                              // TODO: Step 4
+    private fun checkLocalDatabase() {
         val allData = deviceViewModel.readAllData
         allData.observe(viewLifecycleOwner) {
             try {
@@ -358,7 +335,7 @@ class DashbordFragment : Fragment() {
     }
 
     private fun showToast(message: String?) {
-        Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
+        if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
     }
 
     private fun showPopupMenu(view: View?) {
@@ -378,13 +355,13 @@ class DashbordFragment : Fragment() {
                 }
                 R.id.rooms -> {
                     val action = DashbordFragmentDirections.actionDashbordFragmentToRoomsFragment()
-                    findNavController().navigate(action)
+                    if (isOnline()) findNavController().navigate(action)
+                    else showToast("No Internet")
                 }
                 R.id.logout -> {
                     builder.setTitle("Logout").setMessage("Are you sure you want to logout?")
                         .setPositiveButton("Yes"
                         ) { _, _ ->
-//                            loadingDialog.show(childFragmentManager, TAG)
                             signOutUser()
                             val action =
                                 DashbordFragmentDirections.actionDashbordFragmentToRegistrationFragment()
@@ -404,8 +381,6 @@ class DashbordFragment : Fragment() {
     private fun signOutUser() {
         FirebaseAuth.getInstance().signOut()
     }
-
-//    override fun onSaveInstanceState(outState: Bundle) {}
 
     private fun isOnline(context: Context = requireContext()): Boolean {
         val connectivityManager =
