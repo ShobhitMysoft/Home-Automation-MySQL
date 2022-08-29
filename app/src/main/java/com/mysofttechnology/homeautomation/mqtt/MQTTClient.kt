@@ -2,7 +2,7 @@ package com.mysofttechnology.homeautomation.mqtt
 
 import android.content.Context
 import android.util.Log
-import org.eclipse.paho.android.service.MqttAndroidClient
+import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
 private const val TAG = "MQTTClient"
@@ -10,7 +10,7 @@ private const val TAG = "MQTTClient"
 class MQTTClient(context: Context?,
     serverURI: String,
     clientID: String = "") {
-    private var mqttClient = MqttAndroidClient(context, serverURI, clientID)
+    private var mqttClient = MqttAndroidClient(context!!, serverURI, clientID)
 
     private val defaultCbConnect = object : IMqttActionListener {
         override fun onSuccess(asyncActionToken: IMqttToken?) {
