@@ -60,7 +60,7 @@
                 android:id="@+id/vc_code_et"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
+                android:background="@color/neumorph_background"
                 android:fontFamily="@font/raleway"
                 android:gravity="center"
                 android:hint="000000"
@@ -107,6 +107,34 @@
                 android:textColor="@color/white" />
         </soup.neumorphism.NeumorphCardView>
 
+    </LinearLayout>
+
+    <!--Bottom Branding-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingVertical="18dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/raleway"
+            android:text="@string/powered_by"
+            android:textColor="@color/secondary_text"
+            android:textSize="@dimen/_10ssp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/raleway"
+            android:text="@string/mysoft_technology"
+            android:textColor="@color/primary"
+            android:textSize="@dimen/_12ssp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

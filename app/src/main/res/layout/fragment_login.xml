@@ -62,7 +62,7 @@
                     android:id="@+id/login_number_et"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@null"
+                    android:background="@color/neumorph_background"
                     android:fontFamily="@font/raleway"
                     android:hint="Phone number"
                     android:inputType="text"

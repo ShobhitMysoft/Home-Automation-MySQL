@@ -95,7 +95,7 @@
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_dashbord.xml" value="0.21666666666666667" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_edit_room.xml" value="0.22683982683982684" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_fill_wifi_detail.xml" value="0.22982456140350876" />
-        <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_login.xml" value="0.18796296296296297" />
+        <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_login.xml" value="0.22683982683982684" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_profile.xml" value="0.75" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_registration.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_room_controls.xml" value="0.22683982683982684" />
@@ -104,6 +104,7 @@
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/fragment_verify_code.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/icons_list_dialog_layout.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/icons_list_layout.xml" value="0.22982456140350876" />
+        <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/loading_dialog_layout.xml" value="0.22982456140350876" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/rooms_list_item.xml" value="0.22683982683982684" />
         <entry key="..\:/OFFICE/Mobile/RELEASE/Smart Lit -Home Automation App/app/src/main/res/layout/verify_otp_layout.xml" value="0.22982456140350876" />
         <entry key="..\:/Users/Mysoft/AndroidStudioProjects/HomeAutomation/app/src/main/res/drawable-v24/background_solid_curb.xml" value="0.1605" />
