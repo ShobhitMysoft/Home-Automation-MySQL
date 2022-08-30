@@ -36,4 +36,6 @@
 
     <color name="dark_grey">#121212</color>
     <color name="dark_grey_secondary">#212121</color>
+
+    <color name="neumorph_background">@null</color>
 </resources>
