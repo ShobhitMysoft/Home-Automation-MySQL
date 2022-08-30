@@ -1,10 +1,13 @@
 package com.mysofttechnology.homeautomation
 
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -36,6 +39,7 @@ private const val TAG = "DashbordFragment"
 
 class DashbordFragment : Fragment() {
 
+    private val packageName: String = "com.mysofttechnology.homeautomation"
     private var devicesLen: Int = 0
     private var s1Name: String = "Switch 1"
     private var s2Name: String = "Switch 2"
@@ -111,6 +115,19 @@ class DashbordFragment : Fragment() {
             Navigation.findNavController(it)
                 .navigate(R.id.action_dashbordFragment_to_scanDeviceFragment)
         }
+
+        binding.updateBtn.setOnClickListener {
+            goToPlayStore()
+        }
+    }
+
+    private fun goToPlayStore() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
+        } catch (e: ActivityNotFoundException) {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
+        }
+//        binding.newUpdateView.visibility = View.GONE
     }
 
     private fun checkDeviceAvailability() {
@@ -173,6 +190,55 @@ class DashbordFragment : Fragment() {
             binding.addDeviceBtn.visibility = View.VISIBLE
             binding.noDeviceMsg.visibility = View.VISIBLE
             binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
+        }
+        // TODO:
+//        checkForNewUpdate()
+    }
+
+    // TODO: Not completed yet!
+    private fun checkForNewUpdate() {
+        if (isOnline()) {
+            val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
+            val newUpdateUrl = getString(R.string.base_url) + "getString(R.string.url_new_update)"
+
+            val stringRequest = object : StringRequest(Method.POST, newUpdateUrl,
+                { response ->
+                    try {
+                        val mData = JSONObject(response.toString())
+                        val resp = mData.get("response") as Int
+                        val msg = mData.get("msg")
+
+                        if (resp == 1) {
+                            val currentVersion = mData.get("current_version") as String
+                            if (BuildConfig.VERSION_CODE < currentVersion.toInt()) {
+                                binding.newUpdateView.visibility = View.VISIBLE
+                            }
+                        } else {
+                            binding.newUpdateView.visibility = View.GONE
+                        }
+                    } catch (e: Exception) {
+
+                        Log.d(TAG, "Exception in checkForNewUpdate: $e")
+                        if (isAdded && e.message != null) showToast(e.message)
+                    }
+                }, {
+
+                    if (isAdded) showToast("Something went wrong.")
+                    Log.e(TAG, "VollyError: ${it.message}")
+                }) {
+                override fun getParams(): Map<String, String> {
+                    val params = HashMap<String, String>()
+                    params["user_id"] = cuPhoneNo.toString()
+                    return params
+                }
+
+                override fun getHeaders(): MutableMap<String, String> {
+                    val params = HashMap<String, String>()
+                    params["Content-Type"] = "application/x-www-form-urlencoded"
+                    return params
+                }
+            }
+            requestQueue.add(stringRequest)
         }
     }
 

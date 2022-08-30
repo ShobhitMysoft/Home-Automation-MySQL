@@ -112,14 +112,14 @@
         android:id="@+id/no_device_msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@color/card_view_bg"
         android:fontFamily="@font/raleway"
         android:gravity="center"
-        android:background="@color/card_view_bg"
         android:padding="@dimen/_30sdp"
-        android:visibility="gone"
         android:text="You have not connected any device yet! Add your first device right now and enjoy."
         android:textColor="@color/black"
         android:textSize="@dimen/_12ssp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -184,6 +184,109 @@
                     android:textStyle="bold" />
 
             </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/new_update_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@color/black"
+                android:paddingStart="@dimen/_12sdp">
+
+                <ImageView
+                    android:id="@+id/update_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_rocket_launch"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/update_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12ssp"
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:text="A new update is available"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_14ssp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/update_btn"
+                    app:layout_constraintStart_toEndOf="@id/update_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/update_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:minWidth="60dp"
+                    android:padding="@dimen/_12sdp"
+                    android:text="Update"
+                    android:textAllCaps="true"
+                    android:textColor="@color/colorAccent"
+                    android:textSize="@dimen/_12ssp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/black"
+                android:padding="@dimen/_12sdp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/alert_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_alert"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/alert_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12ssp"
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:text="Verify your identity"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_14ssp"
+                    app:layout_constraintEnd_toStartOf="@id/alert_btn"
+                    app:layout_constraintStart_toEndOf="@id/alert_icon"
+                    app:layout_constraintTop_toTopOf="@id/alert_icon" />
+
+                <TextView
+                    android:id="@+id/alert_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_2sdp"
+                    android:layout_marginEnd="@dimen/_6sdp"
+                    android:text="You need to verify your identity before you can publish to Google Play. This process can take up to 2 business days."
+                    android:textColor="#7D818A"
+                    android:textSize="@dimen/_12ssp"
+                    app:layout_constraintEnd_toStartOf="@id/alert_btn"
+                    app:layout_constraintStart_toStartOf="@id/alert_title"
+                    app:layout_constraintTop_toBottomOf="@id/alert_title" />
+
+                <TextView
+                    android:id="@+id/alert_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:minWidth="60dp"
+                    android:padding="@dimen/_6sdp"
+                    android:text="Ok"
+                    android:textColor="@color/colorAccent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Controls -->
             <LinearLayout
