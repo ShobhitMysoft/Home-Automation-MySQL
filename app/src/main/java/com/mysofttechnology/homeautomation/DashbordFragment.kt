@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -64,6 +65,18 @@ class DashbordFragment : Fragment() {
     private var currentUser: FirebaseUser? = null
     private var cuPhoneNo: String? = null
     private var currentUserId: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val exitAppDialog = ExitAppDialog()
+
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            exitAppDialog.show(childFragmentManager, "Exit App")
+        }
+
+        callback.isEnabled = true
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -158,6 +171,7 @@ class DashbordFragment : Fragment() {
             Log.d(TAG, "updateUI: No device available")
 
             binding.addDeviceBtn.visibility = View.VISIBLE
+            binding.noDeviceMsg.visibility = View.VISIBLE
             binding.fragmentContainerView2.findNavController().navigate(R.id.addDeviceFragment)
         }
     }
@@ -320,11 +334,13 @@ class DashbordFragment : Fragment() {
                 if (it.isNotEmpty()) {
 
                     binding.addDeviceBtn.visibility = View.GONE
+                    binding.noDeviceMsg.visibility = View.GONE
                     binding.fragmentContainerView2.findNavController()
                         .navigate(R.id.roomControlsFragment)
                 } else {
 
                     binding.addDeviceBtn.visibility = View.VISIBLE
+                    binding.noDeviceMsg.visibility = View.VISIBLE
                     binding.fragmentContainerView2.findNavController()
                         .navigate(R.id.addDeviceFragment)
                 }

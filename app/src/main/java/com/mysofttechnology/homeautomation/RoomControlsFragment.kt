@@ -108,7 +108,7 @@ class RoomControlsFragment : Fragment() {
 
     private var mqttClient: MQTTClient? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    /*override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val exitAppDialog = ExitAppDialog()
@@ -118,7 +118,7 @@ class RoomControlsFragment : Fragment() {
         }
 
         callback.isEnabled = true
-    }
+    }*/
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {

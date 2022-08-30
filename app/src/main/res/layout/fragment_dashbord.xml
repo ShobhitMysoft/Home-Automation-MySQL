@@ -91,24 +91,40 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- No Device Message -->
+    <!-- Main Dashboard -->
     <TextView
-        android:id="@+id/msg"
+        android:id="@+id/loading_msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="154dp"
         android:fontFamily="@font/raleway"
         android:gravity="center"
         android:padding="@dimen/_30sdp"
-        android:textColor="@color/black"
         android:text="Loading..."
+        android:textColor="@color/black"
         android:textSize="@dimen/_12ssp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/main_dashboard" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Main Dashboard -->
+    <!-- No Device Message -->
+    <TextView
+        android:id="@+id/no_device_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/raleway"
+        android:gravity="center"
+        android:background="@color/card_view_bg"
+        android:padding="@dimen/_30sdp"
+        android:visibility="gone"
+        android:text="You have not connected any device yet! Add your first device right now and enjoy."
+        android:textColor="@color/black"
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ScrollView
         android:id="@+id/main_dashboard"
         android:layout_width="match_parent"
