@@ -162,13 +162,13 @@ class ScanDeviceFragment : Fragment() {
                             showToast("Device already exists")
                             gotoConnectDevice()
                         } else {
-                            showToast("New device")
+//                            showToast("New device")
                             checkChild(deviceId)
                         }
                         Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        showToast("New device")
+//                        showToast("New device")
                         checkChild(deviceId)
                         Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                     }
@@ -217,13 +217,13 @@ class ScanDeviceFragment : Fragment() {
                             binding.sdContinueBtn.isEnabled = true
                             showOtpVerificationDialog(deviceId)
                         } else {
-                            showToast("New User")
+//                            showToast("New User")
                             addDevice(deviceId)
                         }
                         Log.d(TAG, "checkChild: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        showToast("New User")
+//                        showToast("New User")
                         addDevice(deviceId)
                         Log.d(TAG, "checkChild: Message - $msg")
                     }
