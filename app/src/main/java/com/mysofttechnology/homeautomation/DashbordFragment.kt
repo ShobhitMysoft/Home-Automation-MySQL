@@ -113,7 +113,7 @@ class DashbordFragment : Fragment() {
 
         binding.addDeviceBtn.setOnClickListener {
             Navigation.findNavController(it)
-                .navigate(R.id.action_dashbordFragment_to_scanDeviceFragment)
+                .navigate(R.id.action_dashbordFragment_to_scanQrAnimationFragment)
         }
 
         binding.updateBtn.setOnClickListener {

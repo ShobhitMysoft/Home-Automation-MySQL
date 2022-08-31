@@ -90,6 +90,9 @@
             <action
                 android:id="@+id/action_dashbordFragment_to_scanDeviceFragment"
                 app:destination="@id/scanDeviceFragment" />
+            <action
+                android:id="@+id/action_dashbordFragment_to_scanQrAnimationFragment"
+                app:destination="@id/scanQrAnimationFragment" />
         </fragment>
         <fragment
             android:id="@+id/profileFragment"
@@ -204,6 +207,16 @@
             <argument
                 android:name="roomID"
                 app:argType="string" />
+        </fragment>
+        <fragment
+            android:id="@+id/scanQrAnimationFragment"
+            android:name="com.mysofttechnology.homeautomation.ScanQrAnimationFragment"
+            android:label="fragment_scan_qr_animation"
+            tools:layout="@layout/fragment_scan_qr_animation" >
+            <action
+                android:id="@+id/action_scanQrAnimationFragment_to_scanDeviceFragment"
+                app:destination="@id/scanDeviceFragment"
+                app:popUpTo="@id/dashbordFragment" />
         </fragment>
     </navigation>
 </navigation>
