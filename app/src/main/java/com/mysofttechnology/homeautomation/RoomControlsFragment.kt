@@ -70,6 +70,7 @@ private const val TAG = "RoomControlsFragment"
 
 class RoomControlsFragment : Fragment() {
 
+    private var backPressedTime: Long = 0
     private var ssidOutputStream: OutputStream? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var isBTConnected: Boolean = false
@@ -108,17 +109,23 @@ class RoomControlsFragment : Fragment() {
 
     private var mqttClient: MQTTClient? = null
 
-    /*override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val exitAppDialog = ExitAppDialog()
+        val backToast = Toast.makeText(requireActivity(), "Press back again to exit the app.", Toast.LENGTH_LONG)
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            exitAppDialog.show(childFragmentManager, "Exit App")
+            if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                backToast.cancel()
+                activity?.finish()
+            } else {
+                backToast.show()
+            }
+            backPressedTime = System.currentTimeMillis()
         }
 
         callback.isEnabled = true
-    }*/
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?): View? {
@@ -950,7 +957,6 @@ class RoomControlsFragment : Fragment() {
     private fun sendDataToMQTT(signal: String) {
         if (mqttClient?.isConnected() == true) {
             try {
-                showSToast("currentDeviceId = $currentDeviceId")
                 mqttClient!!.publish(currentDeviceId!!, signal, 1, false,
                     object : IMqttActionListener {
                         override fun onSuccess(asyncActionToken: IMqttToken?) {

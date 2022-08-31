@@ -108,7 +108,6 @@
         android:inputType="text"
         android:maxLength="26"
         android:maxLines="1"
-        android:text="SL1_14301302"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/info_tv" />

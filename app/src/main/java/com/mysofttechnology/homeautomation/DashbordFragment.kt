@@ -45,6 +45,7 @@ class DashbordFragment : Fragment() {
     private var s2Name: String = "Switch 2"
     private var s3Name: String = "Switch 3"
     private var s4Name: String = "Switch 4"
+
     private var s6Name: String = "Switch"
     private var s1State: Int = 0
     private var s2State: Int = 0
@@ -57,6 +58,8 @@ class DashbordFragment : Fragment() {
     private var s3Icon: Int = 0
     private var s4Icon: Int = 0
     private var s6Icon: Int = 0
+
+    private var backPressedTime: Long = 0
 
     private lateinit var deviceViewModel: DeviceViewModel
     private lateinit var requestQueue: RequestQueue
@@ -73,10 +76,16 @@ class DashbordFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val exitAppDialog = ExitAppDialog()
+        val backToast = Toast.makeText(requireActivity(), "Press back again to exit the app.", Toast.LENGTH_LONG)
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            exitAppDialog.show(childFragmentManager, "Exit App")
+            if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                backToast.cancel()
+                activity?.finish()
+            } else {
+                backToast.show()
+            }
+            backPressedTime = System.currentTimeMillis()
         }
 
         callback.isEnabled = true
