@@ -452,6 +452,7 @@ class RoomControlsFragment : Fragment() {
 
         builder.setTitle("Bluetooth Error")
             .setMessage(getString(R.string.configure_bluetooth, cd.name))
+            .setCancelable(true)
             .setPositiveButton("Ok") { _, _ -> }
         builder.create()
         builder.show()
