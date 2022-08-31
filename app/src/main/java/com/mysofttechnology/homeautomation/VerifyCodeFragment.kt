@@ -88,7 +88,7 @@ class VerifyCodeFragment : Fragment() {
 
             if (code.isNotEmpty() && code.length == 6) {
                 if (code.isDigitsOnly()) {
-                    loadingDialog.show(childFragmentManager, TAG)
+                    if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                     binding.vcVerifyBtn.isEnabled = true
                     verifyPhoneNumberWithCode(code)
                 } else {
@@ -218,18 +218,21 @@ class VerifyCodeFragment : Fragment() {
         spEditor?.apply()
 
         val action = VerifyCodeFragmentDirections.actionVerifyCodeFragmentToDashbordFragment()
-        findNavController().navigate(action)
+        if (findNavController().currentDestination?.id == R.id.verifyCodeFragment)
+            findNavController().navigate(action)
         loadingDialog.dismiss()
     }
 
     private fun gotoRegistration() {
         val action = VerifyCodeFragmentDirections.actionVerifyCodeFragmentToRegistrationFragment()
-        findNavController().navigate(action)
+        if (findNavController().currentDestination?.id == R.id.verifyCodeFragment)
+            findNavController().navigate(action)
     }
 
     private fun gotoLogin() {
         val action = VerifyCodeFragmentDirections.actionVerifyCodeFragmentToLoginFragment(phoneNumber)
-        findNavController().navigate(action)
+        if (findNavController().currentDestination?.id == R.id.verifyCodeFragment)
+            findNavController().navigate(action)
     }
 
     override fun onDestroyView() {

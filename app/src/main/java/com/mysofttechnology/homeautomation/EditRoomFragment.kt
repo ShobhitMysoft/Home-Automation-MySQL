@@ -74,7 +74,8 @@ class EditRoomFragment : Fragment() {
 
         bind.updateWifiBtn.setOnClickListener {
             val action = EditRoomFragmentDirections.actionEditRoomFragmentToConnectDeviceFragment(deviceId.toString())
-            findNavController().navigate(action)
+            if (findNavController().currentDestination?.id == R.id.editRoomFragment)
+                findNavController().navigate(action)
         }
 
         bind.backBtn.setOnClickListener {
@@ -111,7 +112,7 @@ class EditRoomFragment : Fragment() {
     private fun updateRoom(roomName: String) {
         val roomUrl = getString(R.string.base_url) + getString(R.string.url_room)
 
-        loadingDialog.show(childFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG) else return
         val roomUpdateRequest = object : StringRequest(Method.POST, roomUrl,
             { response ->
                 Log.i(TAG, "updateUI: $response")

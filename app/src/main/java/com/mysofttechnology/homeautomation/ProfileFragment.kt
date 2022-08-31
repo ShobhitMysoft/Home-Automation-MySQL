@@ -3,6 +3,8 @@ package com.mysofttechnology.homeautomation
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -62,7 +64,9 @@ class ProfileFragment : Fragment() {
         }
 
         bind.editProfileFab.setOnClickListener {
-            showEditProfileDialog(currentUserName.toString(), currentUserEmail.toString())
+            if (isOnline()) showEditProfileDialog(currentUserName.toString(),
+                currentUserEmail.toString())
+            else showToast("No internet connection")
         }
 
         bind.fullName.text = currentUserName
@@ -77,7 +81,7 @@ class ProfileFragment : Fragment() {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val profileUrl = getString(R.string.base_url) + getString(R.string.url_profile)
 
-        loadingDialog.show(childFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
 
         val liveDataRequest = object : StringRequest(Method.POST, profileUrl,
             { response ->
@@ -167,7 +171,7 @@ class ProfileFragment : Fragment() {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val updateProfileUrl = getString(R.string.base_url) + getString(R.string.url_profile_update)
 
-        loadingDialog.show(childFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
 
         val roomUpdateRequest = object : StringRequest(Method.POST, updateProfileUrl,
             { response ->
@@ -218,6 +222,28 @@ class ProfileFragment : Fragment() {
             }
         }
         requestQueue.add(roomUpdateRequest)
+    }
+
+    private fun isOnline(): Boolean {
+        if (context != null) {
+            val connectivityManager =
+                context?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            if (capabilities != null) {
+                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
+                    return true
+                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     private fun showToast(message: String?) {

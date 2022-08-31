@@ -86,7 +86,7 @@ class LoginFragment : Fragment() {
                     .setMessage("We will send an SMS message to verify your phone number.")
                     .setPositiveButton("Ok"
                     ) { _, _ ->
-                        loadingDialog.show(childFragmentManager, TAG)
+                        if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                         checkUserData(phone)
                     }
                     .setNegativeButton("No") { _, _ -> }
@@ -186,7 +186,8 @@ class LoginFragment : Fragment() {
                 val action =
                     LoginFragmentDirections.actionLoginFragmentToVerifyCodeFragment(
                         verificationId, fullName, email, phoneNumber, 2)
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.loginFragment)
+                    findNavController().navigate(action)
                 loadingDialog.dismiss()
             }
         }

@@ -44,7 +44,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_4sdp"
                     android:fontFamily="@font/raleway"
-                    android:text="Room ID : "
+                    android:text="Device ID : "
                     android:textColor="@color/secondary_text"
                     android:textSize="14sp"
                     app:layout_constraintStart_toStartOf="parent"

@@ -1,5 +1,6 @@
 package com.mysofttechnology.homeautomation
 
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
@@ -21,6 +22,7 @@ import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -55,7 +57,8 @@ import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBinding
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.mqtt.MQTTClient
-import com.mysofttechnology.homeautomation.utils.*
+import com.mysofttechnology.homeautomation.utils.MQTT_TEST_TOPIC_SUB
+import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -112,7 +115,8 @@ class RoomControlsFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val backToast = Toast.makeText(requireActivity(), "Press back again to exit the app.", Toast.LENGTH_LONG)
+        val backToast = Toast.makeText(requireActivity(), "Press back again to exit the app.",
+            Toast.LENGTH_LONG)
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             if (backPressedTime + 2000 > System.currentTimeMillis()) {
@@ -200,7 +204,7 @@ class RoomControlsFragment : Fragment() {
         val spEditor = sharedPref?.edit()
 
         binding.powerBtn.setOnClickListener {
-            loadingDialog.show(childFragmentManager, "$TAG powerBtn")
+            if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, "$TAG powerBtn")
             togglePowerState()
         }
 
@@ -306,27 +310,27 @@ class RoomControlsFragment : Fragment() {
         binding.switch1MoreBtn.setOnClickListener {
             if (SWITCH1 != null) showEditSwitchMenu(it, SWITCH1!!, "1")
             else if (isOnline()) updateUI()
-            else showSToast("No internet")
+            else showSToast("No internet connection")
         }
         binding.switch2MoreBtn.setOnClickListener {
             if (SWITCH2 != null) showEditSwitchMenu(it, SWITCH2!!, "2")
             else if (isOnline()) updateUI()
-            else showSToast("No internet")
+            else showSToast("No internet connection")
         }
         binding.switch3MoreBtn.setOnClickListener {
             if (SWITCH3 != null) showEditSwitchMenu(it, SWITCH3!!, "3")
             else if (isOnline()) updateUI()
-            else showSToast("No internet")
+            else showSToast("No internet connection")
         }
         binding.switch4MoreBtn.setOnClickListener {
             if (SWITCH4 != null) showEditSwitchMenu(it, SWITCH4!!, "4")
             else if (isOnline()) updateUI()
-            else showSToast("No internet")
+            else showSToast("No internet connection")
         }
         binding.switch6MoreBtn.setOnClickListener {
             if (SWITCH6 != null) showEditSwitchMenu(it, SWITCH6!!, "6")
             else if (isOnline()) updateUI()
-            else showSToast("No internet")
+            else showSToast("No internet connection")
         }
     }
 
@@ -432,17 +436,33 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun checkBluetooth() {
+        Log.d(TAG, "checkBluetooth: currentBtDeviceId = $currentBtDeviceId")
         if (bluetoothAdapter?.isEnabled == true && currentBtDeviceId != null && currentBtDeviceId != "null") {
             GlobalScope.launch(Dispatchers.IO) {
                 connectToBtDevice()
             }
+        } else if (currentBtDeviceId == null || currentBtDeviceId == "null" || currentBtDeviceId.toString().isNullOrBlank()) {
+            showConnectBluetoothDialog()
+            noNetwork()
         } else noNetwork()
+    }
+
+    private fun showConnectBluetoothDialog() {
+        val builder = AlertDialog.Builder(requireActivity())
+
+        builder.setTitle("Bluetooth Error")
+            .setMessage(getString(R.string.configure_bluetooth, cd.name))
+            .setPositiveButton("Ok") { _, _ -> }
+        builder.create()
+        builder.show()
     }
 
     private suspend fun connectToBtDevice() {
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
 
+        // TODO: Bluetooth id is not found(not paired)
+        
         closeSocket()
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
 
@@ -1016,7 +1036,7 @@ class RoomControlsFragment : Fragment() {
                 e.printStackTrace()
             }
         } else {
-            showSToast("MQTT not connected.")
+            showSToast("No internet connection")
         }
 
     }
@@ -1150,7 +1170,7 @@ class RoomControlsFragment : Fragment() {
                 })
             }
         } else {
-            showLToast("You are not connected.")
+            showLToast("No internet connection")
         }
         loadingDialog.dismiss()
     }
@@ -1192,7 +1212,7 @@ class RoomControlsFragment : Fragment() {
                     intent.putExtra(SWITCH_ID, switchID)
                     intent.putExtra(SWITCH_ID_BY_APP, switchIDByApp)
                     if (isOnline()) startActivity(intent)
-                    else showSToast("No internet")
+                    else showSToast("No internet connection")
                 }
             }
             true

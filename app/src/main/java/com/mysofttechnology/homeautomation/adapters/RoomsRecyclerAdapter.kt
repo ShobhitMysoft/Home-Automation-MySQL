@@ -46,8 +46,7 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
         }
 
         holder.shareBtn.setOnClickListener {
-            val otp = (100000..999999).random()
-            generateOTP(room.deviceId, otp.toString(), holder.roomOTP, holder.shareBtn)
+            showOtpGenerateDialog(room.deviceId, holder.roomOTP, holder.shareBtn)
         }
 
         holder.itemView.setOnClickListener {
@@ -55,6 +54,20 @@ class RoomsRecyclerAdapter(private val context: Context, private val roomList: M
             val action = RoomsFragmentDirections.actionRoomsFragmentToEditRoomFragment(room.deviceId, room.roomName, room.roomId)
             navController.navigate(action)
         }
+    }
+
+    private fun showOtpGenerateDialog(deviceId: String, roomOTP: TextView, shareBtn: ImageView) {
+        val builder = AlertDialog.Builder(context)
+
+        builder.setTitle("Generate OTP")
+            .setMessage("Do you want to generate an OTP to share this room with someone else?")
+            .setPositiveButton("Yes") { _, _ ->
+                val otp = (100000..999999).random()
+                generateOTP(deviceId, otp.toString(), roomOTP, shareBtn)
+            }
+            .setNegativeButton("No") { _, _ -> }
+        builder.create()
+        builder.show()
     }
 
     private fun generateOTP(deviceId: String, otp: String, roomOTP: TextView, shareBtn: ImageView) {

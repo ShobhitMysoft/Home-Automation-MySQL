@@ -73,7 +73,8 @@ class RegistrationFragment : Fragment() {
 
     private fun gotoLogin(phoneNumber: String) {
         val action = RegistrationFragmentDirections.actionRegistrationFragmentToLoginFragment(phoneNumber)
-        findNavController().navigate(action)
+        if (findNavController().currentDestination?.id == R.id.registrationFragment)
+            findNavController().navigate(action)
     }
 
     private fun validateUserInputData() {
@@ -91,7 +92,7 @@ class RegistrationFragment : Fragment() {
                             .setMessage("We will send an SMS message to verify your phone number.")
                             .setPositiveButton("Ok"
                             ) { _, _ ->
-                                loadingDialog.show(childFragmentManager, TAG)
+                                if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                                 checkUserData(fullName, email, phone)
                             }
                             .setNegativeButton("No") { _, _ -> }
@@ -197,7 +198,8 @@ class RegistrationFragment : Fragment() {
                 val action =
                     RegistrationFragmentDirections.actionRegistrationFragmentToVerifyCodeFragment(
                         verificationId, fullName, email, phoneNumber, 1)
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.registrationFragment)
+                    findNavController().navigate(action)
                 loadingDialog.dismiss()
             }
         }
@@ -218,7 +220,8 @@ class RegistrationFragment : Fragment() {
         if (currentUser != null) {
             val action =
                 RegistrationFragmentDirections.actionRegistrationFragmentToDashbordFragment()
-            findNavController().navigate(action)
+            if (findNavController().currentDestination?.id == R.id.registrationFragment)
+                findNavController().navigate(action)
         }
     }
 

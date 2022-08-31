@@ -23,7 +23,9 @@ class ScanQrAnimationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        bind.scanQrContinueBtn.setOnClickListener { findNavController().navigate(R.id.action_scanQrAnimationFragment_to_scanDeviceFragment) }
+        bind.scanQrContinueBtn.setOnClickListener {
+            if (findNavController().currentDestination?.id == R.id.scanQrAnimationFragment)
+                findNavController().navigate(R.id.action_scanQrAnimationFragment_to_scanDeviceFragment) }
     }
 
     override fun onDestroyView() {

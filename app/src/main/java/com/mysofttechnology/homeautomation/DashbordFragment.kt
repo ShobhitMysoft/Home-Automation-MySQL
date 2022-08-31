@@ -76,7 +76,8 @@ class DashbordFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val backToast = Toast.makeText(requireActivity(), "Press back again to exit the app.", Toast.LENGTH_LONG)
+        val backToast = Toast.makeText(requireActivity(), "Press back again to exit the app.",
+            Toast.LENGTH_LONG)
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             if (backPressedTime + 2000 > System.currentTimeMillis()) {
@@ -134,7 +135,8 @@ class DashbordFragment : Fragment() {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
         } catch (e: ActivityNotFoundException) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
+            startActivity(Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
         }
 //        binding.newUpdateView.visibility = View.GONE
     }
@@ -442,12 +444,16 @@ class DashbordFragment : Fragment() {
                 R.id.profile -> {
                     val action =
                         DashbordFragmentDirections.actionDashbordFragmentToProfileFragment()
-                    findNavController().navigate(action)
+                    if (findNavController().currentDestination?.id == R.id.dashbordFragment)
+                        findNavController().navigate(action)
                 }
                 R.id.rooms -> {
                     val action = DashbordFragmentDirections.actionDashbordFragmentToRoomsFragment()
-                    if (isOnline()) findNavController().navigate(action)
-                    else showToast("No Internet")
+                    if (isOnline()) {
+                        if (findNavController().currentDestination?.id == R.id.dashbordFragment)
+                            findNavController().navigate(action)
+                    }
+                    else showToast("No internet connection")
                 }
                 R.id.logout -> {
                     builder.setTitle("Logout").setMessage("Are you sure you want to logout?")
@@ -456,7 +462,8 @@ class DashbordFragment : Fragment() {
                             signOutUser()
                             val action =
                                 DashbordFragmentDirections.actionDashbordFragmentToRegistrationFragment()
-                            findNavController().navigate(action)
+                            if (findNavController().currentDestination?.id == R.id.dashbordFragment)
+                                findNavController().navigate(action)
 
                         }
                         .setNegativeButton("No") { _, _ -> }

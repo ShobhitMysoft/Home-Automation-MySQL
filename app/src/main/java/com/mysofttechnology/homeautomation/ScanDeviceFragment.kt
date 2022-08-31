@@ -87,7 +87,7 @@ class ScanDeviceFragment : Fragment() {
             binding.sdContinueBtn.isEnabled = false
             deviceId = binding.deviceIdEt.text.toString()
             if (deviceId.isNotEmpty()) {
-                loadingDialog.show(childFragmentManager, TAG)
+                if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                 checkDeviceAvailability(deviceId)
             } else {
                 Toast.makeText(
@@ -125,7 +125,7 @@ class ScanDeviceFragment : Fragment() {
                 requireActivity().runOnUiThread {
                     Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
                     binding.deviceIdEt.setText(it.toString())
-                    loadingDialog.show(childFragmentManager, TAG)
+                    if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                     deviceId = it.toString()
                     checkDeviceAvailability(deviceId)
                 }
@@ -304,7 +304,7 @@ class ScanDeviceFragment : Fragment() {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val getOtpUrl = getString(R.string.base_url) + getString(R.string.url_get_otp)
 
-        loadingDialog.show(childFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
 
         val getOtpRequest = object : StringRequest(Method.POST, getOtpUrl,
             { response ->
@@ -493,13 +493,15 @@ class ScanDeviceFragment : Fragment() {
             .setNegativeButton("Skip") { _, _ ->
                 val action =
                     ScanDeviceFragmentDirections.actionScanDeviceFragmentToDashbordFragment()
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
+                    findNavController().navigate(action)
                 loadingDialog.dismiss()
             }
             .setPositiveButton("Ok") { _, _ ->
                 val action =
                     ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
+                    findNavController().navigate(action)
                 loadingDialog.dismiss()
             }
             .show()

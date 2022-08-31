@@ -105,7 +105,7 @@ class FillWifiDetailFragment : Fragment() {
 
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
-        loadingDialog.show(parentFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(parentFragmentManager, TAG)
 
         requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
 
@@ -525,7 +525,8 @@ class FillWifiDetailFragment : Fragment() {
             .setNeutralButton("Cancel") { _, _ ->
                 val action =
                     FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToRoomsFragment()
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.fillWifiDetailFragment)
+                    findNavController().navigate(action)
             }
             .setPositiveButton("Ok") { _, _ ->
                 checkSettings()
@@ -541,7 +542,8 @@ class FillWifiDetailFragment : Fragment() {
             .setNeutralButton("Cancel") { _, _ ->
                 val action =
                     FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToRoomsFragment()
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.fillWifiDetailFragment)
+                    findNavController().navigate(action)
             }
             .setPositiveButton("Ok") { _, _ ->
                 checkSettings()

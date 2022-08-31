@@ -72,7 +72,7 @@ class RoomsFragment : Fragment() {
 
     private fun roomsData(): MutableList<RoomsViewModel> {
         val roomsData = ArrayList<RoomsViewModel>()
-        loadingDialog.show(childFragmentManager, "$TAG roomsData")
+        if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, "$TAG roomsData")
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val url = getString(R.string.base_url) + getString(R.string.url_room_list)
 
