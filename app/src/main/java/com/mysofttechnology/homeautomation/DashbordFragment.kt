@@ -115,8 +115,6 @@ class DashbordFragment : Fragment() {
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref?.getString(getString(R.string.current_user_id), "")
 
-        checkDeviceAvailability()
-
         binding.moreMenu.setOnClickListener {
             showPopupMenu(it)
         }
@@ -498,6 +496,11 @@ class DashbordFragment : Fragment() {
             }
         }
         return false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkDeviceAvailability()
     }
 
     override fun onStart() {
