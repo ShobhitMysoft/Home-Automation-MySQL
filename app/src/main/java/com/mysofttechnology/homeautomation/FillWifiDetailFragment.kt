@@ -198,10 +198,10 @@ class FillWifiDetailFragment : Fragment() {
                 ) {
                     checkSettings()
                 } else {
-                    Toast.makeText(requireActivity(), "Location permission denied.",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireActivity(), "Location permission not granted.",
+                        Toast.LENGTH_LONG).show()
                     Navigation.findNavController(requireView())
-                        .navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+                        .navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
 //                    val action =
 //                        FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
 //                    findNavController().navigate(action)
