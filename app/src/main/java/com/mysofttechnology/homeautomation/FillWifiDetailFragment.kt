@@ -121,7 +121,7 @@ class FillWifiDetailFragment : Fragment() {
 
         bind.wifiLv.setOnItemClickListener { _, _, pos, _ ->
             ssid = wifiSSIDList[pos]
-            Toast.makeText(requireActivity(), ssid, Toast.LENGTH_SHORT).show()
+
             if (btSocket != null && btSocket!!.isConnected) {
                 sendSSIDToDevice()
                 showWifiPasswordDialog()
@@ -336,9 +336,14 @@ class FillWifiDetailFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-//                        showToast("Received 1")
+
+                        Log.d(TAG, "verifyWifi: wifi = ${mData.get("wifi")}")
+
                         if (mData.get("wifi") == "1") startActivity(Intent(requireContext(), WorkDoneActivity::class.java))
-                        else btSocket = null
+                        else {
+                            btSocket = null
+                            findNavController().navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
+                        }
 
                         Log.d(TAG, "verifyWifi: Message - $msg")
                     } else {
@@ -429,25 +434,22 @@ class FillWifiDetailFragment : Fragment() {
 
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
         try {
-            Log.i(TAG, "connectToBtDevice: Trying to connect socket.")
             btSocket!!.connect()
             requireActivity().runOnUiThread {
                 waitDialog.dismiss()
                 sendSSIDToDevice()
                 showWifiPasswordDialog()
             }
-            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
         } catch (e: Exception) {
             requireActivity().runOnUiThread {
-                showToast("Failed to connect")
+
                 waitDialog.dismiss()
                 Snackbar.make(bind.fwRootView,
                     "Timeout! Make sure you are close to the ${
                         getString(R.string.app_name)
                     } device.",
                     Snackbar.LENGTH_LONG).setAnchorView(bind.refreshFab).show()
-                Log.e(TAG, "connectToBtDevice: Socket Connect Error : ", e)
-                Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
+
                 closeSocket()
             }
         }
