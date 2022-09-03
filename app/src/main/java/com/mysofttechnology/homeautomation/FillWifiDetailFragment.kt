@@ -116,7 +116,7 @@ class FillWifiDetailFragment : Fragment() {
         bind.backBtn.setOnClickListener {
             bind.backBtn.isEnabled = false
             Navigation.findNavController(it)
-                .navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+                .navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
         }
 
         bind.wifiLv.setOnItemClickListener { _, _, pos, _ ->

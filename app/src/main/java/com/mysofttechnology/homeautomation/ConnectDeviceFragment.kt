@@ -40,7 +40,7 @@ class ConnectDeviceFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
-            deviceId = it.getString("deviceId").toString()
+            deviceId = it.getString("deviceId")
         }
     }
 
@@ -79,9 +79,7 @@ class ConnectDeviceFragment : Fragment() {
                 TAG,
                 "Device Name = ${deviceNameList[position]}\nBT Device = ${btDeviceList[position]}"
             )
-
             gotoFillWifiFrag(btDeviceList[position].toString())
-
         }
     }
 
@@ -116,7 +114,6 @@ class ConnectDeviceFragment : Fragment() {
     }
 
     private fun loadPairedDevices() {
-        bind.scanningTv.visibility = View.VISIBLE
         bind.refreshFab.visibility = View.GONE
 
         val bluetoothManager =
@@ -129,26 +126,28 @@ class ConnectDeviceFragment : Fragment() {
 //            checkPermissions()
 //        } else {
 
-            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
-            pairedDevices?.forEach { device ->
-                val deviceName = device.name
-                val deviceIdDigits = deviceId?.substring(4, deviceId!!.length)
+        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
+        pairedDevices?.forEach { device ->
+            if (deviceNameList.isNotEmpty()) bind.noPairedDeviceView.visibility = View.GONE
+            else bind.noPairedDeviceView.visibility = View.VISIBLE
+
+            val deviceName = device.name
+            val deviceIdDigits = deviceId?.substring(4, deviceId!!.length)
+
 //                val deviceHardwareAddress = device.address // MAC address
 
-                if (deviceName?.contains("$deviceIdDigits") == true) gotoFillWifiFrag(
-                    device.toString())
+            if (deviceName?.contains(
+                    "$deviceIdDigits") == true || deviceName == deviceId
+            ) gotoFillWifiFrag(device.toString())
 
-                if (deviceName.take(2) == "SL") {
-                    deviceNameList.add(deviceName.toString())
-                    btDeviceList.add(device)
-                    listAdapter.notifyDataSetChanged()
-                }
-
-                Log.d(TAG, "loadPairedDevices: $deviceName | $device")
+            if (deviceName.take(2) == "SL") {
+                deviceNameList.add(deviceName.toString())
+                btDeviceList.add(device)
+                listAdapter.notifyDataSetChanged()
             }
-            bind.scanningTv.visibility = View.GONE
-            bind.refreshFab.visibility = View.VISIBLE
-            bind.devicesLv.adapter = listAdapter
+        }
+        bind.refreshFab.visibility = View.VISIBLE
+        bind.devicesLv.adapter = listAdapter
 //        }
     }
 
@@ -176,7 +175,8 @@ class ConnectDeviceFragment : Fragment() {
             if (result.resultCode == RESULT_OK) {
                 loadPairedDevices()
             } else {
-                Toast.makeText(requireActivity(), "Permission not granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireActivity(), "Permission not granted", Toast.LENGTH_SHORT)
+                    .show()
                 if (findNavController().currentDestination?.id == R.id.connectDeviceFragment)
                     findNavController().navigate(R.id.action_connectDeviceFragment_to_roomsFragment)
             }
@@ -184,14 +184,14 @@ class ConnectDeviceFragment : Fragment() {
 
     private val requestMultiplePermissions = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        permissions.entries.forEach {
-            Log.d("test006", "${it.key} = ${it.value}")
-            if (it.value == false) {
-                Toast.makeText(requireActivity(), "Permissions not granted", Toast.LENGTH_SHORT).show()
-                /*if (findNavController().currentDestination?.id == R.id.connectDeviceFragment)
-                    findNavController().navigate(R.id.action_connectDeviceFragment_to_roomsFragment)*/
-            }
+        val granted = permissions.entries.all {
+            it.value == true
         }
+
+        if (granted) {
+            loadPairedDevices()
+        } else Toast.makeText(requireActivity(), "Permissions are not granted", Toast.LENGTH_SHORT)
+            .show()
     }
 
     /*private val registerForResult = registerForActivityResult(

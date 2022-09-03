@@ -2,10 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cd_root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:id="@+id/cd_root_view"
     tools:context=".ConnectDeviceFragment">
 
     <LinearLayout
@@ -46,24 +46,11 @@
         android:layout_marginHorizontal="@dimen/_15sdp"
         android:layout_marginVertical="@dimen/_12sdp"
         android:fontFamily="@font/raleway"
-        android:text="Available Devices"
+        android:text="Smartlit Paired Devices"
         android:textColor="@color/secondary_text"
         android:textSize="14dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/action_bar" />
-
-    <TextView
-        android:id="@+id/scanning_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/_15sdp"
-        android:layout_marginVertical="@dimen/_12sdp"
-        android:fontFamily="@font/raleway"
-        android:text="Scanning. . ."
-        android:textColor="@color/secondary_text"
-        android:textSize="14dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/action_bar" />
 
     <ListView
@@ -78,6 +65,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/available_devices" />
 
+    <LinearLayout
+        android:id="@+id/no_paired_device_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@+id/devices_lv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/devices_lv">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/anim_view"
+            android:layout_width="@dimen/_150sdp"
+            android:layout_height="@dimen/_150sdp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/lotti_trying_to_scan" />
+
+        <TextView
+            android:id="@+id/no_paired_device_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/raleway"
+            android:gravity="center"
+            android:text="No paired Smartlit devices found"
+            android:textColor="@color/secondary_text"
+            android:textSize="@dimen/_12ssp" />
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/msg"
         android:layout_width="wrap_content"
@@ -85,8 +107,8 @@
         android:fontFamily="@font/raleway"
         android:gravity="center"
         android:padding="@dimen/_20sdp"
-        android:textColor="@color/black"
         android:text="Make sure the device is already paired.\nGo to Settings > Bluetooth > Select the device to pair"
+        android:textColor="@color/black"
         android:textSize="@dimen/_12ssp"
         app:layout_constraintBottom_toTopOf="@+id/bt_settings_btn"
         app:layout_constraintEnd_toEndOf="parent"

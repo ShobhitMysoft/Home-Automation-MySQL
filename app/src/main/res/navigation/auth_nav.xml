@@ -88,9 +88,6 @@
                 android:id="@+id/action_dashbordFragment_to_roomsFragment"
                 app:destination="@id/roomsFragment" />
             <action
-                android:id="@+id/action_dashbordFragment_to_scanDeviceFragment"
-                app:destination="@id/scanDeviceFragment" />
-            <action
                 android:id="@+id/action_dashbordFragment_to_scanQrAnimationFragment"
                 app:destination="@id/scanQrAnimationFragment" />
         </fragment>
@@ -164,11 +161,6 @@
             android:name="com.mysofttechnology.homeautomation.FillWifiDetailFragment"
             android:label="fragment_fill_wifi_detail"
             tools:layout="@layout/fragment_fill_wifi_detail" >
-            <action
-                android:id="@+id/action_fillWifiDetailFragment_to_connectDeviceFragment"
-                app:destination="@id/connectDeviceFragment"
-                app:popUpTo="@id/connectDeviceFragment"
-                app:popUpToInclusive="true" />
             <action
                 android:id="@+id/action_fillWifiDetailFragment_to_roomsFragment"
                 app:destination="@id/roomsFragment"

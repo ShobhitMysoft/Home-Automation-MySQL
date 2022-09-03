@@ -1,20 +1,29 @@
 package com.mysofttechnology.homeautomation
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
+import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.activities.WorkDoneActivity
 import com.mysofttechnology.homeautomation.databinding.FragmentEditRoomBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
@@ -36,6 +45,9 @@ class EditRoomFragment : Fragment() {
 
     private var _binding: FragmentEditRoomBinding? = null
     private val bind get() = _binding!!
+
+    private var snackbar: Snackbar? = null
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
     private lateinit var requestQueue: RequestQueue
 
@@ -68,19 +80,72 @@ class EditRoomFragment : Fragment() {
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
 
+        snackbar =
+            Snackbar.make(bind.erRootView, "Permissions are not granted", Snackbar.LENGTH_SHORT)
+                .setAction("SETTINGS") {
+                    startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:" + BuildConfig.APPLICATION_ID)))
+                }
+
+
+        permissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val granted = permissions.entries.all {
+                it.value == true
+            }
+
+            if (granted) {
+                val action = EditRoomFragmentDirections.actionEditRoomFragmentToConnectDeviceFragment(deviceId!!)
+                if (findNavController().currentDestination?.id == R.id.editRoomFragment)
+                    Navigation.findNavController(requireView()).navigate(action)
+            } else snackbar?.show()
+        }
+
         loadUI()
 
         bind.submitBtn.setOnClickListener { submitRoomDetails() }
 
         bind.updateWifiBtn.setOnClickListener {
-            val action = EditRoomFragmentDirections.actionEditRoomFragmentToConnectDeviceFragment(deviceId.toString())
-            if (findNavController().currentDestination?.id == R.id.editRoomFragment)
-                findNavController().navigate(action)
+            checkAllPermissions()
         }
 
         bind.backBtn.setOnClickListener {
             bind.backBtn.isEnabled = false
             Navigation.findNavController(it).navigate(R.id.action_editRoomFragment_to_roomsFragment)
+        }
+    }
+
+    private fun checkAllPermissions() {
+        val permReqList: MutableList<String> = arrayListOf()
+
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        )
+            permReqList.add(Manifest.permission.ACCESS_FINE_LOCATION)
+
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        )
+            permReqList.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
+            )
+                permReqList.add(Manifest.permission.BLUETOOTH_SCAN)
+
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
+            )
+                permReqList.add(Manifest.permission.BLUETOOTH_CONNECT)
+        }
+
+        if (permReqList.isNotEmpty()) {
+            permissionLauncher.launch(permReqList.toTypedArray())
+        } else {
+            val action = EditRoomFragmentDirections.actionEditRoomFragmentToConnectDeviceFragment(deviceId!!)
+            if (findNavController().currentDestination?.id == R.id.editRoomFragment)
+                Navigation.findNavController(requireView()).navigate(action)
         }
     }
 
@@ -175,5 +240,6 @@ class EditRoomFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        snackbar?.dismiss()
     }
 }
