@@ -108,11 +108,12 @@
             <action
                 android:id="@+id/action_roomsFragment_to_dashbordFragment"
                 app:destination="@id/dashbordFragment"
-                app:popUpTo="@id/auth_nav"
-                app:popUpToInclusive="true" />
+                app:popUpTo="@id/dashbordFragment"
+                app:popUpToInclusive="false" />
             <action
                 android:id="@+id/action_roomsFragment_to_scanDeviceFragment"
-                app:destination="@id/scanDeviceFragment" />
+                app:destination="@id/scanDeviceFragment"
+                app:popUpTo="@id/dashbordFragment" />
             <action
                 android:id="@+id/action_roomsFragment_to_editRoomFragment"
                 app:destination="@id/editRoomFragment" />
@@ -146,7 +147,7 @@
             <action
                 android:id="@+id/action_connectDeviceFragment_to_fillWifiDetailFragment"
                 app:destination="@id/fillWifiDetailFragment"
-                app:popUpTo="@id/connectDeviceFragment" />
+                app:popUpTo="@id/editRoomFragment" />
             <action
                 android:id="@+id/action_connectDeviceFragment_to_roomsFragment"
                 app:destination="@id/roomsFragment"
@@ -164,7 +165,7 @@
             <action
                 android:id="@+id/action_fillWifiDetailFragment_to_roomsFragment"
                 app:destination="@id/roomsFragment"
-                app:popUpTo="@id/dashbordFragment"
+                app:popUpTo="@id/roomsFragment"
                 app:popUpToInclusive="true" />
             <argument
                 android:name="btDevice"

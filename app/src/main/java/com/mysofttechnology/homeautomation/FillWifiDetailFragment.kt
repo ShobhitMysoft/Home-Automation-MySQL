@@ -3,7 +3,10 @@ package com.mysofttechnology.homeautomation
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.wifi.WifiManager
@@ -22,7 +25,6 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.android.volley.RequestQueue
@@ -74,14 +76,14 @@ class FillWifiDetailFragment : Fragment() {
                     wifiManager!!.disconnect()
                 }
             }
-            Navigation.findNavController(requireView())
-                .navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
+
+//            findNavController().navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
 //            val action =
 //                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
 //            findNavController().navigate(action)
         }
 
-        callback.isEnabled = true
+        callback.isEnabled = false
 
         arguments?.let {
             btDevice = it.getString("btDevice").toString()
@@ -281,48 +283,48 @@ class FillWifiDetailFragment : Fragment() {
     }
 
     private fun updateLive(value: String, appl: String) {
-            val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
+        val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
 
-            val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
-                { response ->
-                    Log.i(TAG, "updateUI: $response")
-                    try {
-                        val mData = JSONObject(response.toString())
-                        val resp = mData.get("response") as Int
-                        val msg = mData.get("msg")
+        val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
+            { response ->
+                Log.i(TAG, "updateUI: $response")
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
 
-                        if (resp == 1) {
+                    if (resp == 1) {
 //                            showToast("0 sent!")
-                            Handler(Looper.getMainLooper()).postDelayed({
+                        Handler(Looper.getMainLooper()).postDelayed({
 //                                showToast("Handler called")
-                                verifyWifi()
-                            }, 15000)
-                            Log.d(TAG, "updateLive: Message - $msg")
-                        } else {
+                            verifyWifi()
+                        }, 15000)
+                        Log.d(TAG, "updateLive: Message - $msg")
+                    } else {
 
-                            Log.e(TAG, "updateLive: Message - $msg")
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Exception in updateLive: $e")
+                        Log.e(TAG, "updateLive: Message - $msg")
                     }
-                }, {
-                    Log.e(TAG, "VollyError: ${it.message}")
-                }) {
-                override fun getParams(): Map<String, String> {
-                    val params = HashMap<String, String>()
-                    params["device_id"] = deviceId
-                    params["appliance"] = appl
-                    params["data"] = value
-                    return params
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception in updateLive: $e")
                 }
-
-                override fun getHeaders(): MutableMap<String, String> {
-                    val params = HashMap<String, String>()
-                    params["Content-Type"] = "application/x-www-form-urlencoded"
-                    return params
-                }
+            }, {
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId
+                params["appliance"] = appl
+                params["data"] = value
+                return params
             }
-            requestQueue.add(liveUpdateRequest)
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(liveUpdateRequest)
     }
 
     private fun verifyWifi() {
@@ -339,10 +341,12 @@ class FillWifiDetailFragment : Fragment() {
 
                         Log.d(TAG, "verifyWifi: wifi = ${mData.get("wifi")}")
 
-                        if (mData.get("wifi") == "1") startActivity(Intent(requireContext(), WorkDoneActivity::class.java))
+                        if (mData.get("wifi") == "1") startActivity(
+                            Intent(requireContext(), WorkDoneActivity::class.java))
                         else {
                             btSocket = null
-                            findNavController().navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
+                            findNavController().navigate(
+                                R.id.action_fillWifiDetailFragment_to_roomsFragment)
                         }
 
                         Log.d(TAG, "verifyWifi: Message - $msg")
@@ -563,6 +567,7 @@ class FillWifiDetailFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         closeSocket()
+        snackbar?.dismiss()
     }
 
     /*private fun retryDialog() {
