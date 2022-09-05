@@ -67,6 +67,12 @@ import java.io.OutputStream
 import java.util.*
 
 private const val TAG = "RoomControlsFragment"
+private const val MQTT_FAN: String = "fan"
+private const val MQTT_SWITCH1: String = "switch1"
+private const val MQTT_SWITCH2: String = "switch2"
+private const val MQTT_SWITCH3: String = "switch3"
+private const val MQTT_SWITCH4: String = "switch4"
+private const val MQTT_SWITCH6: String = "switch6"
 
 class RoomControlsFragment : Fragment() {
 
@@ -228,7 +234,7 @@ class RoomControlsFragment : Fragment() {
                         3.0f -> "H"
                         4.0f -> "I"
                         else -> "E"
-                    })
+                    }, MQTT_FAN)
                 }
             }
         })
@@ -251,7 +257,7 @@ class RoomControlsFragment : Fragment() {
                 }
             } else {
                 if (!isChecked) {
-                    sendDataToMQTT("E")
+                    sendDataToMQTT("E", MQTT_FAN)
                 } else {
                     val oldFanSpeed = sharedPref!!.getString("old_fan_speed_$currentDeviceId)",
                         liveFanSpeed.toString())
@@ -260,7 +266,7 @@ class RoomControlsFragment : Fragment() {
                         "2" -> "G"
                         "3" -> "H"
                         else -> "I"
-                    })
+                    }, MQTT_FAN)
                 }
             }
         }
@@ -269,7 +275,7 @@ class RoomControlsFragment : Fragment() {
             val isChecked = binding.switch1Switch.isChecked
             if (isBTConnected) sendDataToBT(if (isChecked) "A" else "a")
             else {
-                sendDataToMQTT(if (isChecked) "A" else "a")
+                sendDataToMQTT(if (isChecked) "A" else "a", MQTT_SWITCH1)
             }
         }
 
@@ -277,7 +283,7 @@ class RoomControlsFragment : Fragment() {
             val isChecked = binding.switch2Switch.isChecked
             if (isBTConnected) sendDataToBT(if (isChecked) "B" else "b")
             else {
-                sendDataToMQTT(if (isChecked) "B" else "b")
+                sendDataToMQTT(if (isChecked) "B" else "b", MQTT_SWITCH2)
             }
         }
 
@@ -285,7 +291,7 @@ class RoomControlsFragment : Fragment() {
             val isChecked = binding.switch3Switch.isChecked
             if (isBTConnected) sendDataToBT(if (isChecked) "C" else "c")
             else {
-                sendDataToMQTT(if (isChecked) "C" else "c")
+                sendDataToMQTT(if (isChecked) "C" else "c", MQTT_SWITCH3)
             }
         }
 
@@ -293,7 +299,7 @@ class RoomControlsFragment : Fragment() {
             val isChecked = binding.switch4Switch.isChecked
             if (isBTConnected) sendDataToBT(if (isChecked) "D" else "d")
             else {
-                sendDataToMQTT(if (isChecked) "D" else "d")
+                sendDataToMQTT(if (isChecked) "D" else "d", MQTT_SWITCH4)
             }
         }
 
@@ -301,7 +307,7 @@ class RoomControlsFragment : Fragment() {
             val isChecked = binding.switch6Switch.isChecked
             if (isBTConnected) sendDataToBT(if (isChecked) "A" else "a")
             else {
-                sendDataToMQTT(if (isChecked) "A" else "a")
+                sendDataToMQTT(if (isChecked) "A" else "a", MQTT_SWITCH6)
             }
         }
 
@@ -458,7 +464,7 @@ class RoomControlsFragment : Fragment() {
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
 
         // TODO: Bluetooth id is not found(not paired)
-        
+
         closeSocket()
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
 
@@ -544,78 +550,98 @@ class RoomControlsFragment : Fragment() {
     }
 
     private fun connectToMQTT() {
-
         val serverURI = getString(R.string.mqtt_server_url)
         val clientID = "${UUID.randomUUID()}"
         val username = "mysoft"
         val password = "Mysoft@#$123"
 
+        var startIndex = 1
+        var endIndex = 5
+
+        if (curDevSwitchCount == "1") {
+            startIndex = 6
+            endIndex = 6
+        }
+
+        Log.i(TAG, "connectToMQTT: $startIndex | $endIndex")
+
         if (serverURI != null && clientID != null) {
             mqttClient = MQTTClient(context, serverURI, clientID)
 
-//            if (!mqttClient!!.isConnected()) {
-                mqttClient!!.connect(username, password,
-                    object : IMqttActionListener {
-                        override fun onSuccess(asyncActionToken: IMqttToken?) {
-                            Log.d(this.javaClass.name, "Connection success")
+            mqttClient!!.connect(username, password,
+                object : IMqttActionListener {
+                    override fun onSuccess(asyncActionToken: IMqttToken?) {
+                        Log.d(this.javaClass.name, "Connection success")
 
-                            val topic_pub = "${currentDeviceId}_pub"
-                            mqttClient!!.subscribe(topic_pub,
+                        for (i in startIndex..endIndex) {
+
+                            val switch = when (i) {
+                                1 -> MQTT_SWITCH1
+                                2 -> MQTT_SWITCH2
+                                3 -> MQTT_SWITCH3
+                                4 -> MQTT_SWITCH4
+                                5 -> MQTT_FAN
+                                else -> MQTT_SWITCH6
+                            }
+
+                            Log.d(TAG, "connectToMQTT: switch - $switch")
+
+                            val topicPub = "${currentDeviceId}/${switch}_pub"
+                            mqttClient!!.subscribe(topicPub,
                                 1,
                                 object : IMqttActionListener {
                                     override fun onSuccess(asyncActionToken: IMqttToken?) {
-                                        val msg = "Subscribed to: $topic_pub"
+                                        val msg = "Subscribed to: $topicPub"
                                         Log.d(this.javaClass.name, msg)
                                     }
 
                                     override fun onFailure(asyncActionToken: IMqttToken?,
                                         exception: Throwable?) {
                                         Log.e(this.javaClass.name,
-                                            "Failed to subscribe: $topic_pub")
+                                            "Failed to subscribe: $topicPub")
                                     }
                                 })
                         }
+                    }
 
-                        override fun onFailure(asyncActionToken: IMqttToken?,
-                            exception: Throwable?) {
-                            Log.e(this.javaClass.name,
-                                "Connection failure: ${exception.toString()}")
+                    override fun onFailure(asyncActionToken: IMqttToken?,
+                        exception: Throwable?) {
+                        Log.e(this.javaClass.name,
+                            "Connection failure: ${exception.toString()}")
 
-                            try {
-                                binding.connectionBtn.setImageDrawable(
-                                    context?.let {
-                                        ContextCompat.getDrawable(it, R.drawable.ic_no_network)
-                                    })
+                        try {
+                            binding.connectionBtn.setImageDrawable(
+                                context?.let {
+                                    ContextCompat.getDrawable(it, R.drawable.ic_no_network)
+                                })
 //                                enableUI()
-                                binding.statusPb.visibility = View.INVISIBLE
-                                binding.connectionBtn.visibility = View.VISIBLE
-                                checkBluetooth()
-                            } catch (e: Exception) {
-                                Log.e(TAG, "connectToInternet: Error", e)
-                            }
+                            binding.statusPb.visibility = View.INVISIBLE
+                            binding.connectionBtn.visibility = View.VISIBLE
+                            checkBluetooth()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "connectToInternet: Error", e)
                         }
-                    },
-                    object : MqttCallback {
-                        override fun messageArrived(topic: String?, message: MqttMessage?) {
-                            val msg =
-                                "Receive message: ${message.toString()} from topic: $topic"
-                            Log.d(this.javaClass.name, msg)
+                    }
+                },
+                object : MqttCallback {
+                    override fun messageArrived(topic: String?, message: MqttMessage?) {
+                        val msg =
+                            "Receive message: ${message.toString()} from topic: $topic"
+                        Log.d(this.javaClass.name, msg)
 
-                            updateSwitchState(message.toString())
-                        }
+                        updateSwitchState(message.toString())
+                    }
 
-                        override fun connectionLost(cause: Throwable?) {
-                            Log.i(this.javaClass.name, "Connection lost ${cause.toString()}")
-//                            showSToast("Connection Lost")
-//                            if (isAdded && isOnline()) connectToMQTT()
-//                            else loadUi()
-                        }
+                    override fun connectionLost(cause: Throwable?) {
+                        Log.i(this.javaClass.name, "Connection lost ${cause.toString()}")
+                        loadUi()
+                    }
 
-                        override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                            Log.d(this.javaClass.name, "Delivery complete")
-                        }
-                    })
-//            }
+                    override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                        // TODO: Use this when Delivery complete
+                        Log.d(this.javaClass.name, "Delivery complete")
+                    }
+                })
         }
 
     }
@@ -679,7 +705,6 @@ class RoomControlsFragment : Fragment() {
                             }
 
                             togglePowerButton(app1Val, app2Val, app3Val, app4Val, fan)
-
                         }
                     } else {
                         showPSnackbar("Failed to get room data")
@@ -971,13 +996,14 @@ class RoomControlsFragment : Fragment() {
 
     }
 
-    private fun sendDataToMQTT(signal: String) {
+    private fun sendDataToMQTT(signal: String, switch: String?) {
         if (mqttClient?.isConnected() == true) {
             try {
-                mqttClient!!.publish(currentDeviceId!!, signal, 1, false,
+                val topic = "${currentDeviceId}/${switch}"
+                mqttClient!!.publish(topic, signal, 1, false,
                     object : IMqttActionListener {
                         override fun onSuccess(asyncActionToken: IMqttToken?) {
-                            val msg = "Publish message: $signal to topic: $currentDeviceId"
+                            val msg = "Publish message: $signal to topic: $topic"
                             Log.d(this.javaClass.name, msg)
 
                             when (signal) {
@@ -1165,6 +1191,12 @@ class RoomControlsFragment : Fragment() {
                         }
                         fanSpeed
                     } else "E"
+                }, when (i) {
+                    0 -> MQTT_SWITCH1
+                    1 -> MQTT_SWITCH2
+                    2 -> MQTT_SWITCH3
+                    3 -> MQTT_SWITCH4
+                    else -> MQTT_FAN
                 })
             }
         } else {
