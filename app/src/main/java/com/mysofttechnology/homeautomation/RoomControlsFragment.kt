@@ -217,7 +217,6 @@ class RoomControlsFragment : Fragment() {
 
             override fun onStopTrackingTouch(slider: Slider) {
                 val speed = slider.value
-//                disableUI()
                 spEditor?.putString("old_fan_speed_$currentDeviceId)", speed.toInt().toString())
                 spEditor?.apply()
                 if (isBTConnected) sendDataToBT(when (speed) {
@@ -241,7 +240,7 @@ class RoomControlsFragment : Fragment() {
 
         binding.fanSwitch.setOnClickListener {
             val isChecked = binding.fanSwitch.isChecked
-//            disableUI()
+
             if (isBTConnected) {
                 if (!isChecked) {
                     sendDataToBT("E")
@@ -520,7 +519,7 @@ class RoomControlsFragment : Fragment() {
 //        requireActivity().runOnUiThread {
         binding.connectionBtn.setImageDrawable(
             context?.let { ContextCompat.getDrawable(it, R.drawable.ic_no_network) })
-//        enableUI()
+
         binding.statusPb.visibility = View.INVISIBLE
         binding.connectionBtn.visibility = View.VISIBLE
 //        }
@@ -614,7 +613,7 @@ class RoomControlsFragment : Fragment() {
                                 context?.let {
                                     ContextCompat.getDrawable(it, R.drawable.ic_no_network)
                                 })
-//                                enableUI()
+
                             binding.statusPb.visibility = View.INVISIBLE
                             binding.connectionBtn.visibility = View.VISIBLE
                             checkBluetooth()
@@ -980,8 +979,6 @@ class RoomControlsFragment : Fragment() {
 
                 updateSwitchState(signal)
 
-//                enableUI()
-
                 togglePowerButton(
                     if (binding.switch1Switch.isChecked) ONE else ZERO,
                     if (binding.switch2Switch.isChecked) ONE else ZERO,
@@ -1054,7 +1051,6 @@ class RoomControlsFragment : Fragment() {
                         }
                     })
 
-//                enableUI()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -1135,12 +1131,9 @@ class RoomControlsFragment : Fragment() {
                 if (app1Val == ZERO && app2Val == ZERO && app3Val == ZERO && app4Val == ZERO && fan == ZERO) {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_off) })
-//                    enableUI()
-
                 } else {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
-//                    enableUI()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "togglePower: Error", e)
