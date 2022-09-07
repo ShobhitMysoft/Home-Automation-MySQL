@@ -156,11 +156,13 @@ class ScanDeviceFragment : Fragment() {
             // RESPONSE if worked
             decodeCallback = DecodeCallback {
                 requireActivity().runOnUiThread {
-                    Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
-                    binding.deviceIdEt.setText(it.toString())
-                    if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
-                    deviceId = it.toString()
-                    checkDeviceAvailability(deviceId)
+//                    Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
+                    if (it.toString().startsWith("Smartlit")) {
+                        binding.deviceIdEt.setText(it.toString())
+                        if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
+                        deviceId = it.toString()
+                        checkDeviceAvailability(deviceId)
+                    } else showToast("Device not identified")
                 }
             }
 
@@ -539,6 +541,7 @@ class ScanDeviceFragment : Fragment() {
                 loadingDialog.dismiss()
                 checkAllPermissions()
             }
+            .setNeutralButton("Cancel") { _, _ -> }
             .show()
 
     }
