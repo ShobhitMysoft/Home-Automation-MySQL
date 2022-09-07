@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sd_root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
@@ -42,9 +43,9 @@
         android:id="@+id/barcode_scanner"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        app:autoFocusButtonColor="@color/white"
+        app:autoFocusButtonColor="#FFFFFFFF"
         app:autoFocusButtonVisible="true"
-        app:flashButtonColor="@color/white"
+        app:flashButtonColor="#FFFFFFFF"
         app:flashButtonVisible="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -70,7 +71,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/raleway"
                 android:text="Camera permission not allowed!"
-                android:textColor="@color/white"
+                android:textColor="#FFFFFFFF"
                 android:textSize="@dimen/_14ssp" />
 
             <Button
@@ -88,21 +89,29 @@
 
     </FrameLayout>
 
+    <TextView
+        android:id="@+id/info_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="30dp"
+        android:text="To add a device scan the QR Code which is available on your Smartlit device or enter the device ID manually."
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/barcode_scanner" />
+
     <EditText
         android:id="@+id/device_id_et"
         style="@style/EdittextStyle"
         android:layout_marginLeft="30dp"
-        android:layout_marginTop="30dp"
         android:layout_marginRight="30dp"
         android:gravity="center"
         android:hint="Enter device ID"
         android:inputType="text"
         android:maxLength="26"
         android:maxLines="1"
-        android:text="SL1_14301302"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barcode_scanner" />
+        app:layout_constraintTop_toBottomOf="@id/info_tv" />
 
     <Button
         android:id="@+id/sd_continue_btn"

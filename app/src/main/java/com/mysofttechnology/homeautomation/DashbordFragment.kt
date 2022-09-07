@@ -45,6 +45,7 @@ class DashbordFragment : Fragment() {
     private var s2Name: String = "Switch 2"
     private var s3Name: String = "Switch 3"
     private var s4Name: String = "Switch 4"
+
     private var s6Name: String = "Switch"
     private var s1State: Int = 0
     private var s2State: Int = 0
@@ -57,6 +58,8 @@ class DashbordFragment : Fragment() {
     private var s3Icon: Int = 0
     private var s4Icon: Int = 0
     private var s6Icon: Int = 0
+
+    private var backPressedTime: Long = 0
 
     private lateinit var deviceViewModel: DeviceViewModel
     private lateinit var requestQueue: RequestQueue
@@ -73,10 +76,17 @@ class DashbordFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val exitAppDialog = ExitAppDialog()
+        val backToast = Toast.makeText(requireActivity(), "Press back again to exit the app.",
+            Toast.LENGTH_LONG)
 
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            exitAppDialog.show(childFragmentManager, "Exit App")
+            if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                backToast.cancel()
+                activity?.finish()
+            } else {
+                backToast.show()
+            }
+            backPressedTime = System.currentTimeMillis()
         }
 
         callback.isEnabled = true
@@ -105,15 +115,13 @@ class DashbordFragment : Fragment() {
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref?.getString(getString(R.string.current_user_id), "")
 
-        checkDeviceAvailability()
-
         binding.moreMenu.setOnClickListener {
             showPopupMenu(it)
         }
 
         binding.addDeviceBtn.setOnClickListener {
             Navigation.findNavController(it)
-                .navigate(R.id.action_dashbordFragment_to_scanDeviceFragment)
+                .navigate(R.id.action_dashbordFragment_to_scanQrAnimationFragment)
         }
 
         binding.updateBtn.setOnClickListener {
@@ -125,7 +133,8 @@ class DashbordFragment : Fragment() {
         try {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
         } catch (e: ActivityNotFoundException) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
+            startActivity(Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")))
         }
 //        binding.newUpdateView.visibility = View.GONE
     }
@@ -433,12 +442,16 @@ class DashbordFragment : Fragment() {
                 R.id.profile -> {
                     val action =
                         DashbordFragmentDirections.actionDashbordFragmentToProfileFragment()
-                    findNavController().navigate(action)
+                    if (findNavController().currentDestination?.id == R.id.dashbordFragment)
+                        findNavController().navigate(action)
                 }
                 R.id.rooms -> {
                     val action = DashbordFragmentDirections.actionDashbordFragmentToRoomsFragment()
-                    if (isOnline()) findNavController().navigate(action)
-                    else showToast("No Internet")
+                    if (isOnline()) {
+                        if (findNavController().currentDestination?.id == R.id.dashbordFragment)
+                            findNavController().navigate(action)
+                    }
+                    else showToast("No internet connection")
                 }
                 R.id.logout -> {
                     builder.setTitle("Logout").setMessage("Are you sure you want to logout?")
@@ -447,7 +460,8 @@ class DashbordFragment : Fragment() {
                             signOutUser()
                             val action =
                                 DashbordFragmentDirections.actionDashbordFragmentToRegistrationFragment()
-                            findNavController().navigate(action)
+                            if (findNavController().currentDestination?.id == R.id.dashbordFragment)
+                                findNavController().navigate(action)
 
                         }
                         .setNegativeButton("No") { _, _ -> }
@@ -482,6 +496,11 @@ class DashbordFragment : Fragment() {
             }
         }
         return false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkDeviceAvailability()
     }
 
     override fun onStart() {

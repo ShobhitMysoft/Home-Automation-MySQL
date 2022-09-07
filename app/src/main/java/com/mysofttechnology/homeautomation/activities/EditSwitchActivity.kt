@@ -122,7 +122,8 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
     }
 
     private fun checkData() {
-        loadingDialog.show(supportFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(supportFragmentManager, TAG)
+//        else return
         val switchName = bind.switchNameEt.text.toString()
 
         if (switchName.trim().isNotBlank()) {
@@ -228,7 +229,7 @@ class EditSwitchActivity : AppCompatActivity(), TimePickerDialog.OnTimeSetListen
     }
 
     private fun loadUIData() {
-        loadingDialog.show(supportFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(supportFragmentManager, TAG)
         val requestQueue = VolleySingleton.getInstance(this).requestQueue
         val switchListUrl = getString(R.string.base_url) + getString(R.string.url_switch_list)
 

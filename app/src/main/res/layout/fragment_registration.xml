@@ -43,8 +43,7 @@
                     android:inputType="textCapWords"
                     android:maxLines="1"
                     android:paddingHorizontal="@dimen/_14sdp"
-                    android:paddingVertical="@dimen/_12sdp"
-                    android:text="Shobhit Sagar" />
+                    android:paddingVertical="@dimen/_12sdp" />
             </soup.neumorphism.NeumorphCardView>
 
             <soup.neumorphism.NeumorphCardView
@@ -63,8 +62,7 @@
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:paddingHorizontal="@dimen/_14sdp"
-                    android:paddingVertical="@dimen/_12sdp"
-                    android:text="shobhit.mysoft@gmail.com" />
+                    android:paddingVertical="@dimen/_12sdp" />
             </soup.neumorphism.NeumorphCardView>
 
             <soup.neumorphism.NeumorphCardView
@@ -84,8 +82,7 @@
                     android:maxLength="10"
                     android:maxLines="1"
                     android:paddingHorizontal="@dimen/_14sdp"
-                    android:paddingVertical="@dimen/_12sdp"
-                    android:text="9560258881" />
+                    android:paddingVertical="@dimen/_12sdp" />
             </soup.neumorphism.NeumorphCardView>
 
             <soup.neumorphism.NeumorphCardView

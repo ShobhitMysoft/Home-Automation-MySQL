@@ -3,15 +3,22 @@ package com.mysofttechnology.homeautomation
 import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
@@ -19,6 +26,7 @@ import androidx.navigation.fragment.findNavController
 import com.android.volley.toolbox.StringRequest
 import com.budiyev.android.codescanner.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.StartActivity.Companion.BLANK
 import com.mysofttechnology.homeautomation.StartActivity.Companion.FRI
 import com.mysofttechnology.homeautomation.StartActivity.Companion.MON
@@ -47,6 +55,9 @@ class ScanDeviceFragment : Fragment() {
     private var _binding: FragmentScanDeviceBinding? = null
     private val binding get() = _binding!!
 
+    private var snackbar: Snackbar? = null
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+
     private lateinit var codeScanner: CodeScanner
     private lateinit var loadingDialog: LoadingDialog
 
@@ -70,6 +81,28 @@ class ScanDeviceFragment : Fragment() {
         sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
 
+        snackbar =
+            Snackbar.make(binding.sdRootView, "Permissions are not granted", Snackbar.LENGTH_SHORT)
+                .setAction("SETTINGS") {
+                    startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:" + BuildConfig.APPLICATION_ID)))
+                }
+                .setAnchorView(binding.sdContinueBtn)
+
+
+        permissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val granted = permissions.entries.all {
+                it.value == true
+            }
+
+            if (granted) {
+                val action = ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+                if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
+                    Navigation.findNavController(requireView()).navigate(action)
+            } else snackbar?.show()
+        }
+
         checkCameraPermission()
         codeScanner()
 
@@ -87,7 +120,7 @@ class ScanDeviceFragment : Fragment() {
             binding.sdContinueBtn.isEnabled = false
             deviceId = binding.deviceIdEt.text.toString()
             if (deviceId.isNotEmpty()) {
-                loadingDialog.show(childFragmentManager, TAG)
+                if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                 checkDeviceAvailability(deviceId)
             } else {
                 Toast.makeText(
@@ -125,7 +158,7 @@ class ScanDeviceFragment : Fragment() {
                 requireActivity().runOnUiThread {
                     Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
                     binding.deviceIdEt.setText(it.toString())
-                    loadingDialog.show(childFragmentManager, TAG)
+                    if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                     deviceId = it.toString()
                     checkDeviceAvailability(deviceId)
                 }
@@ -162,13 +195,13 @@ class ScanDeviceFragment : Fragment() {
                             showToast("Device already exists")
                             gotoConnectDevice()
                         } else {
-                            showToast("New device")
+//                            showToast("New device")
                             checkChild(deviceId)
                         }
                         Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        showToast("New device")
+//                        showToast("New device")
                         checkChild(deviceId)
                         Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                     }
@@ -217,13 +250,13 @@ class ScanDeviceFragment : Fragment() {
                             binding.sdContinueBtn.isEnabled = true
                             showOtpVerificationDialog(deviceId)
                         } else {
-                            showToast("New User")
+//                            showToast("New User")
                             addDevice(deviceId)
                         }
                         Log.d(TAG, "checkChild: Message - $msg")
                     } else {
                         loadingDialog.dismiss()
-                        showToast("New User")
+//                        showToast("New User")
                         addDevice(deviceId)
                         Log.d(TAG, "checkChild: Message - $msg")
                     }
@@ -304,7 +337,7 @@ class ScanDeviceFragment : Fragment() {
         val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val getOtpUrl = getString(R.string.base_url) + getString(R.string.url_get_otp)
 
-        loadingDialog.show(childFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
 
         val getOtpRequest = object : StringRequest(Method.POST, getOtpUrl,
             { response ->
@@ -486,6 +519,7 @@ class ScanDeviceFragment : Fragment() {
     }
 
     private fun gotoConnectDevice() {
+        binding.sdContinueBtn.isEnabled = true
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Is device online?")
             .setMessage("You can Skip if  the device is online but if this is your first time setting up the device you must add wifi detail. Do you want to add wifi details?")
@@ -493,17 +527,54 @@ class ScanDeviceFragment : Fragment() {
             .setNegativeButton("Skip") { _, _ ->
                 val action =
                     ScanDeviceFragmentDirections.actionScanDeviceFragmentToDashbordFragment()
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
+                    findNavController().navigate(action)
                 loadingDialog.dismiss()
             }
             .setPositiveButton("Ok") { _, _ ->
-                val action =
-                    ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
-                findNavController().navigate(action)
+//                val action =
+//                    ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+//                if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
+//                    findNavController().navigate(action)
                 loadingDialog.dismiss()
+                checkAllPermissions()
             }
             .show()
 
+    }
+
+    private fun checkAllPermissions() {
+        val permReqList: MutableList<String> = arrayListOf()
+
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        )
+            permReqList.add(Manifest.permission.ACCESS_FINE_LOCATION)
+
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        )
+            permReqList.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED
+            )
+                permReqList.add(Manifest.permission.BLUETOOTH_SCAN)
+
+            if (ContextCompat.checkSelfPermission(requireContext(),
+                    Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
+            )
+                permReqList.add(Manifest.permission.BLUETOOTH_CONNECT)
+        }
+
+        if (permReqList.isNotEmpty()) {
+            permissionLauncher.launch(permReqList.toTypedArray())
+        } else {
+            val action = ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+            if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
+                Navigation.findNavController(requireView()).navigate(action)
+        }
     }
 
     private val activityResultLauncher = registerForActivityResult(
@@ -514,8 +585,8 @@ class ScanDeviceFragment : Fragment() {
             binding.barcodeScanner.visibility = View.VISIBLE
             binding.permNotAllowedLayout.visibility = View.GONE
         } else {
-            Toast.makeText(requireActivity(), "Camera permission not granted!", Toast.LENGTH_SHORT)
-                .show()
+//            Toast.makeText(requireActivity(), "Camera permission not granted!", Toast.LENGTH_SHORT)
+            snackbar?.show()
             binding.permNotAllowedLayout.visibility = View.VISIBLE
         }
     }
@@ -533,5 +604,6 @@ class ScanDeviceFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        snackbar?.dismiss()
     }
 }

@@ -3,7 +3,10 @@ package com.mysofttechnology.homeautomation
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothSocket
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.wifi.WifiManager
@@ -22,7 +25,6 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.android.volley.RequestQueue
@@ -74,14 +76,14 @@ class FillWifiDetailFragment : Fragment() {
                     wifiManager!!.disconnect()
                 }
             }
-            Navigation.findNavController(requireView())
-                .navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
+
+//            findNavController().navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
 //            val action =
 //                FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
 //            findNavController().navigate(action)
         }
 
-        callback.isEnabled = true
+        callback.isEnabled = false
 
         arguments?.let {
             btDevice = it.getString("btDevice").toString()
@@ -105,7 +107,7 @@ class FillWifiDetailFragment : Fragment() {
 
         loadingDialog = LoadingDialog()
         loadingDialog.isCancelable = false
-        loadingDialog.show(parentFragmentManager, TAG)
+        if (!loadingDialog.isAdded) loadingDialog.show(parentFragmentManager, TAG)
 
         requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
 
@@ -116,12 +118,12 @@ class FillWifiDetailFragment : Fragment() {
         bind.backBtn.setOnClickListener {
             bind.backBtn.isEnabled = false
             Navigation.findNavController(it)
-                .navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+                .navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
         }
 
         bind.wifiLv.setOnItemClickListener { _, _, pos, _ ->
             ssid = wifiSSIDList[pos]
-            Toast.makeText(requireActivity(), ssid, Toast.LENGTH_SHORT).show()
+
             if (btSocket != null && btSocket!!.isConnected) {
                 sendSSIDToDevice()
                 showWifiPasswordDialog()
@@ -198,10 +200,10 @@ class FillWifiDetailFragment : Fragment() {
                 ) {
                     checkSettings()
                 } else {
-                    Toast.makeText(requireActivity(), "Location permission denied.",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireActivity(), "Location permission not granted.",
+                        Toast.LENGTH_LONG).show()
                     Navigation.findNavController(requireView())
-                        .navigate(R.id.action_fillWifiDetailFragment_to_connectDeviceFragment)
+                        .navigate(R.id.action_fillWifiDetailFragment_to_roomsFragment)
 //                    val action =
 //                        FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToConnectDeviceFragment()
 //                    findNavController().navigate(action)
@@ -281,48 +283,48 @@ class FillWifiDetailFragment : Fragment() {
     }
 
     private fun updateLive(value: String, appl: String) {
-            val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
+        val liveUpdateUrl = getString(R.string.base_url) + getString(R.string.url_live_update)
 
-            val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
-                { response ->
-                    Log.i(TAG, "updateUI: $response")
-                    try {
-                        val mData = JSONObject(response.toString())
-                        val resp = mData.get("response") as Int
-                        val msg = mData.get("msg")
+        val liveUpdateRequest = object : StringRequest(Method.POST, liveUpdateUrl,
+            { response ->
+                Log.i(TAG, "updateUI: $response")
+                try {
+                    val mData = JSONObject(response.toString())
+                    val resp = mData.get("response") as Int
+                    val msg = mData.get("msg")
 
-                        if (resp == 1) {
+                    if (resp == 1) {
 //                            showToast("0 sent!")
-                            Handler(Looper.getMainLooper()).postDelayed({
+                        Handler(Looper.getMainLooper()).postDelayed({
 //                                showToast("Handler called")
-                                verifyWifi()
-                            }, 15000)
-                            Log.d(TAG, "updateLive: Message - $msg")
-                        } else {
+                            verifyWifi()
+                        }, 15000)
+                        Log.d(TAG, "updateLive: Message - $msg")
+                    } else {
 
-                            Log.e(TAG, "updateLive: Message - $msg")
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Exception in updateLive: $e")
+                        Log.e(TAG, "updateLive: Message - $msg")
                     }
-                }, {
-                    Log.e(TAG, "VollyError: ${it.message}")
-                }) {
-                override fun getParams(): Map<String, String> {
-                    val params = HashMap<String, String>()
-                    params["device_id"] = deviceId
-                    params["appliance"] = appl
-                    params["data"] = value
-                    return params
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception in updateLive: $e")
                 }
-
-                override fun getHeaders(): MutableMap<String, String> {
-                    val params = HashMap<String, String>()
-                    params["Content-Type"] = "application/x-www-form-urlencoded"
-                    return params
-                }
+            }, {
+                Log.e(TAG, "VollyError: ${it.message}")
+            }) {
+            override fun getParams(): Map<String, String> {
+                val params = HashMap<String, String>()
+                params["device_id"] = deviceId
+                params["appliance"] = appl
+                params["data"] = value
+                return params
             }
-            requestQueue.add(liveUpdateRequest)
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val params = HashMap<String, String>()
+                params["Content-Type"] = "application/x-www-form-urlencoded"
+                return params
+            }
+        }
+        requestQueue.add(liveUpdateRequest)
     }
 
     private fun verifyWifi() {
@@ -336,9 +338,16 @@ class FillWifiDetailFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-//                        showToast("Received 1")
-                        if (mData.get("wifi") == "1") startActivity(Intent(requireContext(), WorkDoneActivity::class.java))
-                        else btSocket = null
+
+                        Log.d(TAG, "verifyWifi: wifi = ${mData.get("wifi")}")
+
+                        if (mData.get("wifi") == "1") startActivity(
+                            Intent(requireContext(), WorkDoneActivity::class.java))
+                        else {
+                            btSocket = null
+                            findNavController().navigate(
+                                R.id.action_fillWifiDetailFragment_to_roomsFragment)
+                        }
 
                         Log.d(TAG, "verifyWifi: Message - $msg")
                     } else {
@@ -429,25 +438,22 @@ class FillWifiDetailFragment : Fragment() {
 
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
         try {
-            Log.i(TAG, "connectToBtDevice: Trying to connect socket.")
             btSocket!!.connect()
             requireActivity().runOnUiThread {
                 waitDialog.dismiss()
                 sendSSIDToDevice()
                 showWifiPasswordDialog()
             }
-            Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
         } catch (e: Exception) {
             requireActivity().runOnUiThread {
-                showToast("Failed to connect")
+
                 waitDialog.dismiss()
                 Snackbar.make(bind.fwRootView,
                     "Timeout! Make sure you are close to the ${
                         getString(R.string.app_name)
                     } device.",
                     Snackbar.LENGTH_LONG).setAnchorView(bind.refreshFab).show()
-                Log.e(TAG, "connectToBtDevice: Socket Connect Error : ", e)
-                Log.d(TAG, "connectToBtDevice: Connected = ${btSocket?.isConnected}")
+
                 closeSocket()
             }
         }
@@ -525,7 +531,8 @@ class FillWifiDetailFragment : Fragment() {
             .setNeutralButton("Cancel") { _, _ ->
                 val action =
                     FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToRoomsFragment()
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.fillWifiDetailFragment)
+                    findNavController().navigate(action)
             }
             .setPositiveButton("Ok") { _, _ ->
                 checkSettings()
@@ -541,7 +548,8 @@ class FillWifiDetailFragment : Fragment() {
             .setNeutralButton("Cancel") { _, _ ->
                 val action =
                     FillWifiDetailFragmentDirections.actionFillWifiDetailFragmentToRoomsFragment()
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.fillWifiDetailFragment)
+                    findNavController().navigate(action)
             }
             .setPositiveButton("Ok") { _, _ ->
                 checkSettings()
@@ -559,6 +567,7 @@ class FillWifiDetailFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         closeSocket()
+        snackbar?.dismiss()
     }
 
     /*private fun retryDialog() {
