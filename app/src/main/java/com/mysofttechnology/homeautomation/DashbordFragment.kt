@@ -25,6 +25,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.intuit.sdp.BuildConfig
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
 import com.mysofttechnology.homeautomation.StartActivity.Companion.SWITCH
 import com.mysofttechnology.homeautomation.database.Device
@@ -510,6 +511,7 @@ class DashbordFragment : Fragment() {
     private fun showFabPrompt() {
         MaterialTapTargetPrompt.Builder(requireActivity())
             .setTarget(binding.moreMenu)
+//            .setBackgroundColour(R.color.colorAccent)
 //            .setPrimaryText("NEXT")
             .setSecondaryText("More options to refresh the data, view profile, view all of your room and logout from your account.")
             .setBackButtonDismissEnabled(false)

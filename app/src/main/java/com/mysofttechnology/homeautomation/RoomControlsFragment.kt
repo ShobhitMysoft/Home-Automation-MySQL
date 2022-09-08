@@ -1,9 +1,11 @@
 package com.mysofttechnology.homeautomation
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.*
+import android.content.pm.PackageManager
 import android.content.res.TypedArray
 import android.graphics.Typeface
 import android.net.ConnectivityManager
@@ -18,6 +20,7 @@ import android.view.ViewGroup
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -62,6 +65,8 @@ import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONArray
 import org.json.JSONObject
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
+import uk.co.samuelwall.materialtaptargetprompt.extras.focals.RectanglePromptFocal
 import java.io.IOException
 import java.io.OutputStream
 import java.util.*
@@ -76,6 +81,7 @@ private const val MQTT_SWITCH6: String = "switch6"
 
 class RoomControlsFragment : Fragment() {
 
+    private var checkedFabPrompt: Boolean = true
     private var backPressedTime: Long = 0
     private var ssidOutputStream: OutputStream? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
@@ -465,6 +471,18 @@ class RoomControlsFragment : Fragment() {
         // TODO: Bluetooth id is not found(not paired)
 
         closeSocket()
+        if (ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
 
         try {
@@ -887,31 +905,31 @@ class RoomControlsFragment : Fragment() {
         switchStopTime.text = stopTime
 
         if (switch.getString(SUN) == ONE) {
-            sunTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
+            sunTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
             sunTv.typeface = Typeface.DEFAULT_BOLD
         }
         if (switch.getString(MON) == ONE) {
-            monTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
+            monTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
             monTv.typeface = Typeface.DEFAULT_BOLD
         }
         if (switch.getString(TUE) == ONE) {
-            tueTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
+            tueTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
             tueTv.typeface = Typeface.DEFAULT_BOLD
         }
         if (switch.getString(WED) == ONE) {
-            wedTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
+            wedTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
             wedTv.typeface = Typeface.DEFAULT_BOLD
         }
         if (switch.getString(THU) == ONE) {
-            thuTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
+            thuTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
             thuTv.typeface = Typeface.DEFAULT_BOLD
         }
         if (switch.getString(FRI) == ONE) {
-            friTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
+            friTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
             friTv.typeface = Typeface.DEFAULT_BOLD
         }
         if (switch.getString(SAT) == ONE) {
-            satTv.setTextColor(ContextCompat.getColor(context!!, R.color.colorAccent))
+            satTv.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent))
             satTv.typeface = Typeface.DEFAULT_BOLD
         }
 
@@ -1135,10 +1153,52 @@ class RoomControlsFragment : Fragment() {
                     binding.powerBtn.setImageDrawable(
                         context?.let { ContextCompat.getDrawable(it, R.drawable.ic_power_btn_on) })
                 }
+
+                if (checkedFabPrompt) {
+                    checkedFabPrompt = false
+                    checkFabPrompt()
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "togglePower: Error", e)
             }
         }
+    }
+
+    private fun checkFabPrompt() {
+        val isRoomControlsFabPromptShown = sharedPref?.getBoolean(getString(R.string.isRoomControlsFabPromptShown), false)
+        if (isRoomControlsFabPromptShown == true) showFabPrompt()
+    }
+
+    private fun showFabPrompt() {
+        MaterialTapTargetPrompt.Builder(requireActivity())
+            .setTarget(binding.currentRoomTv)
+//            .setBackgroundColour(R.color.black)
+//            .setPrimaryText("NEXT")
+            .setSecondaryText("Tap here to view and change rooms.")
+            .setBackButtonDismissEnabled(false)
+            .setPromptFocal(RectanglePromptFocal())
+            .setPromptStateChangeListener { _, state ->
+                if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED || state == MaterialTapTargetPrompt.STATE_NON_FOCAL_PRESSED)
+                MaterialTapTargetPrompt.Builder(requireActivity())
+                    .setTarget(binding.connectionBtn)
+//                    .setBackgroundColour(R.color.black)
+                    .setSecondaryText("This button will show the connection status. You can also click this button to refresh the current rooms data.")
+                    .setBackButtonDismissEnabled(false)
+                    .setPromptStateChangeListener { _, state ->
+                        if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED || state == MaterialTapTargetPrompt.STATE_NON_FOCAL_PRESSED)
+                        MaterialTapTargetPrompt.Builder(requireActivity())
+                            .setTarget(binding.powerBtn)
+//                            .setBackgroundColour(R.color.black)
+                            .setSecondaryText("This button shows the status of the room. If any switch is ON, it will show active state otherwise inactive state. You can also click this button to swich ON/OFF all the switches(appliances) of the current room.")
+                            .setBackButtonDismissEnabled(false)
+                            .setPromptStateChangeListener { _, _ ->
+                                sharedPref?.edit()?.putBoolean(getString(R.string.isRoomControlsFabPromptShown), true)?.apply()
+                            }
+                            .show()
+                    }
+                    .show()
+            }
+            .show()
     }
 
     private fun togglePowerState() {
@@ -1244,6 +1304,10 @@ class RoomControlsFragment : Fragment() {
         popup.show()
     }
 
+    private fun showSToast(message: String? = "Message") {
+        if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
+    }
+
     private fun isOnline(): Boolean {
         if (context != null) {
             val connectivityManager =
@@ -1268,10 +1332,6 @@ class RoomControlsFragment : Fragment() {
 
     private fun showLToast(message: String? = "Message") {
         if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
-    }
-
-    private fun showSToast(message: String? = "Message") {
-        if (isAdded) Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
     }
 
     private fun showPSnackbar(msg: String = "Something went wrong.") {
