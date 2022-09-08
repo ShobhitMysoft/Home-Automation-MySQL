@@ -85,4 +85,5 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.github.hannesa2:paho.mqtt.android:3.3.5'
 
+    implementation 'uk.co.samuelwall:material-tap-target-prompt:3.3.2'
 }
