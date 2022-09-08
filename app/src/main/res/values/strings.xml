@@ -111,4 +111,5 @@
     <string name="isDashboardFabPromptShown">isDashboardFabPromptShown</string>
     <string name="isRoomControlsFabPromptShown">isRoomControlsFabPromptShown</string>
     <string name="isProfileFabPromptShown">isProfileFabPromptShown</string>
+    <string name="isRoomsFabPromptShown">isRoomsFabPromptShown</string>
 </resources>
