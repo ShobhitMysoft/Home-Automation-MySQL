@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.TypedArray
+import android.graphics.Color
 import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.net.Network
@@ -1172,7 +1173,7 @@ class RoomControlsFragment : Fragment() {
     private fun showFabPrompt() {
         MaterialTapTargetPrompt.Builder(requireActivity())
             .setTarget(binding.currentRoomTv)
-//            .setBackgroundColour(R.color.black)
+            .setBackgroundColour(Color.DKGRAY)
 //            .setPrimaryText("NEXT")
             .setSecondaryText("Tap here to view and change rooms.")
             .setBackButtonDismissEnabled(false)
@@ -1181,14 +1182,14 @@ class RoomControlsFragment : Fragment() {
                 if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED || state == MaterialTapTargetPrompt.STATE_NON_FOCAL_PRESSED)
                 MaterialTapTargetPrompt.Builder(requireActivity())
                     .setTarget(binding.connectionBtn)
-//                    .setBackgroundColour(R.color.black)
+                    .setBackgroundColour(Color.DKGRAY)
                     .setSecondaryText("This button will show the connection status. You can also click this button to refresh the current rooms data.")
                     .setBackButtonDismissEnabled(false)
                     .setPromptStateChangeListener { _, state ->
                         if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED || state == MaterialTapTargetPrompt.STATE_NON_FOCAL_PRESSED)
                         MaterialTapTargetPrompt.Builder(requireActivity())
                             .setTarget(binding.powerBtn)
-//                            .setBackgroundColour(R.color.black)
+                            .setBackgroundColour(Color.DKGRAY)
                             .setSecondaryText("This button shows the status of the room. If any switch is ON, it will show active state otherwise inactive state. You can also click this button to swich ON/OFF all the switches(appliances) of the current room.")
                             .setBackButtonDismissEnabled(false)
                             .setPromptStateChangeListener { _, _ ->

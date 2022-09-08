@@ -3,6 +3,7 @@ package com.mysofttechnology.homeautomation
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -232,7 +233,7 @@ class ProfileFragment : Fragment() {
     private fun showFabPrompt() {
         MaterialTapTargetPrompt.Builder(requireActivity())
             .setTarget(bind.editProfileFab)
-//            .setBackgroundColour(R.color.colorAccent)
+            .setBackgroundColour(Color.DKGRAY)
 //            .setPrimaryText("NEXT")
             .setSecondaryText("You can edit your profile by clicking this button.")
             .setBackButtonDismissEnabled(false)

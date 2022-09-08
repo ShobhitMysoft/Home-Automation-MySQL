@@ -2,6 +2,7 @@ package com.mysofttechnology.homeautomation
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -140,7 +141,7 @@ class RoomsFragment : Fragment() {
     private fun showFabPrompt() {
         MaterialTapTargetPrompt.Builder(requireActivity())
             .setTarget(bind.addRoomFab)
-//            .setBackgroundColour(R.color.colorAccent)
+            .setBackgroundColour(Color.DKGRAY)
 //            .setPrimaryText("NEXT")
             .setSecondaryText("You can add new room by clicking this button.")
             .setBackButtonDismissEnabled(false)

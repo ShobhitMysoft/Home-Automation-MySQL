@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -452,8 +453,7 @@ class DashbordFragment : Fragment() {
                     if (isOnline()) {
                         if (findNavController().currentDestination?.id == R.id.dashbordFragment)
                             findNavController().navigate(action)
-                    }
-                    else showToast("No internet connection")
+                    } else showToast("No internet connection")
                 }
                 R.id.logout -> {
                     builder.setTitle("Logout").setMessage("Are you sure you want to logout?")
@@ -503,24 +503,31 @@ class DashbordFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        val isDashboardFabPromptShown = sharedPref?.getBoolean(getString(R.string.isDashboardFabPromptShown), false)
-        if (isDashboardFabPromptShown == true) checkDeviceAvailability()
-        else showFabPrompt()
+        checkDeviceAvailability()
+
+        /*val isDashboardFabPromptShown =
+            sharedPref?.getBoolean(getString(R.string.isDashboardFabPromptShown), false)
+        if (isDashboardFabPromptShown == false) checkDeviceAvailability()
+        else showFabPrompt()*/
     }
 
-    private fun showFabPrompt() {
+    /*private fun showFabPrompt() {
         MaterialTapTargetPrompt.Builder(requireActivity())
             .setTarget(binding.moreMenu)
-//            .setBackgroundColour(R.color.colorAccent)
+            .setBackgroundColour(Color.DKGRAY)
 //            .setPrimaryText("NEXT")
-            .setSecondaryText("More options to refresh the data, view profile, view all of your room and logout from your account.")
+            .setSecondaryText(
+                "More options to refresh the data, view profile, view all of your rooms and logout from your account.")
             .setBackButtonDismissEnabled(false)
-            .setPromptStateChangeListener { _, _ ->
-                sharedPref?.edit()?.putBoolean(getString(R.string.isDashboardFabPromptShown), true)?.apply()
-                checkDeviceAvailability()
+            .setPromptStateChangeListener { _, state ->
+                if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED || state == MaterialTapTargetPrompt.STATE_NON_FOCAL_PRESSED) {
+                    sharedPref?.edit()?.putBoolean(getString(R.string.isDashboardFabPromptShown), true)
+                        ?.apply()
+                    checkDeviceAvailability()
+                }
             }
             .show()
-    }
+    }*/
 
     override fun onStart() {
         super.onStart()
