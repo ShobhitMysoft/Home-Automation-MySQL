@@ -33,6 +33,7 @@ import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONArray
 import org.json.JSONObject
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
 import kotlin.collections.set
 
 private const val TAG = "DashbordFragment"
@@ -500,7 +501,23 @@ class DashbordFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        checkDeviceAvailability()
+
+        val isDashboardFabPromptShown = sharedPref?.getBoolean(getString(R.string.isDashboardFabPromptShown), false)
+        if (isDashboardFabPromptShown == true) checkDeviceAvailability()
+        else showFabPrompt()
+    }
+
+    private fun showFabPrompt() {
+        MaterialTapTargetPrompt.Builder(requireActivity())
+            .setTarget(binding.moreMenu)
+//            .setPrimaryText("NEXT")
+            .setSecondaryText("More options to refresh the data, view profile, view all of your room and logout from your account.")
+            .setBackButtonDismissEnabled(false)
+            .setPromptStateChangeListener { _, _ ->
+                sharedPref?.edit()?.putBoolean(getString(R.string.isDashboardFabPromptShown), true)?.apply()
+                checkDeviceAvailability()
+            }
+            .show()
     }
 
     override fun onStart() {
