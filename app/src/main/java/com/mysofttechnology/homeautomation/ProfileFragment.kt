@@ -19,6 +19,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.databinding.FragmentProfileBinding
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONObject
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
 
 private const val TAG = "ProfileFragment"
 
@@ -74,6 +75,10 @@ class ProfileFragment : Fragment() {
         bind.phoneNumber.text = currentUserId
 
         if (currentUserName.isNullOrBlank() || currentUserEmail.isNullOrBlank()) loadProfile()
+
+        if (sharedPref?.getBoolean(getString(R.string.isProfileFabPromptShown),
+                false) == false
+        ) showFabPrompt()
     }
 
     private fun loadProfile() {
@@ -222,6 +227,20 @@ class ProfileFragment : Fragment() {
             }
         }
         requestQueue.add(roomUpdateRequest)
+    }
+
+    private fun showFabPrompt() {
+        MaterialTapTargetPrompt.Builder(requireActivity())
+            .setTarget(bind.editProfileFab)
+//            .setBackgroundColour(R.color.colorAccent)
+//            .setPrimaryText("NEXT")
+            .setSecondaryText("You can edit your profile by clicking this button.")
+            .setBackButtonDismissEnabled(false)
+            .setPromptStateChangeListener { _, _ ->
+                sharedPref?.edit()?.putBoolean(getString(R.string.isProfileFabPromptShown), true)
+                    ?.apply()
+            }
+            .show()
     }
 
     private fun isOnline(): Boolean {

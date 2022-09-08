@@ -1166,7 +1166,7 @@ class RoomControlsFragment : Fragment() {
 
     private fun checkFabPrompt() {
         val isRoomControlsFabPromptShown = sharedPref?.getBoolean(getString(R.string.isRoomControlsFabPromptShown), false)
-        if (isRoomControlsFabPromptShown == true) showFabPrompt()
+        if (isRoomControlsFabPromptShown == false) showFabPrompt()
     }
 
     private fun showFabPrompt() {
