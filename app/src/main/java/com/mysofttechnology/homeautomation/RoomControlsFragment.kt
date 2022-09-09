@@ -462,9 +462,9 @@ class RoomControlsFragment : Fragment() {
 
         closeSocket()
         if (ActivityCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-        )
-        btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
+                Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        ) btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
+        else showSToast("Bluetooth permission not allowed")
 
         try {
             btSocket!!.connect()
