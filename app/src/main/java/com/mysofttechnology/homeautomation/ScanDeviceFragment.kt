@@ -61,6 +61,8 @@ class ScanDeviceFragment : Fragment() {
     private lateinit var codeScanner: CodeScanner
     private lateinit var loadingDialog: LoadingDialog
 
+    private val mRegexPattern = "^Smartlit[15]_\\d{5,}".toRegex()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loadingDialog = LoadingDialog()
@@ -97,7 +99,9 @@ class ScanDeviceFragment : Fragment() {
             }
 
             if (granted) {
-                val action = ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+                val action =
+                    ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(
+                        deviceId)
                 if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
                     Navigation.findNavController(requireView()).navigate(action)
             } else snackbar?.show()
@@ -119,7 +123,8 @@ class ScanDeviceFragment : Fragment() {
         binding.sdContinueBtn.setOnClickListener {
             binding.sdContinueBtn.isEnabled = false
             deviceId = binding.deviceIdEt.text.toString()
-            if (deviceId.isNotEmpty()) {
+            if (deviceId.isNotEmpty() && mRegexPattern.containsMatchIn(deviceId)
+            ) {
                 if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                 checkDeviceAvailability(deviceId)
             } else {
@@ -138,42 +143,40 @@ class ScanDeviceFragment : Fragment() {
     }
 
     private fun codeScanner() {
-//        val scannerView = bind.barcodeScanner
         codeScanner = CodeScanner(requireActivity(), binding.barcodeScanner)
 
         codeScanner.apply {
             camera = CodeScanner.CAMERA_BACK
-            formats =
-                CodeScanner.ALL_FORMATS       // Or can specify for other formats like 1-D and 2-D
+            formats = CodeScanner.ALL_FORMATS
 
             autoFocusMode = AutoFocusMode.SAFE
-            scanMode =
-                ScanMode.SINGLE          // The scanner will keen scanning continuously by itself and If set to "SINGLE" you will have to keep pressing to scan the code
+            scanMode = ScanMode.SINGLE
             isAutoFocusEnabled = false
-            isFlashEnabled =
-                false                  // Flash is disabled in start, user will click to start it
+            isFlashEnabled = false
 
             // RESPONSE if worked
             decodeCallback = DecodeCallback {
                 requireActivity().runOnUiThread {
-//                    Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
-                    if (it.toString().startsWith("Smartlit")) {
+                    if (mRegexPattern.containsMatchIn(
+                            it.toString())
+                    ) {
                         binding.deviceIdEt.setText(it.toString())
                         if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                         deviceId = it.toString()
                         checkDeviceAvailability(deviceId)
-                    } else showToast("Device not identified")
+                    } else {
+                        showToast("Device not identified")
+                        codeScanner.startPreview()
+                    }
                 }
             }
 
-            // Error Response
             errorCallback = ErrorCallback {
                 requireActivity().runOnUiThread {
                     Log.d(TAG, "Camera Initialisation Error: ${it.message}")
                 }
             }
 
-            // To tell the program to start scanning the QR Code
             binding.barcodeScanner.setOnClickListener {
                 codeScanner.startPreview()
             }
@@ -419,7 +422,7 @@ class ScanDeviceFragment : Fragment() {
 
                     if (resp == 1) {
                         if (deviceId.elementAt(2).toString() == "1") createSwitch(deviceId, 6)
-                         else {
+                        else {
                             for (i in 1..5) createSwitch(deviceId, i)
                         }
                         Log.d(TAG, "addDevice: Message - $msg")
@@ -524,7 +527,8 @@ class ScanDeviceFragment : Fragment() {
         binding.sdContinueBtn.isEnabled = true
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Is device online?")
-            .setMessage("You can Skip if  the device is online but if this is your first time setting up the device you must add wifi detail. Do you want to add wifi details?")
+            .setMessage(
+                "You can Skip if  the device is online but if this is your first time setting up the device you must add wifi detail. Do you want to add wifi details?")
             .setCancelable(false)
             .setNegativeButton("Skip") { _, _ ->
                 val action =
@@ -541,7 +545,7 @@ class ScanDeviceFragment : Fragment() {
                 loadingDialog.dismiss()
                 checkAllPermissions()
             }
-            .setNeutralButton("Cancel") { _, _ -> }
+//            .setNeutralButton("Cancel") { _, _ -> }
             .show()
 
     }
@@ -574,7 +578,9 @@ class ScanDeviceFragment : Fragment() {
         if (permReqList.isNotEmpty()) {
             permissionLauncher.launch(permReqList.toTypedArray())
         } else {
-            val action = ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+            val action =
+                ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(
+                    deviceId)
             if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
                 Navigation.findNavController(requireView()).navigate(action)
         }

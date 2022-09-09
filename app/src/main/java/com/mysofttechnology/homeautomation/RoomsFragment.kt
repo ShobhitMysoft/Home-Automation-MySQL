@@ -2,6 +2,7 @@ package com.mysofttechnology.homeautomation
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -14,14 +15,13 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.toolbox.StringRequest
-import com.google.android.material.snackbar.Snackbar
 import com.mysofttechnology.homeautomation.adapters.RoomsRecyclerAdapter
 import com.mysofttechnology.homeautomation.databinding.FragmentRoomsBinding
 import com.mysofttechnology.homeautomation.models.RoomsViewModel
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.*
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
 
 private const val TAG = "RoomsFragment"
 
@@ -68,6 +68,10 @@ class RoomsFragment : Fragment() {
         }
 
         bind.roomRecyclerview.adapter = roomAdapter
+
+        if (sharedPref?.getBoolean(getString(R.string.isRoomsFabPromptShown),
+                false) == false
+        ) showFabPrompt()
     }
 
     private fun roomsData(): MutableList<RoomsViewModel> {
@@ -132,6 +136,20 @@ class RoomsFragment : Fragment() {
 //            showLSnackbar("No internet")
         }
         return roomsData
+    }
+
+    private fun showFabPrompt() {
+        MaterialTapTargetPrompt.Builder(requireActivity())
+            .setTarget(bind.addRoomFab)
+            .setBackgroundColour(Color.DKGRAY)
+//            .setPrimaryText("NEXT")
+            .setSecondaryText("You can add new room by clicking this button.")
+            .setBackButtonDismissEnabled(false)
+            .setPromptStateChangeListener { _, _ ->
+                sharedPref?.edit()?.putBoolean(getString(R.string.isRoomsFabPromptShown), true)
+                    ?.apply()
+            }
+            .show()
     }
 
     private fun showToast(message: String?) {

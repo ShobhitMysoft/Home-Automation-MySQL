@@ -6,16 +6,17 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.android.volley.toolbox.StringRequest
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONObject
 
 private const val TAG = "AddDeviceFragment"
+
 class AddDeviceFragment : Fragment() {
 
     private var sharedPref: SharedPreferences? = null
@@ -38,7 +39,7 @@ class AddDeviceFragment : Fragment() {
     private fun checkDeviceAvailability() {
         if (isOnline()) {
             val requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
-            val url = getString(R.string.base_url)+getString(R.string.url_room_list)
+            val url = getString(R.string.base_url) + getString(R.string.url_room_list)
 
             val stringRequest = object : StringRequest(Method.POST, url,
                 { response ->
@@ -48,7 +49,8 @@ class AddDeviceFragment : Fragment() {
                         val msg = mData.get("msg")
 
                         if (resp == 1) {
-                            Navigation.findNavController(requireView()).navigate(R.id.action_addDeviceFragment_to_roomControlsFragment)
+                            Navigation.findNavController(requireView())
+                                .navigate(R.id.action_addDeviceFragment_to_roomControlsFragment)
                             Log.d(TAG, "checkDeviceAvailability: Message - $msg")
                         }
                     } catch (e: Exception) {
@@ -95,7 +97,11 @@ class AddDeviceFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        
+
         checkDeviceAvailability()
+
+        /*val isDashboardFabPromptShown =
+            sharedPref?.getBoolean(getString(R.string.isDashboardFabPromptShown), false)
+        if (isDashboardFabPromptShown == true) checkDeviceAvailability()*/
     }
 }

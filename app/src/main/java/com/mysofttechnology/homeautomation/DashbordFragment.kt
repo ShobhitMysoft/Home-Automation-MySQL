@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -25,6 +26,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.intuit.sdp.BuildConfig
 import com.mysofttechnology.homeautomation.StartActivity.Companion.ICON
 import com.mysofttechnology.homeautomation.StartActivity.Companion.SWITCH
 import com.mysofttechnology.homeautomation.database.Device
@@ -33,6 +35,7 @@ import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
 import org.json.JSONArray
 import org.json.JSONObject
+import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
 import kotlin.collections.set
 
 private const val TAG = "DashbordFragment"
@@ -450,8 +453,7 @@ class DashbordFragment : Fragment() {
                     if (isOnline()) {
                         if (findNavController().currentDestination?.id == R.id.dashbordFragment)
                             findNavController().navigate(action)
-                    }
-                    else showToast("No internet connection")
+                    } else showToast("No internet connection")
                 }
                 R.id.logout -> {
                     builder.setTitle("Logout").setMessage("Are you sure you want to logout?")
@@ -500,8 +502,32 @@ class DashbordFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
         checkDeviceAvailability()
+
+        /*val isDashboardFabPromptShown =
+            sharedPref?.getBoolean(getString(R.string.isDashboardFabPromptShown), false)
+        if (isDashboardFabPromptShown == false) checkDeviceAvailability()
+        else showFabPrompt()*/
     }
+
+    /*private fun showFabPrompt() {
+        MaterialTapTargetPrompt.Builder(requireActivity())
+            .setTarget(binding.moreMenu)
+            .setBackgroundColour(Color.DKGRAY)
+//            .setPrimaryText("NEXT")
+            .setSecondaryText(
+                "More options to refresh the data, view profile, view all of your rooms and logout from your account.")
+            .setBackButtonDismissEnabled(false)
+            .setPromptStateChangeListener { _, state ->
+                if (state == MaterialTapTargetPrompt.STATE_FOCAL_PRESSED || state == MaterialTapTargetPrompt.STATE_NON_FOCAL_PRESSED) {
+                    sharedPref?.edit()?.putBoolean(getString(R.string.isDashboardFabPromptShown), true)
+                        ?.apply()
+                    checkDeviceAvailability()
+                }
+            }
+            .show()
+    }*/
 
     override fun onStart() {
         super.onStart()
