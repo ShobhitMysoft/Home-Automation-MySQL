@@ -143,25 +143,20 @@ class ScanDeviceFragment : Fragment() {
     }
 
     private fun codeScanner() {
-//        val scannerView = bind.barcodeScanner
         codeScanner = CodeScanner(requireActivity(), binding.barcodeScanner)
 
         codeScanner.apply {
             camera = CodeScanner.CAMERA_BACK
-            formats =
-                CodeScanner.ALL_FORMATS       // Or can specify for other formats like 1-D and 2-D
+            formats = CodeScanner.ALL_FORMATS
 
             autoFocusMode = AutoFocusMode.SAFE
-            scanMode =
-                ScanMode.SINGLE          // The scanner will keen scanning continuously by itself and If set to "SINGLE" you will have to keep pressing to scan the code
+            scanMode = ScanMode.SINGLE
             isAutoFocusEnabled = false
-            isFlashEnabled =
-                false                  // Flash is disabled in start, user will click to start it
+            isFlashEnabled = false
 
             // RESPONSE if worked
             decodeCallback = DecodeCallback {
                 requireActivity().runOnUiThread {
-//                    Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
                     if (mRegexPattern.containsMatchIn(
                             it.toString())
                     ) {
@@ -169,18 +164,19 @@ class ScanDeviceFragment : Fragment() {
                         if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                         deviceId = it.toString()
                         checkDeviceAvailability(deviceId)
-                    } else showToast("Device not identified")
+                    } else {
+                        showToast("Device not identified")
+                        codeScanner.startPreview()
+                    }
                 }
             }
 
-            // Error Response
             errorCallback = ErrorCallback {
                 requireActivity().runOnUiThread {
                     Log.d(TAG, "Camera Initialisation Error: ${it.message}")
                 }
             }
 
-            // To tell the program to start scanning the QR Code
             binding.barcodeScanner.setOnClickListener {
                 codeScanner.startPreview()
             }
