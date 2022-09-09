@@ -61,7 +61,7 @@ class ScanDeviceFragment : Fragment() {
     private lateinit var codeScanner: CodeScanner
     private lateinit var loadingDialog: LoadingDialog
 
-    private val mRegexPattern = "Smartlit[15]\\_\\d{5,}".toRegex()
+    private val mRegexPattern = "^Smartlit[15]_\\d{5,}".toRegex()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,8 +123,7 @@ class ScanDeviceFragment : Fragment() {
         binding.sdContinueBtn.setOnClickListener {
             binding.sdContinueBtn.isEnabled = false
             deviceId = binding.deviceIdEt.text.toString()
-            if (deviceId.isNotEmpty() && deviceId.startsWith(
-                    "Smartlit") && mRegexPattern.containsMatchIn(deviceId)
+            if (deviceId.isNotEmpty() && mRegexPattern.containsMatchIn(deviceId)
             ) {
                 if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                 checkDeviceAvailability(deviceId)
@@ -163,7 +162,7 @@ class ScanDeviceFragment : Fragment() {
             decodeCallback = DecodeCallback {
                 requireActivity().runOnUiThread {
 //                    Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
-                    if (it.toString().startsWith("Smartlit") && mRegexPattern.containsMatchIn(
+                    if (mRegexPattern.containsMatchIn(
                             it.toString())
                     ) {
                         binding.deviceIdEt.setText(it.toString())
