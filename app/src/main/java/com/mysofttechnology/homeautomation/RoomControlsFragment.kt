@@ -454,17 +454,6 @@ class RoomControlsFragment : Fragment() {
         } else noNetwork()
     }
 
-    /*private fun showConnectBluetoothDialog() {
-        val builder = AlertDialog.Builder(requireActivity())
-
-        builder.setTitle("Bluetooth Error")
-            .setMessage(getString(R.string.configure_bluetooth, cd.name))
-            .setCancelable(true)
-            .setPositiveButton("Ok") { _, _ -> }
-        builder.create()
-        builder.show()
-    }*/
-
     private suspend fun connectToBtDevice() {
         val btAdapter = BluetoothAdapter.getDefaultAdapter()
         val remoteDevice = btAdapter.getRemoteDevice(currentBtDeviceId)
@@ -474,23 +463,13 @@ class RoomControlsFragment : Fragment() {
         closeSocket()
         if (ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
+        )
         btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
 
         try {
             btSocket!!.connect()
         } catch (e: Exception) {
             checkBtIsConnected()
-//            closeSocket()   // failed to connectToBtDevice
         }
 
         checkBtIsConnected()
