@@ -61,6 +61,8 @@ class ScanDeviceFragment : Fragment() {
     private lateinit var codeScanner: CodeScanner
     private lateinit var loadingDialog: LoadingDialog
 
+    private val mRegexPattern = "Smartlit[15]\\_\\d{5,}".toRegex()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         loadingDialog = LoadingDialog()
@@ -97,7 +99,9 @@ class ScanDeviceFragment : Fragment() {
             }
 
             if (granted) {
-                val action = ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+                val action =
+                    ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(
+                        deviceId)
                 if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
                     Navigation.findNavController(requireView()).navigate(action)
             } else snackbar?.show()
@@ -119,7 +123,9 @@ class ScanDeviceFragment : Fragment() {
         binding.sdContinueBtn.setOnClickListener {
             binding.sdContinueBtn.isEnabled = false
             deviceId = binding.deviceIdEt.text.toString()
-            if (deviceId.isNotEmpty()) {
+            if (deviceId.isNotEmpty() && deviceId.startsWith(
+                    "Smartlit") && mRegexPattern.containsMatchIn(deviceId)
+            ) {
                 if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                 checkDeviceAvailability(deviceId)
             } else {
@@ -157,7 +163,9 @@ class ScanDeviceFragment : Fragment() {
             decodeCallback = DecodeCallback {
                 requireActivity().runOnUiThread {
 //                    Toast.makeText(requireActivity(), "$it", Toast.LENGTH_SHORT).show()
-                    if (it.toString().startsWith("Smartlit")) {
+                    if (it.toString().startsWith("Smartlit") && mRegexPattern.containsMatchIn(
+                            it.toString())
+                    ) {
                         binding.deviceIdEt.setText(it.toString())
                         if (!loadingDialog.isAdded) loadingDialog.show(childFragmentManager, TAG)
                         deviceId = it.toString()
@@ -419,7 +427,7 @@ class ScanDeviceFragment : Fragment() {
 
                     if (resp == 1) {
                         if (deviceId.elementAt(2).toString() == "1") createSwitch(deviceId, 6)
-                         else {
+                        else {
                             for (i in 1..5) createSwitch(deviceId, i)
                         }
                         Log.d(TAG, "addDevice: Message - $msg")
@@ -524,7 +532,8 @@ class ScanDeviceFragment : Fragment() {
         binding.sdContinueBtn.isEnabled = true
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Is device online?")
-            .setMessage("You can Skip if  the device is online but if this is your first time setting up the device you must add wifi detail. Do you want to add wifi details?")
+            .setMessage(
+                "You can Skip if  the device is online but if this is your first time setting up the device you must add wifi detail. Do you want to add wifi details?")
             .setCancelable(false)
             .setNegativeButton("Skip") { _, _ ->
                 val action =
@@ -541,7 +550,7 @@ class ScanDeviceFragment : Fragment() {
                 loadingDialog.dismiss()
                 checkAllPermissions()
             }
-            .setNeutralButton("Cancel") { _, _ -> }
+//            .setNeutralButton("Cancel") { _, _ -> }
             .show()
 
     }
@@ -574,7 +583,9 @@ class ScanDeviceFragment : Fragment() {
         if (permReqList.isNotEmpty()) {
             permissionLauncher.launch(permReqList.toTypedArray())
         } else {
-            val action = ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(deviceId)
+            val action =
+                ScanDeviceFragmentDirections.actionScanDeviceFragmentToConnectDeviceFragment(
+                    deviceId)
             if (findNavController().currentDestination?.id == R.id.scanDeviceFragment)
                 Navigation.findNavController(requireView()).navigate(action)
         }
