@@ -1,5 +1,6 @@
 package com.mysofttechnology.homeautomation.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -12,7 +13,7 @@ interface DeviceDao {
     fun addDevice(device: Device)
 
     @Query("SELECT * FROM devices ORDER BY id ASC")
-    suspend fun allDevices(): List<Device>
+    fun allDevices(): LiveData<List<Device>>
 
     @Query("DELETE FROM devices")
     fun clearTable()

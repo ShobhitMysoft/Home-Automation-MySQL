@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class DeviceViewModel(application: Application): AndroidViewModel(application) {
 
-    val readAllData: Deferred<List<Device>>
+    val readAllData: LiveData<List<Device>>
     private val repository: DeviceRepository
 
     init {

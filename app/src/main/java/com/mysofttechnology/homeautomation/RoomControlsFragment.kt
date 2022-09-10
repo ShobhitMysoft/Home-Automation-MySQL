@@ -158,7 +158,6 @@ class RoomControlsFragment : Fragment() {
 
         currentUserId = sharedPref!!.getString(getString(R.string.current_user_id), "")
         selectedRoomIndex = sharedPref!!.getInt(getString(R.string.selected_room_index), 0)
-        Log.i(TAG, "onViewCreated: selectedRoomIndex = $selectedRoomIndex")
 
         waitSnackbar =
             Snackbar.make(requireActivity().findViewById(android.R.id.content), "Please wait...",
@@ -357,39 +356,7 @@ class RoomControlsFragment : Fragment() {
     private fun checkLocalDatabase() {
         val allData = deviceViewModel.readAllData
 
-        allData.invokeOnCompletion { cause ->
-            if (cause != null) {
-                Log.i(TAG, "checkLocalDatabase: $cause")
-            } else {
-                val deviceList = allData.getCompleted()
-
-                Log.d(TAG, "checkLocalDatabase: $deviceList")
-
-                roomsList.clear()
-                deviceIDList.clear()
-                deviceList.forEach {
-                    roomsList.add(it.name)
-                    deviceIDList.add(it.deviceId)
-                }
-
-                if (deviceIDList.size > 0) {
-                    try {
-                        if (selectedRoomIndex > deviceIDList.size) selectedRoomIndex = 0
-
-                        cd = deviceList[selectedRoomIndex]
-                        currentDeviceId = cd.deviceId
-                        curDevSwitchCount = cd.switchCount
-                        currentBtDeviceId = cd.bluetoothId
-                        binding.currentRoomTv.text = cd.name
-                        if (isOnline()) connectToInternet() else updateUIWithLocalDB()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "checkLocalDatabase: Error", e)
-                    }
-                }
-            }
-        }
-
-        /*allData.observe(viewLifecycleOwner) { deviceList ->
+        allData.observe(viewLifecycleOwner) { deviceList ->
             roomsList.clear()
             deviceIDList.clear()
             deviceList.forEach {
@@ -399,7 +366,7 @@ class RoomControlsFragment : Fragment() {
 
             if (deviceIDList.size > 0) {
                 try {
-                    if (selectedRoomIndex > deviceIDList.size) selectedRoomIndex = 0
+                    if (selectedRoomIndex >= deviceIDList.size) selectedRoomIndex = 0
 
                     cd = allData.value?.get(selectedRoomIndex)!!
                     currentDeviceId = cd.deviceId
@@ -411,7 +378,7 @@ class RoomControlsFragment : Fragment() {
                     Log.e(TAG, "checkLocalDatabase: Error", e)
                 }
             }
-        }*/
+        }
     }
 
     private fun updateUIWithLocalDB() {

@@ -36,6 +36,8 @@ class ConnectDeviceFragment : Fragment() {
     private var btDeviceList: ArrayList<BluetoothDevice> = arrayListOf()
     private lateinit var listAdapter: ArrayAdapter<String>
 
+    private val mRegexPattern = "^Smartlit[15]_\\d{5,}".toRegex()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -132,7 +134,7 @@ class ConnectDeviceFragment : Fragment() {
             else bind.noPairedDeviceView.visibility = View.VISIBLE
 
             val deviceName = device.name
-            val deviceIdDigits = deviceId?.substring(4, deviceId!!.length)
+            val deviceIdDigits = deviceId?.substring(deviceId!!.indexOf('_')+1, deviceId!!.length)
 
 //                val deviceHardwareAddress = device.address // MAC address
 
@@ -140,11 +142,16 @@ class ConnectDeviceFragment : Fragment() {
                     "$deviceIdDigits") == true || deviceName == deviceId
             ) gotoFillWifiFrag(device.toString())
 
-            if (deviceName.take(2) == "SL") {
+            if (mRegexPattern.containsMatchIn(deviceName)
+                // TODO: Only for testing purpose (Remove this)
+                || deviceName.contains("mqtt", true) || deviceName.contains("smartlit", true)
+            ) {
                 deviceNameList.add(deviceName.toString())
                 btDeviceList.add(device)
                 listAdapter.notifyDataSetChanged()
             }
+
+            Log.i(TAG, "loadPairedDevices: $deviceName | $deviceIdDigits\n$deviceNameList\n$btDeviceList")
         }
         bind.refreshFab.visibility = View.VISIBLE
         bind.devicesLv.adapter = listAdapter

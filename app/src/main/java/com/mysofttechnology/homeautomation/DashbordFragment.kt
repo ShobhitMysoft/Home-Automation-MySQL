@@ -410,34 +410,7 @@ class DashbordFragment : Fragment() {
     private fun checkLocalDatabase() {
         val allData = deviceViewModel.readAllData
 
-        allData.invokeOnCompletion { cause ->
-            if (cause != null) {
-                Log.i(TAG, "checkLocalDatabase: $cause")
-            } else {
-                val mData = allData.getCompleted()
-
-                Log.d(TAG, "checkLocalDatabase: $mData")
-
-                try {
-                    if (mData.isNotEmpty()) {
-
-                        binding.addDeviceBtn.visibility = View.GONE
-                        binding.noDeviceMsg.visibility = View.GONE
-                        binding.fragmentContainerView2.findNavController()
-                            .navigate(R.id.roomControlsFragment)
-                    } else {
-
-                        binding.addDeviceBtn.visibility = View.VISIBLE
-                        binding.noDeviceMsg.visibility = View.VISIBLE
-                        binding.fragmentContainerView2.findNavController()
-                            .navigate(R.id.addDeviceFragment)
-                    }
-                } catch (e: IllegalArgumentException) {
-                    Log.e(TAG, "checkLocalDatabase: Error", e)
-                }
-            }
-        }
-        /*allData.observe(viewLifecycleOwner) {
+        allData.observe(viewLifecycleOwner) {
             try {
                 if (it.isNotEmpty()) {
 
@@ -455,7 +428,7 @@ class DashbordFragment : Fragment() {
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG, "checkLocalDatabase: Error", e)
             }
-        }*/
+        }
     }
 
     private fun showToast(message: String?) {
