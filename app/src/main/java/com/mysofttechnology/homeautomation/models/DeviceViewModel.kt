@@ -7,12 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.database.DeviceRepository
 import com.mysofttechnology.homeautomation.database.DevicesDb
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class DeviceViewModel(application: Application): AndroidViewModel(application) {
 
-    val readAllData: LiveData<List<Device>>
+    val readAllData: Deferred<List<Device>>
     private val repository: DeviceRepository
 
     init {

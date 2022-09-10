@@ -60,9 +60,7 @@ import com.mysofttechnology.homeautomation.databinding.FragmentRoomControlsBindi
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.mqtt.MQTTClient
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -355,10 +353,43 @@ class RoomControlsFragment : Fragment() {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun checkLocalDatabase() {
         val allData = deviceViewModel.readAllData
 
-        allData.observe(viewLifecycleOwner) { deviceList ->
+        allData.invokeOnCompletion { cause ->
+            if (cause != null) {
+                Log.i(TAG, "checkLocalDatabase: $cause")
+            } else {
+                val deviceList = allData.getCompleted()
+
+                Log.d(TAG, "checkLocalDatabase: $deviceList")
+
+                roomsList.clear()
+                deviceIDList.clear()
+                deviceList.forEach {
+                    roomsList.add(it.name)
+                    deviceIDList.add(it.deviceId)
+                }
+
+                if (deviceIDList.size > 0) {
+                    try {
+                        if (selectedRoomIndex > deviceIDList.size) selectedRoomIndex = 0
+
+                        cd = deviceList[selectedRoomIndex]
+                        currentDeviceId = cd.deviceId
+                        curDevSwitchCount = cd.switchCount
+                        currentBtDeviceId = cd.bluetoothId
+                        binding.currentRoomTv.text = cd.name
+                        if (isOnline()) connectToInternet() else updateUIWithLocalDB()
+                    } catch (e: Exception) {
+                        Log.e(TAG, "checkLocalDatabase: Error", e)
+                    }
+                }
+            }
+        }
+
+        /*allData.observe(viewLifecycleOwner) { deviceList ->
             roomsList.clear()
             deviceIDList.clear()
             deviceList.forEach {
@@ -380,15 +411,8 @@ class RoomControlsFragment : Fragment() {
                     Log.e(TAG, "checkLocalDatabase: Error", e)
                 }
             }
-        }
+        }*/
     }
-
-    /*private fun isLessThanAndroidS(): Boolean {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-            return true
-        } else showOkPSnackbar("Sorry! Android devices above version 11 can't be connected over wifi currently.")
-        return false
-    }*/
 
     private fun updateUIWithLocalDB() {
         binding.connectionBtn.visibility = View.INVISIBLE
@@ -445,6 +469,7 @@ class RoomControlsFragment : Fragment() {
         checkBluetooth()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun checkBluetooth() {
         Log.d(TAG, "checkBluetooth: currentBtDeviceId = $currentBtDeviceId")
         if (bluetoothAdapter?.isEnabled == true && currentBtDeviceId != null && currentBtDeviceId != "null") {
@@ -462,9 +487,9 @@ class RoomControlsFragment : Fragment() {
 
         closeSocket()
         if (ActivityCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-        )
-        btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
+                Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        ) btSocket = remoteDevice.createRfcommSocketToServiceRecord(mUUID)
+        else showSToast("Bluetooth permission not allowed")
 
         try {
             btSocket!!.connect()
