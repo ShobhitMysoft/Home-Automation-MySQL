@@ -33,6 +33,7 @@ import com.mysofttechnology.homeautomation.database.Device
 import com.mysofttechnology.homeautomation.databinding.FragmentDashbordBinding
 import com.mysofttechnology.homeautomation.models.DeviceViewModel
 import com.mysofttechnology.homeautomation.utils.VolleySingleton
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONArray
 import org.json.JSONObject
 import uk.co.samuelwall.materialtaptargetprompt.MaterialTapTargetPrompt
@@ -405,9 +406,38 @@ class DashbordFragment : Fragment() {
         requestQueue.add(liveDataRequest)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun checkLocalDatabase() {
         val allData = deviceViewModel.readAllData
-        allData.observe(viewLifecycleOwner) {
+
+        allData.invokeOnCompletion { cause ->
+            if (cause != null) {
+                Log.i(TAG, "checkLocalDatabase: $cause")
+            } else {
+                val mData = allData.getCompleted()
+
+                Log.d(TAG, "checkLocalDatabase: $mData")
+
+                try {
+                    if (mData.isNotEmpty()) {
+
+                        binding.addDeviceBtn.visibility = View.GONE
+                        binding.noDeviceMsg.visibility = View.GONE
+                        binding.fragmentContainerView2.findNavController()
+                            .navigate(R.id.roomControlsFragment)
+                    } else {
+
+                        binding.addDeviceBtn.visibility = View.VISIBLE
+                        binding.noDeviceMsg.visibility = View.VISIBLE
+                        binding.fragmentContainerView2.findNavController()
+                            .navigate(R.id.addDeviceFragment)
+                    }
+                } catch (e: IllegalArgumentException) {
+                    Log.e(TAG, "checkLocalDatabase: Error", e)
+                }
+            }
+        }
+        /*allData.observe(viewLifecycleOwner) {
             try {
                 if (it.isNotEmpty()) {
 
@@ -425,7 +455,7 @@ class DashbordFragment : Fragment() {
             } catch (e: IllegalArgumentException) {
                 Log.e(TAG, "checkLocalDatabase: Error", e)
             }
-        }
+        }*/
     }
 
     private fun showToast(message: String?) {
