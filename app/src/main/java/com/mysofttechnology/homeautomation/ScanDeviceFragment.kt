@@ -421,7 +421,7 @@ class ScanDeviceFragment : Fragment() {
                     val msg = mData.get("msg")
 
                     if (resp == 1) {
-                        if (deviceId.elementAt(2).toString() == "1") createSwitch(deviceId, 6)
+                        if (deviceId.elementAt(8).toString() == "1") createSwitch(deviceId, 6)
                         else {
                             for (i in 1..5) createSwitch(deviceId, i)
                         }
@@ -449,8 +449,8 @@ class ScanDeviceFragment : Fragment() {
                 params["device_id"] = deviceId
                 params["user_id"] = currentUserId.toString()
                 params["room_name"] = "Room $deviceId"
-                Log.i(TAG, "getParams: $deviceId | ${deviceId.elementAt(2)}")
-                params["switch_count"] = deviceId.elementAt(2).toString()
+                Log.i(TAG, "getParams: $deviceId | ${deviceId.elementAt(8)}")
+                params["switch_count"] = deviceId.elementAt(8).toString()
                 return params
             }
 

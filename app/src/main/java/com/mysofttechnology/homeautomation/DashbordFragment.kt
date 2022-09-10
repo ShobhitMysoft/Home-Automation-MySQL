@@ -257,13 +257,14 @@ class DashbordFragment : Fragment() {
 
     private fun createLocalDatabase(
         deviceListData: JSONArray) {
+        Log.d(TAG, "createLocalDatabase deviceListData: $deviceListData")
         requestQueue = VolleySingleton.getInstance(requireContext()).requestQueue
         val switchListUrl = getString(R.string.base_url) + getString(R.string.url_switch_list)
 
         devicesLen = deviceListData.length()
 
         for (i in 0 until devicesLen) {
-            Log.d(TAG, "createLocalDatabase: $deviceListData")
+            Log.d(TAG, "createLocalDatabase deviceListData: $deviceListData")
             val deviceData = deviceListData.getJSONObject(i)
             val roomName = deviceData.get("room_name").toString()
             val deviceId = deviceData.get("device_id").toString()
